@@ -18,7 +18,6 @@ C:\Users\mzivkovic\Source\Repos\API\Persistence\bin\Debug\netcoreapp3.1\Domain.p
 C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.csprojAssemblyReference.cache
 C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.AssemblyInfoInputs.cache
 C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.AssemblyInfo.cs
-C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.csproj.CoreCompileInputs.cache
 C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.csproj.CopyComplete
 C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.dll
 C:\Users\mzivkovic\Source\Repos\API\Persistence\obj\Debug\netcoreapp3.1\Persistence.pdb
