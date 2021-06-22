@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "sfWhD2l+2uAR3BH/ovPO+2dZB8U2dwkSuRN+BHJ9bQzZBgyx+8++XtB5sipIuDwxyGT1o1aqV3GJ0Yt6kyYyCQ==",
+  "dgSpecHash": "bsKMlPRxfG9/zN7AvOgXlHEqdLr4/uvLebe80/HVB5lhv4UTlffnuMehog76HQQZ3dpDBwOruLgivBtd7XpE0Q==",
   "success": true,
-  "projectFilePath": "C:\\Users\\mzivkovic\\Source\\Repos\\API\\Domain\\Domain.csproj",
+  "projectFilePath": "C:\\Users\\jevge\\Source\\Repos\\API\\Domain\\Domain.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
