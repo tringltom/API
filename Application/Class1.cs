@@ -4,6 +4,6 @@ namespace Application
 {
     public class Class1
     {
-        public int MyProperty { get; set; }
+        public bool HasName { get; set; }
     }
 }
