@@ -4,23 +4,26 @@ using System.Linq;
 using Domain.Entities;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Application.Repositories;
 
 namespace Application.Managers
 {
     public class ValueManager : IValueManager
     {
-        private readonly DataContext _context;
 
-        public ValueManager(DataContext context)
+        private readonly IValueRepository _valueRepository;
+
+        public ValueManager(IValueRepository valueRepository)
         {
-            _context = context;
+            _valueRepository = valueRepository;
         }
 
         public async Task<List<Value>> GetAllWithIdAbove(int id)
         {
             // this is only for boilerplate code
             // this example is not ideal as it does not contain any real business logic (should be in repository as is)
-            return await _context.Values.Where(v => v.Id > id).ToListAsync();
+            var allValues = await _valueRepository.GetAllValues();
+            return allValues.Where(v => v.Id > id).ToList();
         }
     }
 }
