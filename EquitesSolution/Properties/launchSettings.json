@@ -20,7 +20,7 @@
     "API": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "EquitesAPI",
+      "launchUrl": "Values",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
