@@ -15,10 +15,10 @@ namespace API.Controllers
     public class UsersController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IRegistrationService _registrationService;
-        public UsersController(IRegistrationService registrationService, IMapper mapper)
+        private readonly IUserService _userService;
+        public UsersController(IUserService registrationService, IMapper mapper)
         {
-            _registrationService = registrationService;
+            _userService = registrationService;
             _mapper = mapper;
         }
 
@@ -26,60 +26,58 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register([FromBody] UserForRegistrationRequestDto userToRegister)
         {
-            try
+            // should add fluent validation to save code space
+            if (userToRegister == null || !ModelState.IsValid)
             {
-                // should add fluent validation to save code space
-                if (userToRegister == null || !ModelState.IsValid)
-                {
-                    //_logger.LogError("");
-                    return BadRequest("Unos nije validan");
-                }
-
-                var user = _mapper.Map<User>(userToRegister);
-                var origin = Request.Headers["origin"];
-
-                await _registrationService.Register(user, userToRegister.Password, origin);
-
-                return Ok("Registracija uspesna - Molimo proverite vase postansko sanduce");
+                return BadRequest("Unos nije validan");
             }
-            catch (Exception e)
-            {
-                //_logger.LogError($"Something went wrong inside CreateOwner action: {ex.Message}");
-                return StatusCode(500, e.Message);
-            }
+
+            var user = _mapper.Map<User>(userToRegister);
+            var origin = Request.Headers["origin"];
+
+            await _userService.RegisterAsync(user, userToRegister.Password, origin);
+
+            return Ok("Registracija uspesna - Molimo proverite vase postansko sanduce");
         }
 
         [AllowAnonymous]
         [HttpGet("resendEmailVerification")]
         public async Task<ActionResult> ResendEmailVerification([FromQuery]string email)
         {
-            try
-            {
-                var origin = Request.Headers["origin"];
+            var origin = Request.Headers["origin"];
 
-                await _registrationService.ResendConfirmationEmail(email, origin);
+            await _userService.ResendConfirmationEmailAsync(email, origin);
 
-                return Ok("Email za potvrdu poslat - Molimo proverite vase postansko sanduce");
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
+            return Ok("Email za potvrdu poslat - Molimo proverite vase postansko sanduce");
         }
 
-        //[HttpPost("verifyEmail")]
-        //[AllowAnonymous]
-        //public async Task<ActionResult> VerifyEmail()
-        //{
+        [HttpPost("verifyEmail")]
+        [AllowAnonymous]
+        public async Task<ActionResult> VerifyEmail(UserEmailForVerificationRequestDto emailverification)
+        {
+            if (emailverification == null || !ModelState.IsValid)
+            {
+                return BadRequest("Unos nije validan");
+            }
 
-        //}
+            await _userService.ConfirmEmailAsync(emailverification.Email, emailverification.Token);
 
-        //[AllowAnonymous]
-        //[HttpPost("login")]
-        //public async Task<ActionResult<User>> Login()
-        //{
+            return Ok("Email adresa potvrdjena. Mozete se ulogovati");
+        }
 
-        //}
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<ActionResult<User>> Login(UserForLoginRequestDto userLogin)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest("Unos nije validan");
+            }
+
+            await _userService.LoginAsync(userLogin.Email, userLogin.Password);
+
+            return Ok("Uspesno logovanje");
+        }
 
         //[AllowAnonymous]
         //[HttpPost("facebook")]

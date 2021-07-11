@@ -1,6 +1,8 @@
-﻿using MailKit.Net.Smtp;
+﻿using Application.Errors;
+using MailKit.Net.Smtp;
 using MimeKit;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -39,7 +41,7 @@ namespace Application.Services
             client.Dispose();
         }
 
-        public async Task<bool> SendConfirmationEmailAsync(string verifyUrl, string email)
+        public async Task SendConfirmationEmailAsync(string verifyUrl, string email)
         {
             try
             {
@@ -59,12 +61,11 @@ namespace Application.Services
 
                 await FinalizeMessageAsync(message);
 
-                return true;
             }
-            catch(Exception)
+            catch(Exception e)
             {
                 // log that email has failed to send
-                return false;
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to send e-mail with error: {e.Message}" });
             }
 
         }

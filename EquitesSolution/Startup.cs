@@ -12,6 +12,12 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;
 using Application.Services;
+using API.Middleware;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Threading.Tasks;
+using Application.Security;
 
 namespace API
 {
@@ -43,7 +49,8 @@ namespace API
             services.AddScoped<IUserManager, UserManager>();
 
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IRegistrationService, RegistrationService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IJwtGenerator, JwtGenerator>();
 
             services.AddDefaultIdentity<User>(options =>
                 {
@@ -70,18 +77,50 @@ namespace API
 
             });
 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["TokenKey"]));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(opt =>
+                {
+                    opt.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = key,
+                        ValidateAudience = false,
+                        ValidateIssuer = false,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero
+                    };
+                    opt.Events = new JwtBearerEvents
+                    {
+                        //OnMessageReceived = context =>
+                        //{
+                        //    var accessToken = context.Request.Query["access_token"];
+                        //    var path = context.HttpContext.Request.Path;
+                        //    if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                        //    {
+                        //        context.Token = accessToken;
+                        //    }
+
+                        //    return Task.CompletedTask;
+                        //}
+                    };
+                });
+
             services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseMiddleware<ErrorHandlingMiddleware>();
+
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
+                //app.UseDeveloperExceptionPage();
             }
 
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 

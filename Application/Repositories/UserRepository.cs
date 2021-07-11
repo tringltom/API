@@ -1,5 +1,7 @@
 ﻿using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Persistence;
 using System.Threading.Tasks;
 
 namespace Application.Repositories
@@ -7,10 +9,12 @@ namespace Application.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly UserManager<User> _userIdentityManager;
+        private readonly DataContext _context;
 
-        public UserRepository(UserManager<User> userIdentityManager)
+        public UserRepository(UserManager<User> userIdentityManager, DataContext context)
         {
             _userIdentityManager = userIdentityManager;
+            _context = context;
         }
 
         public async Task<bool> CreateUserAsync(User user, string password)
@@ -24,5 +28,14 @@ namespace Application.Repositories
             return await _userIdentityManager.FindByEmailAsync(email);
         }
 
+        public async Task<bool> ExistsWithEmailAsync(string email)
+        {
+            return await _context.Users.AnyAsync(x => x.Email == email);
+        }
+
+        public async Task<bool> ExistsWithUsernameAsync(string username)
+        {
+            return await _context.Users.AnyAsync(x => x.UserName == username);
+        }
     }
 }
