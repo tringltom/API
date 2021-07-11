@@ -6,9 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route("/[controller]")]
-    [ApiController]
-    public class ValuesController : ControllerBase
+    [Route("[controller]")]
+    public class ValuesController : BaseController
     {
         private readonly IValueManager _valuesManager;
         public ValuesController(IValueManager valuesManager)

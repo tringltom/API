@@ -1,5 +1,6 @@
 using Application.Managers;
 using Application.Repositories;
+using API.Mappings;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Persistence;
+using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
+using System;
+using Application.Services;
 
 namespace API
 {
@@ -27,12 +32,43 @@ namespace API
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddAutoMapper(typeof(UserProfile));
 
             //Add Transient Repositories
             services.AddTransient<IValueRepository, ValueRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
 
             //Add Scoped Managers
             services.AddScoped<IValueManager, ValueManager>();
+            services.AddScoped<IUserManager, UserManager>();
+
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IRegistrationService, RegistrationService>();
+
+            services.AddDefaultIdentity<User>(options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = true;
+                    options.User.RequireUniqueEmail = true;
+                })
+                .AddEntityFrameworkStores<DataContext>();
+
+
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Password settings.
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 1;
+
+                // Lockout settings.
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
+            });
 
             services.AddControllers();
         }
@@ -49,6 +85,7 @@ namespace API
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
