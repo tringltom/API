@@ -8,6 +8,7 @@ namespace Persistence
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
+            
         }
 
         public virtual DbSet<Value> Values { get; set; }

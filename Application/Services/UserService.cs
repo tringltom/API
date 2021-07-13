@@ -1,12 +1,17 @@
 ﻿using Application.Errors;
+using Application.Models;
 using Application.Repositories;
 using Application.Security;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System;
+using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -19,15 +24,19 @@ namespace Application.Services
         private readonly IUserRepository  _userRepository;
         private readonly IEmailService _emailService;
         private readonly IJwtGenerator _jwtGenerator;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IFacebookAccessor _facebookAccessor;
 
         public UserService(IUserRepository userRepository, IEmailService emailService, UserManager<User> userIdentityManager,
-                            SignInManager<User> signInManager, IJwtGenerator jwtGenerator)
+                            SignInManager<User> signInManager, IJwtGenerator jwtGenerator, IHttpContextAccessor httpContextAccessor, IFacebookAccessor facebookAccessor)
         {
             _userRepository = userRepository;
             _emailService = emailService;
             _userIdentityManager = userIdentityManager;
             _signInManager = signInManager;
             _jwtGenerator = jwtGenerator;
+            _httpContextAccessor = httpContextAccessor;
+            _facebookAccessor = facebookAccessor;
         }
 
         public async Task RegisterAsync(User user, string password, string origin)
@@ -77,7 +86,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Failed to send verification email" });
         }
 
-        public async Task LoginAsync(string email, string password)
+        public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
         {
             var user = await _userIdentityManager.FindByEmailAsync(email);
 
@@ -95,10 +104,82 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.Unauthorized, new { Error = "User not authorized." });
 
             var refreshToken = _jwtGenerator.GetRefreshToken();
+
             user.RefreshTokens.Add(refreshToken);
             await _userIdentityManager.UpdateAsync(user);
-            //return new User(user, _jwtGenerator, refreshToken.Token);
-            
+
+            var userToken = _jwtGenerator.CreateToken(user);
+
+            return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
+        }
+
+        public async Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken)
+        {
+            var currentUserName = GetCurrentUsername();
+
+            var user = await _userIdentityManager.FindByNameAsync(currentUserName);
+
+            var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
+
+            if (oldToken != null && !oldToken.IsActive) { throw new RestException(HttpStatusCode.Unauthorized); }
+
+            if (oldToken != null)
+            {
+                oldToken.Revoked = DateTime.UtcNow;
+            }
+
+            var newRefreshToken = _jwtGenerator.GetRefreshToken();
+
+            user.RefreshTokens.Add(newRefreshToken);
+
+            await _userIdentityManager.UpdateAsync(user);
+
+            var userToken = _jwtGenerator.CreateToken(user);
+
+            return new UserBaseServiceResponse(userToken, user.UserName, newRefreshToken.Token);
+        }
+
+        public async Task<UserBaseServiceResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)
+        {
+            var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
+
+            if (userInfo == null) { throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena" }); }
+
+            var user = await _userIdentityManager.FindByEmailAsync(userInfo.Email);
+
+            var refreshToken = _jwtGenerator.GetRefreshToken();
+
+            var userToken = _jwtGenerator.CreateToken(user);
+
+            if (user != null)
+            {
+                user.RefreshTokens.Add(refreshToken);
+                await _userIdentityManager.UpdateAsync(user);
+                return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
+            }
+
+            user = new User
+            {
+                Id = userInfo.Id,
+                Email = userInfo.Email,
+                UserName = "fb_" + userInfo.Id,
+                EmailConfirmed = true
+            };
+
+            user.RefreshTokens.Add(refreshToken);
+
+            var result = await _userIdentityManager.CreateAsync(user);
+
+            if (!result.Succeeded) { throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem creating user" }); }
+
+            return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
+        }
+
+        public string GetCurrentUsername()
+        {
+            var username = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            return username;
         }
 
         private async Task<string> GenerateUserTokenForEmailConfirmationAsync(User user)

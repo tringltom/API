@@ -2,10 +2,12 @@
 using System.Threading.Tasks;
 using Application.Managers;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [AllowAnonymous]
     [Route("[controller]")]
     public class ValuesController : BaseController
     {

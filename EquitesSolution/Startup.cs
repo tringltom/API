@@ -1,23 +1,26 @@
 using Application.Managers;
 using Application.Repositories;
 using API.Mappings;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using Persistence;
 using Domain.Entities;
-using Microsoft.AspNetCore.Identity;
 using System;
 using Application.Services;
 using API.Middleware;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using Application.Security;
+using API.Validations;
 
 namespace API
 {
@@ -35,6 +38,7 @@ namespace API
         {
             services.AddDbContext<DataContext>(opt =>
             {
+                opt.UseLazyLoadingProxies();
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
@@ -51,24 +55,28 @@ namespace API
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IFacebookAccessor, FacebookAccessor>();
 
             services.AddDefaultIdentity<User>(options =>
                 {
                     options.SignIn.RequireConfirmedAccount = true;
                     options.User.RequireUniqueEmail = true;
                 })
+                .AddSignInManager<SignInManager<User>>()
+                .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<DataContext>();
+            
 
 
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 1;
+                //options.Password.RequireDigit = true;
+                //options.Password.RequireLowercase = true;
+                //options.Password.RequireNonAlphanumeric = true;
+                //options.Password.RequireUppercase = true;
+                //options.Password.RequiredLength = 6;
+                //options.Password.RequiredUniqueChars = 1;
 
                 // Lockout settings.
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
@@ -91,23 +99,16 @@ namespace API
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero
                     };
-                    opt.Events = new JwtBearerEvents
-                    {
-                        //OnMessageReceived = context =>
-                        //{
-                        //    var accessToken = context.Request.Query["access_token"];
-                        //    var path = context.HttpContext.Request.Path;
-                        //    if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
-                        //    {
-                        //        context.Token = accessToken;
-                        //    }
-
-                        //    return Task.CompletedTask;
-                        //}
-                    };
                 });
 
-            services.AddControllers();
+            services.AddControllers(opt =>
+            {
+                var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                opt.Filters.Add(new AuthorizeFilter(policy));
+            }).AddFluentValidation(cfg =>
+            {
+                cfg.RegisterValidatorsFromAssemblyContaining<UserEmailForVerificationRequestDtoValidation>();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
