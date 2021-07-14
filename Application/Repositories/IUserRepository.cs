@@ -10,7 +10,7 @@ namespace Application.Repositories
         Task<bool> CreateUserWithoutPasswordAsync(User user);
         Task<User> FindUserByNameAsync(string name);
         Task<User> FindUserByEmailAsync(string email);
-        Task<string> GenerateUserEmailConfirmationTokenAsyn(User user)
+        Task<string> GenerateUserEmailConfirmationTokenAsyn(User user);
         Task<bool> ExistsWithEmailAsync(string email);
         Task<bool> ExistsWithUsernameAsync(string username);
         Task<bool> ConfirmUserEmailAsync(User user, string token);
