@@ -19,21 +19,17 @@ namespace Application.Services
     public class UserService : IUserService
     {
 
-        private readonly UserManager<User> _userIdentityManager;
-        private readonly SignInManager<User> _signInManager;
         private readonly IUserRepository  _userRepository;
         private readonly IEmailService _emailService;
         private readonly IJwtGenerator _jwtGenerator;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFacebookAccessor _facebookAccessor;
 
-        public UserService(IUserRepository userRepository, IEmailService emailService, UserManager<User> userIdentityManager,
-                            SignInManager<User> signInManager, IJwtGenerator jwtGenerator, IHttpContextAccessor httpContextAccessor, IFacebookAccessor facebookAccessor)
+        public UserService(IUserRepository userRepository, IEmailService emailService,
+                            IJwtGenerator jwtGenerator, IHttpContextAccessor httpContextAccessor, IFacebookAccessor facebookAccessor)
         {
             _userRepository = userRepository;
             _emailService = emailService;
-            _userIdentityManager = userIdentityManager;
-            _signInManager = signInManager;
             _jwtGenerator = jwtGenerator;
             _httpContextAccessor = httpContextAccessor;
             _facebookAccessor = facebookAccessor;
@@ -53,8 +49,7 @@ namespace Application.Services
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyUrl(origin, token, user.Email);
 
-            await _emailService.SendConfirmationEmailAsync(verifyUrl, user.Email);
-                
+            // await _emailService.SendConfirmationEmailAsync(verifyUrl, user.Email);
         }
 
         public async Task ResendConfirmationEmailAsync(string email, string origin)
@@ -72,7 +67,7 @@ namespace Application.Services
 
         public async Task ConfirmEmailAsync(string email, string token)
         {
-            var user = await _userIdentityManager.FindByEmailAsync(email);
+            var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronadjen korisnik sa datom email adresom." });
@@ -80,15 +75,13 @@ namespace Application.Services
             var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
             var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
 
-            var result = await _userIdentityManager.ConfirmEmailAsync(user, decodedToken);
-
-            if (!result.Succeeded)
+            if (!await _userRepository.ConfirmUserEmailAsync(user, decodedToken))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Failed to send verification email" });
         }
 
         public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
         {
-            var user = await _userIdentityManager.FindByEmailAsync(email);
+            var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronadjen korisnik sa datom email adresom." });
@@ -96,17 +89,16 @@ namespace Application.Services
             if (!user.EmailConfirmed)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite vasu email adresu pre logovanja." });
 
-            var result = await _signInManager
-                .CheckPasswordSignInAsync(user, password, false);
-
-
-            if (!result.Succeeded)
-                throw new RestException(HttpStatusCode.Unauthorized, new { Error = "User not authorized." });
+            if (!await _userRepository.SignInUserViaPasswordWithLockoutAsync(user, password))
+                throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
 
             var refreshToken = _jwtGenerator.GetRefreshToken();
 
             user.RefreshTokens.Add(refreshToken);
-            await _userIdentityManager.UpdateAsync(user);
+
+            if (!await _userRepository.UpdateUserAsync(user))
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user{user.UserName}" });
+
 
             var userToken = _jwtGenerator.CreateToken(user);
 
@@ -117,11 +109,14 @@ namespace Application.Services
         {
             var currentUserName = GetCurrentUsername();
 
-            var user = await _userIdentityManager.FindByNameAsync(currentUserName);
+            var user = await _userRepository.FindUserByNameAsync(currentUserName);
+
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronadjen korisnik sa korisnickim imenom {currentUserName}" });
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-            if (oldToken != null && !oldToken.IsActive) { throw new RestException(HttpStatusCode.Unauthorized); }
+            if (oldToken != null && !oldToken.IsActive) { throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." }); }
 
             if (oldToken != null)
             {
@@ -132,7 +127,9 @@ namespace Application.Services
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            await _userIdentityManager.UpdateAsync(user);
+            if (!await _userRepository.UpdateUserAsync(user))
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user{user.UserName}" });
+
 
             var userToken = _jwtGenerator.CreateToken(user);
 
@@ -143,9 +140,10 @@ namespace Application.Services
         {
             var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
 
-            if (userInfo == null) { throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena" }); }
+            if (userInfo == null) 
+                throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena" });
 
-            var user = await _userIdentityManager.FindByEmailAsync(userInfo.Email);
+            var user = await _userRepository.FindUserByEmailAsync(userInfo.Email);
 
             var refreshToken = _jwtGenerator.GetRefreshToken();
 
@@ -154,7 +152,9 @@ namespace Application.Services
             if (user != null)
             {
                 user.RefreshTokens.Add(refreshToken);
-                await _userIdentityManager.UpdateAsync(user);
+                if (!await _userRepository.UpdateUserAsync(user))
+                    throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user{user.UserName}" });
+                
                 return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
             }
 
@@ -168,9 +168,8 @@ namespace Application.Services
 
             user.RefreshTokens.Add(refreshToken);
 
-            var result = await _userIdentityManager.CreateAsync(user);
-
-            if (!result.Succeeded) { throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem creating user" }); }
+            if (await _userRepository.CreateUserWithoutPasswordAsync(user)) 
+                throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem creating user" });
 
             return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
         }
@@ -184,7 +183,7 @@ namespace Application.Services
 
         private async Task<string> GenerateUserTokenForEmailConfirmationAsync(User user)
         {
-            var token = await _userIdentityManager.GenerateEmailConfirmationTokenAsync(user);
+            var token = await _userRepository.GenerateUserEmailConfirmationTokenAsyn(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
             return token;

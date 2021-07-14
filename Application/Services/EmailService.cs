@@ -64,7 +64,6 @@ namespace Application.Services
             }
             catch(Exception e)
             {
-                // log that email has failed to send
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to send e-mail with error: {e.Message}" });
             }
 
