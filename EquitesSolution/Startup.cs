@@ -42,6 +42,15 @@ namespace API
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
 
+
+            services.AddCors(opt =>
+            {
+                opt.AddPolicy("CorsPolicy", policy =>
+                {
+                    policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("http://localhost:3000").AllowCredentials();
+                });
+            });
+
             services.AddAutoMapper(typeof(UserProfile));
 
             //Add Transient Repositories
@@ -65,8 +74,6 @@ namespace API
                 .AddSignInManager<SignInManager<User>>()
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<DataContext>();
-            
-
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -115,6 +122,7 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseCors("CorsPolicy");
 
             app.UseAuthentication();
             app.UseAuthorization();

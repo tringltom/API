@@ -49,7 +49,7 @@ namespace Application.Services
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyUrl(origin, token, user.Email);
 
-            // await _emailService.SendConfirmationEmailAsync(verifyUrl, user.Email);
+            await _emailService.SendConfirmationEmailAsync(verifyUrl, user.Email);
         }
 
         public async Task ResendConfirmationEmailAsync(string email, string origin)
