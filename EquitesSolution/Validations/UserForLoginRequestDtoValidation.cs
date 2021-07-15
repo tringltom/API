@@ -11,7 +11,7 @@ namespace API.Validations
     {
         public UserForLoginRequestDtoValidation()
         {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress().Configure(rule => rule.MessageBuilder = _ => "Neispravna email adresa");
+            RuleFor(x => x.Email).NotEmpty().EmailAddress().Configure(rule => rule.MessageBuilder = _ => "Neispravna email adresa.");
             RuleFor(x => x.Password).Password();
         }
     }

@@ -34,7 +34,7 @@ namespace API.Controllers
 
             await _userService.RegisterAsync(user, userToRegister.Password, origin);
 
-            return Ok("Registracija uspesna - Molimo proverite vase postansko sanduce.");
+            return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
 
         [AllowAnonymous]
@@ -45,7 +45,7 @@ namespace API.Controllers
 
             await _userService.ResendConfirmationEmailAsync(email, origin);
 
-            return Ok("Email za potvrdu poslat - Molimo proverite vase postansko sanduce.");
+            return Ok("Email za potvrdu poslat - Molimo proverite Vaše poštansko sanduče.");
         }
 
         [HttpPost("verifyEmail")]
@@ -54,7 +54,7 @@ namespace API.Controllers
         {
             await _userService.ConfirmEmailAsync(emailverification.Email, emailverification.Token);
 
-            return Ok("Email adresa potvrdjena. Mozete se ulogovati.");
+            return Ok("Email adresa potvrđena. Možete se ulogovati.");
         }
 
         [AllowAnonymous]
@@ -67,7 +67,7 @@ namespace API.Controllers
 
             SetTokenCookie(user.RefreshToken);
 
-            return Ok("Uspesno logovanje.");
+            return Ok("Uspešno logovanje.");
         }
 
         [AllowAnonymous]

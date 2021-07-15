@@ -10,7 +10,8 @@ namespace Application.Services
     public class EmailService : IEmailService
     {
 
-        // mg this should be dynamic somehow without adding coupling with API layer
+        // this should be dynamic somehow without adding coupling with API layer
+        // also domain email should be created and those credentials used
         private const string _sender = "EkvitiDev@outlook.com";
         private const string _senderPassword = "Ekviti2021";
         private const string _outlookSmtp = "smtp-mail.outlook.com";
@@ -53,8 +54,8 @@ namespace Application.Services
 
                 BodyBuilder bodyBuilder = new BodyBuilder
                 {
-                    HtmlBody = $"<p>Molimo Vas, potvrdite email adresu klikom na sledeci link:</p><p><a href='{verifyUrl}'>Potvrda</a></p>",
-                    TextBody = $"Molimo Vas, potvrdite email adresu klikom na sledeci link: {verifyUrl}"
+                    HtmlBody = $"<p>Molimo Vas, potvrdite email adresu klikom na sledeći link:</p><p><a href='{verifyUrl}'>Potvrda</a></p>",
+                    TextBody = $"Molimo Vas, potvrdite email adresu klikom na sledeći link: {verifyUrl}"
                 };
 
                 message.Body = bodyBuilder.ToMessageBody();

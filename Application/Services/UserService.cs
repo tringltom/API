@@ -38,13 +38,13 @@ namespace Application.Services
         public async Task RegisterAsync(User user, string password, string origin)
         {
             if (await _userRepository.ExistsWithEmailAsync(user.Email))
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Vec postoji nalog sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Već postoji nalog sa datom email adresom." });
 
             if (await _userRepository.ExistsWithUsernameAsync(user.UserName))
-                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Korisnicko ime vec postoji." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Korisničko ime već postoji." });
 
             if (!await _userRepository.CreateUserAsync(user, password))
-                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspesno dodavanje korisnika." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešno dodavanje korisnika." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyUrl(origin, token, user.Email);
@@ -57,7 +57,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if(user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronadjen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyUrl(origin, token, email);
@@ -70,7 +70,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronadjen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
 
             var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
             var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
@@ -84,10 +84,10 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronadjen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
 
             if (!user.EmailConfirmed)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite vasu email adresu pre logovanja." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite Vašu email adresu pre logovanja." });
 
             if (!await _userRepository.SignInUserViaPasswordWithLockoutAsync(user, password))
                 throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
@@ -112,7 +112,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByNameAsync(currentUserName);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronadjen korisnik sa korisnickim imenom {currentUserName}" });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}" });
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
