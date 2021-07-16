@@ -49,6 +49,11 @@ namespace Application.Repositories
             return result.Succeeded;
         }
 
+        public async Task<IdentityResult> RecoverUserPasswordAsync(User user, string resetToken, string newPassword)
+        {
+            return await _userIdentityManager.ResetPasswordAsync(user, resetToken, newPassword);
+        }
+
         public async Task<bool> UpdateUserAsync(User user)
         {
             var result = await _userIdentityManager.UpdateAsync(user);
@@ -58,6 +63,11 @@ namespace Application.Repositories
         public async Task<string> GenerateUserEmailConfirmationTokenAsyn(User user)
         {
             return await _userIdentityManager.GenerateEmailConfirmationTokenAsync(user);
+        }
+
+        public async Task<string> GenerateUserPasswordResetTokenAsync(User user)
+        {
+            return await _userIdentityManager.GeneratePasswordResetTokenAsync(user);
         }
 
         public async Task<bool> ExistsWithEmailAsync(string email)
@@ -70,16 +80,14 @@ namespace Application.Repositories
             return await _context.Users.AnyAsync(x => x.UserName == username);
         }
 
-        public async Task<bool> SignInUserViaPasswordNoLockoutAsync(User user, string password)
+        public async Task<SignInResult> SignInUserViaPasswordNoLockoutAsync(User user, string password)
         {
-            var result = await _userSigninManager.CheckPasswordSignInAsync(user, password, false);
-            return result.Succeeded;
+            return await _userSigninManager.CheckPasswordSignInAsync(user, password, false);
         }
 
-        public async Task<bool> SignInUserViaPasswordWithLockoutAsync(User user, string password)
+        public async Task<SignInResult> SignInUserViaPasswordWithLockoutAsync(User user, string password)
         {
-            var result = await _userSigninManager.CheckPasswordSignInAsync(user, password, true);
-            return result.Succeeded;
+            return await _userSigninManager.CheckPasswordSignInAsync(user, password, true);
         }
     }
 }

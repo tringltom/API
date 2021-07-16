@@ -22,12 +22,15 @@ namespace Application.Services
            
         }
 
-        private MimeMessage ComposeMessage()
+        private MimeMessage ComposeMessage(string email)
         {
             MimeMessage message = new MimeMessage();
 
             MailboxAddress from = new MailboxAddress(_sender);
             message.From.Add(from);
+
+            MailboxAddress to = new MailboxAddress(email);
+            message.To.Add(to);
 
             return message;
         }
@@ -46,10 +49,8 @@ namespace Application.Services
         {
             try
             {
-                var message = ComposeMessage();
+                var message = ComposeMessage(email);
 
-                MailboxAddress to = new MailboxAddress(email);
-                message.To.Add(to);
                 message.Subject = "Ekviti - Potvrda email adrese";
 
                 BodyBuilder bodyBuilder = new BodyBuilder
@@ -68,6 +69,31 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to send e-mail with error: {e.Message}" });
             }
 
+        }
+
+        public async Task SendPasswordRecoveryEmailAsync(string verifyUrl, string email)
+        {
+            try
+            {
+                var message = ComposeMessage(email);
+
+                message.Subject = "Ekviti - Potvrda oporavka šifre";
+
+                BodyBuilder bodyBuilder = new BodyBuilder
+                {
+                    HtmlBody = $"<p>Molimo Vas, kliknite na sledeći link kako biste promenili šifru:</p><p><a href='{verifyUrl}'>Nova Šifra</a></p>",
+                    TextBody = $"Molimo Vas, kliknite na sledeći link kako biste promenili šifru: {verifyUrl}"
+                };
+
+                message.Body = bodyBuilder.ToMessageBody();
+
+                await FinalizeMessageAsync(message);
+
+            }
+            catch (Exception e)
+            {
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to send e-mail with error: {e.Message}" });
+            }
         }
 
     }

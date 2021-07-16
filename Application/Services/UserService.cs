@@ -47,7 +47,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešno dodavanje korisnika." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
-            var verifyUrl = GenerateVerifyUrl(origin, token, user.Email);
+            var verifyUrl = GenerateVerifyEmailUrl(origin, token, user.Email);
 
             await _emailService.SendConfirmationEmailAsync(verifyUrl, user.Email);
         }
@@ -60,7 +60,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
-            var verifyUrl = GenerateVerifyUrl(origin, token, email);
+            var verifyUrl = GenerateVerifyEmailUrl(origin, token, email);
 
             await _emailService.SendConfirmationEmailAsync(verifyUrl, user.Email);
         }
@@ -72,33 +72,73 @@ namespace Application.Services
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
 
-            var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
-            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+            var decodedToken = DecodeToken(token);
 
             if (!await _userRepository.ConfirmUserEmailAsync(user, decodedToken))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Failed to send verification email" });
         }
 
-        public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
+
+        public async Task RecoverUserPasswordViaEmailAsync(string email, string origin)
         {
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
 
+            var token = await GenerateUserTokenForPasswordResetAsync(user);
+            var verifyUrl = GenerateVerifPasswordRecoveryUrl(origin, token, email);
+
+            await _emailService.SendPasswordRecoveryEmailAsync(verifyUrl, user.Email);
+        }
+
+        public async Task<User> ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword)
+        {
+            var user = await _userRepository.FindUserByEmailAsync(email);
+
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+
+            var decodedToken = DecodeToken(token);
+
+            var passwordRecoveryResult = await _userRepository.RecoverUserPasswordAsync(user, decodedToken, newPassword);
+
+            if (!passwordRecoveryResult.Succeeded)
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update password for user {user.UserName}." });
+
+            return user;
+        }
+
+        public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
+        {
+            var user = await _userRepository.FindUserByEmailAsync(email);
+            
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+
             if (!user.EmailConfirmed)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite Vašu email adresu pre logovanja." });
 
-            if (!await _userRepository.SignInUserViaPasswordWithLockoutAsync(user, password))
-                throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
+            var signInResult = await _userRepository.SignInUserViaPasswordWithLockoutAsync(user, password);
+
+            if (!signInResult.Succeeded)
+            {
+                if(signInResult.IsLockedOut)
+                {
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = $"Vaš nalog je zaključan. Pokusajte ponovo u {user.LockoutEnd}." });
+                }
+                else
+                {
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Pogrešna šifra." });
+                }
+            }
 
             var refreshToken = _jwtGenerator.GetRefreshToken();
 
             user.RefreshTokens.Add(refreshToken);
 
             if (!await _userRepository.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user{user.UserName}" });
-
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user {user.UserName}." });
 
             var userToken = _jwtGenerator.CreateToken(user);
 
@@ -189,9 +229,30 @@ namespace Application.Services
             return token;
         }
 
-        private string GenerateVerifyUrl(string origin, string token, string email)
+        private async Task<string> GenerateUserTokenForPasswordResetAsync(User user)
         {
-            return $"{origin}/user/verifyEmail?token={token}&email={email}";
+            var token = await _userRepository.GenerateUserPasswordResetTokenAsync(user);
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            return token;
+        }
+
+        private string DecodeToken(string token)
+        {
+            var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);
+            var decodedToken = Encoding.UTF8.GetString(decodedTokenBytes);
+
+            return decodedToken;
+        }
+
+        private string GenerateVerifyEmailUrl(string origin, string token, string email)
+        {
+            return  $"{origin}/user/verifyEmail?token={token}&email={email}";
+        }
+
+        private string GenerateVerifPasswordRecoveryUrl(string origin, string token, string email)
+        {
+            return $"{origin}/user/verifyPasswordRecovery?token={token}&email={email}";
         }
 
     }

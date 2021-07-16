@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using API.DTOs.User;
 using Application.Services;
 using AutoMapper;
+using AutoMapper.Configuration;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API.Controllers
 {
@@ -27,7 +27,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult> Register([FromBody] UserForRegistrationRequestDto userToRegister)
+        public async Task<ActionResult> Register(UserForRegistrationRequestDto userToRegister)
         {
             var user = _mapper.Map<User>(userToRegister);
             var origin = Request.Headers["origin"];
@@ -67,26 +67,26 @@ namespace API.Controllers
 
             SetTokenCookie(user.RefreshToken);
 
-            return Ok("Uspešno logovanje.");
+            return user;
         }
 
         [AllowAnonymous]
         [HttpPost("facebook")]
         public async Task<ActionResult<UserBaseResponseDto>> FacebookLogin(string accessToken, CancellationToken cancellationToken)
         {
+            //var result = await _userService.FacebookLoginAsync(accessToken, cancellationToken);
 
-            var result = await _userService.FacebookLoginAsync(accessToken, cancellationToken);
+            //var user = _mapper.Map<UserBaseResponseDto>(result);
 
-            var user = _mapper.Map<UserBaseResponseDto>(result);
+            //SetTokenCookie(user.RefreshToken);
+            //return user;
 
-            SetTokenCookie(user.RefreshToken);
-            return user;
+            return StatusCode(500, "Not yet implemented. Application is not enlisted with FB.");
         }
 
         [HttpPost("refreshToken")]
         public async Task<ActionResult<UserBaseResponseDto>> RefreshToken(string refreshToken)
         {
-
             var result = await _userService.RefreshTokenAsync(refreshToken);
 
             var user = _mapper.Map<UserBaseResponseDto>(result);
@@ -94,6 +94,26 @@ namespace API.Controllers
             SetTokenCookie(user.RefreshToken);
 
             return user;
+        }
+
+        [AllowAnonymous]
+        [HttpGet("recoverPassword")]
+        public async Task<ActionResult> RecoverPassword([FromQuery]string email)
+        {
+            var origin = Request.Headers["origin"];
+
+            await _userService.RecoverUserPasswordViaEmailAsync(email, origin);
+
+            return Ok("Molimo proverite Vaše poštansko sanduče kako biste uneli novu šifru.");
+        }
+
+        [HttpPost("verifyPasswordRecovery")]
+        [AllowAnonymous]
+        public async Task<ActionResult> VerifyPasswordRecovery(UserEmailForPasswordRecoveryVerificationDtoRequest passwordRecoveryVerify)
+        {
+            await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
+
+            return Ok("Uspešna izmena šifre.");
         }
 
         private void SetTokenCookie(string refreshToken)
