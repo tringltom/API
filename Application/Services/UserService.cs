@@ -138,7 +138,7 @@ namespace Application.Services
             user.RefreshTokens.Add(refreshToken);
 
             if (!await _userRepository.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspela izmena za korisnika {user.UserName}." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
 
             var userToken = _jwtGenerator.CreateToken(user);
 

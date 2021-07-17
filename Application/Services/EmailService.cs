@@ -66,7 +66,7 @@ namespace Application.Services
             }
             catch(Exception e)
             {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspelo slanje emaila" });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila" });
                 // TODO add log  $"Failed to send e-mail with error: {e.Message}"
             }
 
