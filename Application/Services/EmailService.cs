@@ -11,7 +11,7 @@ namespace Application.Services
     {
 
         // this should be dynamic somehow without adding coupling with API layer
-        // also domain email should be created and those credentials used
+        // also domain email should be created and those credentials used for production
         private const string _sender = "EkvitiDev@outlook.com";
         private const string _senderPassword = "Ekviti2021";
         private const string _outlookSmtp = "smtp-mail.outlook.com";
@@ -66,7 +66,8 @@ namespace Application.Services
             }
             catch(Exception e)
             {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to send e-mail with error: {e.Message}" });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspelo slanje emaila" });
+                // TODO add log  $"Failed to send e-mail with error: {e.Message}"
             }
 
         }

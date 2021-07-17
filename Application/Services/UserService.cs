@@ -38,7 +38,7 @@ namespace Application.Services
         public async Task RegisterAsync(User user, string password, string origin)
         {
             if (await _userRepository.ExistsWithEmailAsync(user.Email))
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Već postoji nalog sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Već postoji nalog sa unetom email adresom." });
 
             if (await _userRepository.ExistsWithUsernameAsync(user.UserName))
                 throw new RestException(HttpStatusCode.BadRequest, new { Username = "Korisničko ime već postoji." });
@@ -57,7 +57,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if(user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyEmailUrl(origin, token, email);
@@ -70,12 +70,12 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
             var decodedToken = DecodeToken(token);
 
             if (!await _userRepository.ConfirmUserEmailAsync(user, decodedToken))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Failed to send verification email" });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Neuspešno slanje verifikacionog emaila." });
         }
 
 
@@ -84,7 +84,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
             var token = await GenerateUserTokenForPasswordResetAsync(user);
             var verifyUrl = GenerateVerifPasswordRecoveryUrl(origin, token, email);
@@ -97,14 +97,14 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
             var decodedToken = DecodeToken(token);
 
             var passwordRecoveryResult = await _userRepository.RecoverUserPasswordAsync(user, decodedToken, newPassword);
 
             if (!passwordRecoveryResult.Succeeded)
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update password for user {user.UserName}." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena šifre." });
 
             return user;
         }
@@ -114,7 +114,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByEmailAsync(email);
             
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa datom email adresom." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nevalidan email ili nevalidna šifra." });
 
             if (!user.EmailConfirmed)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite Vašu email adresu pre logovanja." });
@@ -125,11 +125,11 @@ namespace Application.Services
             {
                 if(signInResult.IsLockedOut)
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = $"Vaš nalog je zaključan. Pokusajte ponovo u {user.LockoutEnd}." });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.LocalDateTime - DateTime.Now)?.TotalMinutes)} minuta." });
                 }
                 else
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Pogrešna šifra." });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Nevalidan email ili nevalidna šifra." });
                 }
             }
 
@@ -138,7 +138,7 @@ namespace Application.Services
             user.RefreshTokens.Add(refreshToken);
 
             if (!await _userRepository.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user {user.UserName}." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspela izmena za korisnika {user.UserName}." });
 
             var userToken = _jwtGenerator.CreateToken(user);
 
@@ -152,7 +152,7 @@ namespace Application.Services
             var user = await _userRepository.FindUserByNameAsync(currentUserName);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}" });
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
@@ -168,7 +168,7 @@ namespace Application.Services
             user.RefreshTokens.Add(newRefreshToken);
 
             if (!await _userRepository.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user{user.UserName}" });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
 
 
             var userToken = _jwtGenerator.CreateToken(user);
@@ -181,7 +181,7 @@ namespace Application.Services
             var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
 
             if (userInfo == null) 
-                throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena" });
+                throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena." });
 
             var user = await _userRepository.FindUserByEmailAsync(userInfo.Email);
 
@@ -193,7 +193,7 @@ namespace Application.Services
             {
                 user.RefreshTokens.Add(refreshToken);
                 if (!await _userRepository.UpdateUserAsync(user))
-                    throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to update user{user.UserName}" });
+                    throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
                 
                 return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
             }
@@ -209,7 +209,7 @@ namespace Application.Services
             user.RefreshTokens.Add(refreshToken);
 
             if (await _userRepository.CreateUserWithoutPasswordAsync(user)) 
-                throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem creating user" });
+                throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
 
             return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
         }
@@ -247,12 +247,12 @@ namespace Application.Services
 
         private string GenerateVerifyEmailUrl(string origin, string token, string email)
         {
-            return  $"{origin}/user/verifyEmail?token={token}&email={email}";
+            return  $"{origin}/users/verifyEmail?token={token}&email={email}";
         }
 
         private string GenerateVerifPasswordRecoveryUrl(string origin, string token, string email)
         {
-            return $"{origin}/user/verifyPasswordRecovery?token={token}&email={email}";
+            return $"{origin}/users/verifyPasswordRecovery?token={token}&email={email}";
         }
 
     }

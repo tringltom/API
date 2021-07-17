@@ -12,11 +12,11 @@ namespace API.Validations
         {
             var options = ruleBuilder
                 .NotEmpty()
-                .MinimumLength(6).WithMessage("Šifra mora imati barem 6 karaktera.")
-                .Matches("[A-Z]").WithMessage("Šifra mora sadržati barem jedno veliko slovo.")
-                .Matches("[a-z]").WithMessage("Šifra mora sadržati barem jedno malo slovo.")
-                .Matches("[0-9]").WithMessage("Šifra mora sadržati barem jedan broj.")
-                .Matches("[^a-zA-Z0-9]").WithMessage("Šifra mora sadržati barem jedan alfanumerički karakter.");
+                .MinimumLength(6).WithMessage("Šifra mora imati barem 6 karaktera")
+                .Matches("[A-Z]").WithMessage("Šifra mora sadržati barem jedno veliko slovo")
+                .Matches("[a-z]").WithMessage("Šifra mora sadržati barem jedno malo slovo")
+                .Matches("[0-9]").WithMessage("Šifra mora sadržati barem jedan broj")
+                .Matches("[^a-zA-Z0-9]").WithMessage("Šifra mora sadržati barem jedan simbol");
 
             return options;
         }
