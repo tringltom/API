@@ -105,7 +105,7 @@ namespace API
                 opt.Filters.Add(new AuthorizeFilter(policy));
             }).AddFluentValidation(cfg =>
             {
-                cfg.RegisterValidatorsFromAssemblyContaining<UserEmailForVerificationRequestDtoValidation>();
+                cfg.RegisterValidatorsFromAssemblyContaining<UserForEmailVerificationRequestDtoValidation>();
             });
         }
 

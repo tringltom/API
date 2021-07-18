@@ -39,18 +39,18 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpGet("resendEmailVerification")]
-        public async Task<ActionResult> ResendEmailVerification([FromQuery]string email)
+        public async Task<ActionResult> ResendEmailVerification([FromQuery]UserForResendEmailVerificationRequestDto user)
         {
             var origin = Request.Headers["origin"];
 
-            await _userService.ResendConfirmationEmailAsync(email, origin);
+            await _userService.ResendConfirmationEmailAsync(user.Email, origin);
 
             return Ok("Email za potvrdu poslat - Molimo proverite Vaše poštansko sanduče.");
         }
 
         [HttpPost("verifyEmail")]
         [AllowAnonymous]
-        public async Task<ActionResult> VerifyEmail(UserEmailForVerificationRequestDto emailverification)
+        public async Task<ActionResult> VerifyEmail(UserForEmailVerificationRequestDto emailverification)
         {
             await _userService.ConfirmEmailAsync(emailverification.Email, emailverification.Token);
 
@@ -85,9 +85,9 @@ namespace API.Controllers
         }
 
         [HttpPost("refreshToken")]
-        public async Task<ActionResult<UserBaseResponseDto>> RefreshToken(string refreshToken)
+        public async Task<ActionResult<UserBaseResponseDto>> RefreshToken(UserForRefreshTokenRequestDto userTokenRefresh)
         {
-            var result = await _userService.RefreshTokenAsync(refreshToken);
+            var result = await _userService.RefreshTokenAsync(userTokenRefresh.Token);
 
             var user = _mapper.Map<UserBaseResponseDto>(result);
 
@@ -97,19 +97,19 @@ namespace API.Controllers
         }
 
         [AllowAnonymous]
-        [HttpGet("recoverPassword")]
-        public async Task<ActionResult> RecoverPassword([FromQuery]string email)
+        [HttpPost("recoverPassword")]
+        public async Task<ActionResult> RecoverPassword(UserForRecoverPasswordRequestDto user)
         {
             var origin = Request.Headers["origin"];
 
-            await _userService.RecoverUserPasswordViaEmailAsync(email, origin);
+            await _userService.RecoverUserPasswordViaEmailAsync(user.Email, origin);
 
             return Ok("Molimo proverite Vaše poštansko sanduče kako biste uneli novu šifru.");
         }
 
         [HttpPost("verifyPasswordRecovery")]
         [AllowAnonymous]
-        public async Task<ActionResult> VerifyPasswordRecovery(UserEmailForPasswordRecoveryVerificationDtoRequest passwordRecoveryVerify)
+        public async Task<ActionResult> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationDtoRequest passwordRecoveryVerify)
         {
             await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
 

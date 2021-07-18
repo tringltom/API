@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace API.Validations
 {
-    public class UserEmailForVerificationRequestDtoValidation : AbstractValidator<UserEmailForVerificationRequestDto>
+    public class UserForResendEmailVerificationRequestDtoValidation : AbstractValidator<UserForResendEmailVerificationRequestDto>
     {
-        public UserEmailForVerificationRequestDtoValidation()
+        public UserForResendEmailVerificationRequestDtoValidation()
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress().Configure(rule => rule.MessageBuilder = _ => "Neispravna email adresa");
-            RuleFor(x => x.Token).NotEmpty().WithMessage("Token ne sme biti prazan");
         }
     }
 }
