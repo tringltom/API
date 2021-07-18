@@ -104,7 +104,7 @@ namespace Application.Services
             var passwordRecoveryResult = await _userRepository.RecoverUserPasswordAsync(user, decodedToken, newPassword);
 
             if (!passwordRecoveryResult.Succeeded)
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena šifre." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Neuspešna izmena šifre." });
 
             return user;
         }

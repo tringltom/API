@@ -118,6 +118,10 @@ namespace API
             {
                 //app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseHsts();
+            }
 
             app.UseHttpsRedirection();
 
