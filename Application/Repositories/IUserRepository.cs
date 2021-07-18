@@ -14,6 +14,7 @@ namespace Application.Repositories
         Task<string> GenerateUserEmailConfirmationTokenAsyn(User user);
         Task<string> GenerateUserPasswordResetTokenAsync(User user);
         Task<IdentityResult> RecoverUserPasswordAsync(User user, string resetToken, string newPassword);
+        Task<IdentityResult> ChangeUserPasswordAsync(User user, string oldPassword, string newPassword);
         Task<bool> ExistsWithEmailAsync(string email);
         Task<bool> ExistsWithUsernameAsync(string username);
         Task<bool> ConfirmUserEmailAsync(User user, string token);

@@ -109,6 +109,19 @@ namespace Application.Services
             return user;
         }
 
+        public async Task ChangeUserPasswordAsync(string email, string oldPassword, string newPassword)
+        {
+            var user = await _userRepository.FindUserByEmailAsync(email);
+
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
+
+            var changePassword = await _userRepository.ChangeUserPasswordAsync(user, oldPassword, newPassword);
+
+            if (!changePassword.Succeeded)
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = "Neuspešna izmena šifre." });
+        }
+
         public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
         {
             var user = await _userRepository.FindUserByEmailAsync(email);

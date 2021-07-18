@@ -85,9 +85,12 @@ namespace API.Controllers
         }
 
         [HttpPost("refreshToken")]
-        public async Task<ActionResult<UserBaseResponseDto>> RefreshToken(UserForRefreshTokenRequestDto userTokenRefresh)
+        public async Task<ActionResult<UserBaseResponseDto>> RefreshToken()
         {
-            var result = await _userService.RefreshTokenAsync(userTokenRefresh.Token);
+
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            var result = await _userService.RefreshTokenAsync(refreshToken);
 
             var user = _mapper.Map<UserBaseResponseDto>(result);
 
@@ -109,9 +112,15 @@ namespace API.Controllers
 
         [HttpPost("verifyPasswordRecovery")]
         [AllowAnonymous]
-        public async Task<ActionResult> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationDtoRequest passwordRecoveryVerify)
+        public async Task<ActionResult<User>> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationDtoRequest passwordRecoveryVerify)
         {
-            await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
+            return await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
+        }
+
+        [HttpPost("changePassword")]
+        public async Task<ActionResult> ChangePassword(UserForPasswordChangeRequestDto user)
+        {
+            await _userService.ChangeUserPasswordAsync(user.Email, user.OldPassword, user.NewPassword);
 
             return Ok("Uspešna izmena šifre.");
         }

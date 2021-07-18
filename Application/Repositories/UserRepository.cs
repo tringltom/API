@@ -54,6 +54,11 @@ namespace Application.Repositories
             return await _userIdentityManager.ResetPasswordAsync(user, resetToken, newPassword);
         }
 
+        public async Task<IdentityResult> ChangeUserPasswordAsync(User user, string oldPassword, string newPassword)
+        {
+            return await _userIdentityManager.ChangePasswordAsync(user, oldPassword, newPassword);
+        }
+
         public async Task<bool> UpdateUserAsync(User user)
         {
             var result = await _userIdentityManager.UpdateAsync(user);
