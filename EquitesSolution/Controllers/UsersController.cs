@@ -32,7 +32,7 @@ namespace API.Controllers
             var user = _mapper.Map<User>(userToRegister);
             var origin = Request.Headers["origin"];
 
-            await _userService.RegisterAsync(user, userToRegister.Password, origin);
+            // await _userService.RegisterAsync(user, userToRegister.Password, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
