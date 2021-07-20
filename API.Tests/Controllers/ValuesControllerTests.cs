@@ -3,10 +3,8 @@ using Application.Managers;
 using Domain.Entities;
 using Moq;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace API.Tests.Controllers

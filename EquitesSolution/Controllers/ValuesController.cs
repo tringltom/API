@@ -2,13 +2,14 @@
 using System.Threading.Tasks;
 using Application.Managers;
 using Domain.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Route("/[controller]")]
-    [ApiController]
-    public class ValuesController : ControllerBase
+    [AllowAnonymous]
+    [Route("[controller]")]
+    public class ValuesController : BaseController
     {
         private readonly IValueManager _valuesManager;
         public ValuesController(IValueManager valuesManager)

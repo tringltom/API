@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using Persistence;
 using System.Linq;
 using Domain.Entities;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Application.Repositories;
 
 namespace Application.Managers
