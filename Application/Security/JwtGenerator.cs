@@ -1,9 +1,11 @@
-﻿using Domain.Entities;
+﻿using Application.Errors;
+using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -16,10 +18,16 @@ namespace Application.Security
 
         public JwtGenerator(IConfiguration config)
         {
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"]));
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("TokenKey").Value));
         }
         public string CreateToken(User user)
         {
+
+            if (user == null || string.IsNullOrWhiteSpace(user.UserName))
+            {
+                throw new RestException(HttpStatusCode.BadRequest, new { UserName = "Korisničko ime ne sme biti prazno." });
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.UserName)
