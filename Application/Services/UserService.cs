@@ -169,7 +169,8 @@ namespace Application.Services
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-            if (oldToken != null && !oldToken.IsActive) { throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." }); }
+            if (oldToken != null && !oldToken.IsActive) 
+                throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
 
             if (oldToken != null)
             {

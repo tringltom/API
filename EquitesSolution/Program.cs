@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog.Web;
 using Persistence;
 
 namespace API
@@ -13,6 +14,7 @@ namespace API
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
+            var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
 
             using (var scope = host.Services.CreateScope())
             {
@@ -24,8 +26,7 @@ namespace API
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "An error occured during migration");
+                    logger.Error(ex, "An error occured during migration");
                 }
             }
 
@@ -37,6 +38,11 @@ namespace API
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                });
+                }).ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(LogLevel.Trace);
+                })
+            .UseNLog();
     }
 }

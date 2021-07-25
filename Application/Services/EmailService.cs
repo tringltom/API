@@ -66,8 +66,7 @@ namespace Application.Services
             }
             catch(Exception e)
             {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila" });
-                // TODO add log  $"Failed to send e-mail with error: {e.Message}"
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila" }, e.Message);
             }
 
         }
@@ -93,7 +92,7 @@ namespace Application.Services
             }
             catch (Exception e)
             {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Failed to send e-mail with error: {e.Message}" });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila za oporavak šifre" }, e.Message);
             }
         }
 
