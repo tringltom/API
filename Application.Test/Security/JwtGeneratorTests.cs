@@ -47,7 +47,7 @@ namespace Application.Tests.Security
 
             // Act
             // Assert
-            Assert.That(() => sut.CreateToken(user), Throws.Exception.TypeOf<RestException>());
+            Assert.Throws<RestException>(() => sut.CreateToken(user));
         }
 
         [Test]
@@ -60,7 +60,7 @@ namespace Application.Tests.Security
 
             // Act
             // Assert
-            Assert.That(() => sut.CreateToken(user), Throws.Exception.TypeOf<RestException>());
+            Assert.Throws<RestException>(() => sut.CreateToken(user));
         }
 
         [Test]

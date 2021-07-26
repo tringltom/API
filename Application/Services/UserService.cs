@@ -4,7 +4,6 @@ using Application.Repositories;
 using Application.Security;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Linq;
