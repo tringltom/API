@@ -15,6 +15,7 @@ namespace API
         {
             var host = CreateHostBuilder(args).Build();
             var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+            logger.Fatal("hello from logs folder!"); // TO DO remove after initial deploy
 
             using (var scope = host.Services.CreateScope())
             {
