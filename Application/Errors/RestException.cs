@@ -7,16 +7,16 @@ namespace Application.Errors
 {
     public class RestException : Exception
     {
-        public RestException(HttpStatusCode code, object errors = null, string exceptionMessage = null)
+        public RestException(HttpStatusCode code, object errors = null, Exception exception = null)
         {
             Code = code;
             Errors = errors;
-            ExceptionMesage = exceptionMessage;
+            Exception = exception;
         }
 
         public HttpStatusCode Code { get; }
         public object Errors { get; }
-        public string ExceptionMesage { get; set; }
+        public Exception Exception { get; set; }
 
     }
 }

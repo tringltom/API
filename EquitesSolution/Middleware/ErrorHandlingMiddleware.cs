@@ -25,10 +25,10 @@ namespace API.Middleware
             switch (ex)
             {
                 case RestException re:
-                    if (re.ExceptionMesage != null)
-                        logger.LogCritical(re, "REST ERROR - {@error}, INNER ERROR - {innerError}", re.Errors, re.ExceptionMesage);
+                    if (re.Exception != null)
+                        logger.LogCritical(re, "REST ERROR - {error}, INNER ERROR - {@innerError}", re.Errors, re.Exception);
                     else
-                        logger.LogError(re, "REST ERROR - {@error}", re.Errors);
+                        logger.LogError(re, "REST ERROR - {error}", re.Errors);
 
                     errors = re.Errors;
                     context.Response.StatusCode = (int)re.Code;
