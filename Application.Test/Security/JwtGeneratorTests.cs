@@ -25,7 +25,7 @@ namespace Application.Tests.Security
         }
 
         [Test]
-        public void CreateToken_CorrectUser()
+        public void CreateToken()
         {
             // Arrange
             var user = _fixture.Create<User>();
