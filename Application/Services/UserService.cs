@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.WebUtilities;
 using System;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,16 +20,14 @@ namespace Application.Services
         private readonly IUserRepository  _userRepository;
         private readonly IEmailService _emailService;
         private readonly IJwtGenerator _jwtGenerator;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IFacebookAccessor _facebookAccessor;
 
         public UserService(IUserRepository userRepository, IEmailService emailService,
-                            IJwtGenerator jwtGenerator, IHttpContextAccessor httpContextAccessor, IFacebookAccessor facebookAccessor)
+                            IJwtGenerator jwtGenerator, IFacebookAccessor facebookAccessor)
         {
             _userRepository = userRepository;
             _emailService = emailService;
             _jwtGenerator = jwtGenerator;
-            _httpContextAccessor = httpContextAccessor;
             _facebookAccessor = facebookAccessor;
         }
 
@@ -86,7 +83,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
             var token = await GenerateUserTokenForPasswordResetAsync(user);
-            var verifyUrl = GenerateVerifPasswordRecoveryUrl(origin, token, email);
+            var verifyUrl = GenerateVerifyPasswordRecoveryUrl(origin, token, email);
 
             await _emailService.SendPasswordRecoveryEmailAsync(verifyUrl, user.Email);
         }
@@ -159,7 +156,7 @@ namespace Application.Services
 
         public async Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken)
         {
-            var currentUserName = GetCurrentUsername();
+            var currentUserName = _userRepository.GetCurrentUsername();
 
             var user = await _userRepository.FindUserByNameAsync(currentUserName);
 
@@ -226,13 +223,6 @@ namespace Application.Services
             return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
         }
 
-        public string GetCurrentUsername()
-        {
-            var username = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
-
-            return username;
-        }
-
         private async Task<string> GenerateUserTokenForEmailConfirmationAsync(User user)
         {
             var token = await _userRepository.GenerateUserEmailConfirmationTokenAsyn(user);
@@ -262,7 +252,7 @@ namespace Application.Services
             return  $"{origin}/users/verifyEmail?token={token}&email={email}";
         }
 
-        private string GenerateVerifPasswordRecoveryUrl(string origin, string token, string email)
+        private string GenerateVerifyPasswordRecoveryUrl(string origin, string token, string email)
         {
             return $"{origin}/users/verifyPasswordRecovery?token={token}&email={email}";
         }

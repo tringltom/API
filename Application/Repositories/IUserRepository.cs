@@ -21,5 +21,6 @@ namespace Application.Repositories
         Task<SignInResult> SignInUserViaPasswordNoLockoutAsync(User user, string password);
         Task<SignInResult> SignInUserViaPasswordWithLockoutAsync(User user, string password);
         Task<bool> UpdateUserAsync(User user);
+        string GetCurrentUsername();
     }
 }

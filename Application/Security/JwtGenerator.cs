@@ -20,13 +20,9 @@ namespace Application.Security
         {
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("TokenKey").Value));
         }
+
         public string CreateToken(User user)
         {
-
-            if (user == null || string.IsNullOrWhiteSpace(user.UserName))
-            {
-                throw new RestException(HttpStatusCode.BadRequest, new { UserName = "Korisničko ime ne sme biti prazno." });
-            }
 
             var claims = new List<Claim>
             {

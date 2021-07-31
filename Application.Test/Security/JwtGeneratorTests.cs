@@ -39,31 +39,6 @@ namespace Application.Tests.Security
         }
 
         [Test]
-        [TestCase(null)]
-        public void CreateToken_NullUser(User user)
-        {
-            // Arrange
-            var sut = new JwtGenerator(_config);
-
-            // Act
-            // Assert
-            Assert.Throws<RestException>(() => sut.CreateToken(user));
-        }
-
-        [Test]
-        public void CreateToken_NullUserName()
-        {
-            // Arrange
-            var user = _fixture.Create<User>();
-            user.UserName = null;
-            var sut = new JwtGenerator(_config);
-
-            // Act
-            // Assert
-            Assert.Throws<RestException>(() => sut.CreateToken(user));
-        }
-
-        [Test]
         public void GetRefreshToken()
         {
             // Arrange
