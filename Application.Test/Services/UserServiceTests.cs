@@ -29,7 +29,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        public void RegisterAsync_CorrectParameters()
+        public void RegisterAsync_Successful()
         {
             // Arrange
             var userRepoMock = new Mock<IUserRepository>();
@@ -89,6 +89,7 @@ namespace Application.Tests.Services
             // Assert
             Assert.ThrowsAsync<RestException>(async () => await sut.RegisterAsync(user, password, origin));
             userRepoMock.Verify(x => x.ExistsWithEmailAsync(user.Email), Times.Once());
+            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(user.UserName), Times.Never());
         }
 
         [Test]
