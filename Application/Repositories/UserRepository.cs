@@ -13,12 +13,12 @@ namespace Application.Repositories
     {
         private readonly UserManager<User> _userIdentityManager;
         private readonly SignInManager<User> _userSigninManager;
-        private readonly HttpContextAccessor _httpContextAccessor;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly DataContext _context;
 
         public UserRepository(UserManager<User> userIdentityManager, DataContext context,
-            SignInManager<User> userSigninManager, HttpContextAccessor httpContextAccessor)
+            SignInManager<User> userSigninManager, IHttpContextAccessor httpContextAccessor)
         {
             _userIdentityManager = userIdentityManager;
             _userSigninManager = userSigninManager;
