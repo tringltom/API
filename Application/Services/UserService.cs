@@ -138,7 +138,7 @@ namespace Application.Services
             {
                 if(signInResult.IsLockedOut)
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.LocalDateTime - DateTime.Now)?.TotalMinutes)} minuta." });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Error = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
                 }
                 else
                 {
