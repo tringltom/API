@@ -1,19 +1,18 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using API.DTOs.User;
+﻿using API.DTOs.User;
 using Application.Services;
 using AutoMapper;
-using AutoMapper.Configuration;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 
 namespace API.Controllers
 {
-    
+
     [Route("users")]
     public class UsersController : BaseController
     {
