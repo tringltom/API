@@ -1,25 +1,24 @@
-﻿using Application.Errors;
-using Application.Models;
-using Application.Repositories;
-using Application.Security;
-using Domain.Entities;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Errors;
+using Application.Models;
+using Application.Repositories;
+using Application.Security;
+using Domain.Entities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace Application.Services
 {
     public class UserService : IUserService
     {
 
-        private readonly IUserRepository  _userRepository;
+        private readonly IUserRepository _userRepository;
         private readonly IEmailService _emailService;
         private readonly IJwtGenerator _jwtGenerator;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -56,7 +55,7 @@ namespace Application.Services
         {
             var user = await _userRepository.FindUserByEmailAsync(email);
 
-            if(user == null)
+            if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
@@ -125,7 +124,7 @@ namespace Application.Services
         public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
         {
             var user = await _userRepository.FindUserByEmailAsync(email);
-            
+
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nevalidan email ili nevalidna šifra." });
 
@@ -136,7 +135,7 @@ namespace Application.Services
 
             if (!signInResult.Succeeded)
             {
-                if(signInResult.IsLockedOut)
+                if (signInResult.IsLockedOut)
                 {
                     throw new RestException(HttpStatusCode.Unauthorized, new { Error = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
                 }
@@ -169,7 +168,7 @@ namespace Application.Services
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-            if (oldToken != null && !oldToken.IsActive) 
+            if (oldToken != null && !oldToken.IsActive)
                 throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
 
             if (oldToken != null)
@@ -194,7 +193,7 @@ namespace Application.Services
         {
             var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
 
-            if (userInfo == null) 
+            if (userInfo == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena." });
 
             var user = await _userRepository.FindUserByEmailAsync(userInfo.Email);
@@ -208,7 +207,7 @@ namespace Application.Services
                 user.RefreshTokens.Add(refreshToken);
                 if (!await _userRepository.UpdateUserAsync(user))
                     throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
-                
+
                 return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
             }
 
@@ -222,7 +221,7 @@ namespace Application.Services
 
             user.RefreshTokens.Add(refreshToken);
 
-            if (await _userRepository.CreateUserWithoutPasswordAsync(user)) 
+            if (await _userRepository.CreateUserWithoutPasswordAsync(user))
                 throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
 
             return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
@@ -261,7 +260,7 @@ namespace Application.Services
 
         private string GenerateVerifyEmailUrl(string origin, string token, string email)
         {
-            return  $"{origin}/users/verifyEmail?token={token}&email={email}";
+            return $"{origin}/users/verifyEmail?token={token}&email={email}";
         }
 
         private string GenerateVerifPasswordRecoveryUrl(string origin, string token, string email)

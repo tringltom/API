@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Domain.Entities;
 using System.Threading.Tasks;
 using Application.Repositories;
+using Domain.Entities;
 
 namespace Application.Managers
 {

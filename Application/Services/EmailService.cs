@@ -1,9 +1,9 @@
-﻿using Application.Errors;
-using MailKit.Net.Smtp;
-using MimeKit;
-using System;
+﻿using System;
 using System.Net;
 using System.Threading.Tasks;
+using Application.Errors;
+using MailKit.Net.Smtp;
+using MimeKit;
 
 namespace Application.Services
 {
@@ -19,17 +19,17 @@ namespace Application.Services
 
         public EmailService()
         {
-           
+
         }
 
         private MimeMessage ComposeMessage(string email)
         {
-            MimeMessage message = new MimeMessage();
+            var message = new MimeMessage();
 
-            MailboxAddress from = new MailboxAddress(_sender);
+            var from = new MailboxAddress(_sender);
             message.From.Add(from);
 
-            MailboxAddress to = new MailboxAddress(email);
+            var to = new MailboxAddress(email);
             message.To.Add(to);
 
             return message;
@@ -37,7 +37,7 @@ namespace Application.Services
 
         private async Task FinalizeMessageAsync(MimeMessage message)
         {
-            SmtpClient client = new SmtpClient();
+            var client = new SmtpClient();
             await client.ConnectAsync(_outlookSmtp, _outlookPort, false);
             await client.AuthenticateAsync(_sender, _senderPassword);
             await client.SendAsync(message);
@@ -53,7 +53,7 @@ namespace Application.Services
 
                 message.Subject = "Ekviti - Potvrda email adrese";
 
-                BodyBuilder bodyBuilder = new BodyBuilder
+                var bodyBuilder = new BodyBuilder
                 {
                     HtmlBody = $"<p>Molimo Vas, potvrdite email adresu klikom na sledeći link:</p><p><a href='{verifyUrl}'>Potvrda</a></p>",
                     TextBody = $"Molimo Vas, potvrdite email adresu klikom na sledeći link: {verifyUrl}"
@@ -64,7 +64,7 @@ namespace Application.Services
                 await FinalizeMessageAsync(message);
 
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila" }, e);
             }
@@ -79,7 +79,7 @@ namespace Application.Services
 
                 message.Subject = "Ekviti - Potvrda oporavka šifre";
 
-                BodyBuilder bodyBuilder = new BodyBuilder
+                var bodyBuilder = new BodyBuilder
                 {
                     HtmlBody = $"<p>Molimo Vas, kliknite na sledeći link kako biste promenili šifru:</p><p><a href='{verifyUrl}'>Nova Šifra</a></p>",
                     TextBody = $"Molimo Vas, kliknite na sledeći link kako biste promenili šifru: {verifyUrl}"

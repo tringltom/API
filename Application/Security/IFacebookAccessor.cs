@@ -1,5 +1,5 @@
-﻿using Application.Models;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Application.Models;
 
 namespace Application.Security
 {
