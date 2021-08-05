@@ -5,12 +5,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bin\**" />
     <Compile Remove="Models\**" />
     <Compile Remove="Validators\**" />
+    <Content Remove="bin\**" />
     <Content Remove="Models\**" />
     <Content Remove="Validators\**" />
+    <EmbeddedResource Remove="bin\**" />
     <EmbeddedResource Remove="Models\**" />
     <EmbeddedResource Remove="Validators\**" />
+    <None Remove="bin\**" />
     <None Remove="Models\**" />
     <None Remove="Validators\**" />
   </ItemGroup>
@@ -28,6 +32,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.5" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.13.0" />
   </ItemGroup>
 
   <ItemGroup>

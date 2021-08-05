@@ -134,7 +134,7 @@ namespace Application.Services
             {
                 if(signInResult.IsLockedOut)
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Greška = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.LocalDateTime - DateTime.Now)?.TotalMinutes)} minuta." });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Greška = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
                 }
                 else
                 {
@@ -165,7 +165,8 @@ namespace Application.Services
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-            if (oldToken != null && !oldToken.IsActive) { throw new RestException(HttpStatusCode.Unauthorized, new { Greška = "Niste autorizovani." }); }
+            if (oldToken != null && !oldToken.IsActive) 
+                throw new RestException(HttpStatusCode.Unauthorized, new { Greška = "Niste autorizovani." });
 
             if (oldToken != null)
             {
