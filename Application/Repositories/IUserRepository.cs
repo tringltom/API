@@ -1,7 +1,7 @@
 ﻿
+using System.Threading.Tasks;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
 
 namespace Application.Repositories
 {

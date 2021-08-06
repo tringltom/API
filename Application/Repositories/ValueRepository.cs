@@ -1,8 +1,8 @@
-﻿using Domain.Entities;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Application.Repositories
 {

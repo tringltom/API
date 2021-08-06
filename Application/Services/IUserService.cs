@@ -1,7 +1,7 @@
-﻿using Application.Models;
-using Domain.Entities;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Application.Models;
+using Domain.Entities;
 
 namespace Application.Services
 {
