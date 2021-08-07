@@ -1,10 +1,10 @@
-﻿using Application.Managers;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Application.Managers;
 using Application.Repositories;
 using Domain.Entities;
 using Moq;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Application.Tests.Managers
 {

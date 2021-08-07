@@ -1,11 +1,11 @@
-﻿using API.Controllers;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using API.Controllers;
 using Application.Managers;
 using Domain.Entities;
 using Moq;
 using NUnit.Framework;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace API.Tests.Controllers
 {

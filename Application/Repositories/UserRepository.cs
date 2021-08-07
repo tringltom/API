@@ -1,11 +1,9 @@
-﻿using Domain.Entities;
+﻿using System.Threading.Tasks;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Application.Repositories
 {

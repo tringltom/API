@@ -1,6 +1,14 @@
+using System;
+using System.Text;
+using API.Mappings;
+using API.Middleware;
+using API.Validations;
 using Application.Managers;
 using Application.Repositories;
-using API.Mappings;
+using Application.Security;
+using Application.Services;
+using Domain.Entities;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -13,14 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Persistence;
-using Domain.Entities;
-using System;
-using Application.Services;
-using API.Middleware;
-using System.Text;
-using FluentValidation.AspNetCore;
-using Application.Security;
-using API.Validations;
 
 namespace API
 {

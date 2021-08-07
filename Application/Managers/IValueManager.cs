@@ -1,6 +1,6 @@
-﻿using Domain.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Domain.Entities;
 
 namespace Application.Managers
 {
