@@ -1,4 +1,6 @@
-﻿using API.Controllers;
+﻿using System.Net;
+using System.Threading.Tasks;
+using API.Controllers;
 using API.DTOs.User;
 using Application.Models;
 using Application.Services;
@@ -9,8 +11,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
-using System.Net;
-using System.Threading.Tasks;
 
 namespace API.Tests.Controllers
 {
@@ -93,7 +93,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        public void VerufyEmail_Successfull()
+        public void VerifyEmail_Successfull()
         {
             // Arrange
             var userServiceMock = new Mock<IUserService>();

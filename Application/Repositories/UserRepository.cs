@@ -70,7 +70,7 @@ namespace Application.Repositories
             return result.Succeeded;
         }
 
-        public async Task<string> GenerateUserEmailConfirmationTokenAsyn(User user)
+        public async Task<string> GenerateUserEmailConfirmationTokenAsync(User user)
         {
             return await _userIdentityManager.GenerateEmailConfirmationTokenAsync(user);
         }

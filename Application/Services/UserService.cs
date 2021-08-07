@@ -227,7 +227,7 @@ namespace Application.Services
 
         private async Task<string> GenerateUserTokenForEmailConfirmationAsync(User user)
         {
-            var token = await _userRepository.GenerateUserEmailConfirmationTokenAsyn(user);
+            var token = await _userRepository.GenerateUserEmailConfirmationTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
 
             return token;

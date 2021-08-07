@@ -36,7 +36,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.ExistsWithEmailAsync(It.IsAny<string>())).ReturnsAsync(false);
             userRepoMock.Setup(x => x.ExistsWithUsernameAsync(It.IsAny<string>())).ReturnsAsync(false);
             userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsyn(It.IsAny<User>()))
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             var emailServiceMock = new Mock<IEmailService>();
@@ -67,7 +67,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.ExistsWithEmailAsync(It.IsAny<string>())).ReturnsAsync(true);
             userRepoMock.Setup(x => x.ExistsWithUsernameAsync(It.IsAny<string>())).ReturnsAsync(false);
             userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsyn(It.IsAny<User>()))
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             var emailServiceMock = new Mock<IEmailService>();
@@ -100,7 +100,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.ExistsWithEmailAsync(It.IsAny<string>())).ReturnsAsync(false);
             userRepoMock.Setup(x => x.ExistsWithUsernameAsync(It.IsAny<string>())).ReturnsAsync(true);
             userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsyn(It.IsAny<User>()))
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             var emailServiceMock = new Mock<IEmailService>();
@@ -132,7 +132,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.ExistsWithEmailAsync(It.IsAny<string>())).ReturnsAsync(false);
             userRepoMock.Setup(x => x.ExistsWithUsernameAsync(It.IsAny<string>())).ReturnsAsync(false);
             userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), It.IsAny<string>())).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsyn(It.IsAny<User>()))
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             var emailServiceMock = new Mock<IEmailService>();
@@ -164,7 +164,7 @@ namespace Application.Tests.Services
             var userRepoMock = new Mock<IUserRepository>();
             userRepoMock.Setup(x => x.FindUserByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync(_fixture.Create<User>());
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsyn(It.IsAny<User>()))
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             var emailServiceMock = new Mock<IEmailService>();
@@ -196,7 +196,7 @@ namespace Application.Tests.Services
             var userRepoMock = new Mock<IUserRepository>();
             userRepoMock.Setup(x => x.FindUserByEmailAsync(It.IsAny<string>()))
                 .ReturnsAsync((User)null);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsyn(It.IsAny<User>()))
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             var emailServiceMock = new Mock<IEmailService>();
