@@ -166,7 +166,7 @@ namespace Application.Services
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
-            if (oldToken != null && !oldToken.IsActive) 
+            if (oldToken != null && !oldToken.IsActive)
                 throw new RestException(HttpStatusCode.Unauthorized, new { Greška = "Niste autorizovani." });
 
             if (oldToken != null)
@@ -205,7 +205,7 @@ namespace Application.Services
                 user.RefreshTokens.Add(refreshToken);
                 if (!await _userRepository.UpdateUserAsync(user))
                     throw new RestException(HttpStatusCode.InternalServerError, new { Greška = $"Neuspešna izmena za korisnika {user.UserName}." });
-                
+
                 return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
             }
 
