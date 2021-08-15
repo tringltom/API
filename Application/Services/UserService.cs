@@ -34,6 +34,12 @@ namespace Application.Services
             _facebookAccessor = facebookAccessor;
         }
 
+        public async Task<UserBaseServiceResponse> GetCurrentlyLoggedInUser()
+        {
+            var refreshToken = _jwtGenerator.GetRefreshToken();
+            var test = await RefreshTokenAsync(refreshToken.Token);
+            return test;
+        }
         public async Task RegisterAsync(User user, string password, string origin)
         {
             if (await _userRepository.ExistsWithEmailAsync(user.Email))

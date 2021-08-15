@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text;
 using API.Mappings;
 using API.Middleware;
@@ -106,7 +106,8 @@ namespace API
             }).AddFluentValidation(cfg =>
             {
                 cfg.RegisterValidatorsFromAssemblyContaining<UserForEmailVerificationRequestDtoValidation>();
-            });
+            }).AddNewtonsoftJson(options =>
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore); ;
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

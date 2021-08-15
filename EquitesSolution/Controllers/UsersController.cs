@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs.User;
+using Application.Models;
 using Application.Services;
 using AutoMapper;
 using Domain.Entities;
@@ -38,7 +39,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpGet("resendEmailVerification")]
-        public async Task<ActionResult> ResendEmailVerification([FromQuery]UserForResendEmailVerificationRequestDto user)
+        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserForResendEmailVerificationRequestDto user)
         {
             var origin = Request.Headers["origin"];
 
@@ -56,6 +57,13 @@ namespace API.Controllers
             return Ok("Email adresa potvrđena. Možete se ulogovati.");
         }
 
+        [HttpGet]
+        public async Task<ActionResult<UserBaseServiceResponse>> CurrentUser()
+        {
+            var currentUser = await _userService.GetCurrentlyLoggedInUser();
+
+            return currentUser;
+        }
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<UserBaseResponseDto>> Login(UserForLoginRequestDto userLogin)
