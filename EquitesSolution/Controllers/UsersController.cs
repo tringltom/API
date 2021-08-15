@@ -38,7 +38,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpGet("resendEmailVerification")]
-        public async Task<ActionResult> ResendEmailVerification([FromQuery]UserForResendEmailVerificationRequestDto user)
+        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserForResendEmailVerificationRequestDto user)
         {
             var origin = Request.Headers["origin"];
 
