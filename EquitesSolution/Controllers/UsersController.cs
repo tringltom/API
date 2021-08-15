@@ -69,6 +69,16 @@ namespace API.Controllers
             return user;
         }
 
+        [HttpPost("logout")]
+        public async Task<ActionResult> Logout()
+        {
+            var refreshToken = Request.Cookies["refreshToken"];
+
+            await _userService.LogoutUserAsync(refreshToken);
+
+            return Ok("Uspešno ste izlogovani.");
+        }
+
         [AllowAnonymous]
         [HttpPost("facebook")]
         public async Task<ActionResult<UserBaseResponseDto>> FacebookLogin(string accessToken, CancellationToken cancellationToken)

@@ -85,6 +85,11 @@ namespace Application.Repositories
             return await _context.Users.AnyAsync(x => x.UserName == username);
         }
 
+        public async Task SignOutUserAsync()
+        {
+            await _userSigninManager.SignOutAsync();
+        }
+
         public async Task<SignInResult> SignInUserViaPasswordNoLockoutAsync(User user, string password)
         {
             return await _userSigninManager.CheckPasswordSignInAsync(user, password, false);

@@ -189,6 +189,29 @@ namespace Application.Services
             return new UserBaseServiceResponse(userToken, user.UserName, newRefreshToken.Token);
         }
 
+        public async Task LogoutUserAsync(string refreshToken)
+        {
+            var currentUserName = GetCurrentUsername();
+
+            var user = await _userRepository.FindUserByNameAsync(currentUserName);
+
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
+
+            var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
+
+            if (oldToken != null && !oldToken.IsActive)
+                throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
+
+            if (oldToken != null)
+            {
+                oldToken.Revoked = DateTime.UtcNow;
+            }
+
+            if (!await _userRepository.UpdateUserAsync(user))
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
+        }
+
         public async Task<UserBaseServiceResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)
         {
             var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
