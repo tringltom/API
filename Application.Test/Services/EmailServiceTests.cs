@@ -17,6 +17,8 @@ namespace Application.Tests.Services
 
         }
 
+        // TODO - extract FinalizeMessageAsync/ComposeMessage from EmailService and create success tests
+
         [Test]
         [InlineAutoData(null, "email@email")]
         [InlineAutoData("", "email@email")]
