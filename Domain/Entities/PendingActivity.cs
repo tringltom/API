@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Domain.Entities
 {
@@ -16,6 +17,7 @@ namespace Domain.Entities
         public double Longitude { get; set; }
         public int XpReward { get; set; }
         public DateTimeOffset DateCreated { get; set; }
+        public virtual ICollection<PendingActivityMedia> PendingActivityMedias { get; set; }
 
     }
 }
