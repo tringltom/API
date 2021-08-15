@@ -89,7 +89,7 @@ namespace Application.Services
             await _emailService.SendPasswordRecoveryEmailAsync(verifyUrl, user.Email);
         }
 
-        public async Task<User> ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword)
+        public async Task ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword)
         {
             var user = await _userRepository.FindUserByEmailAsync(email);
 
@@ -102,8 +102,6 @@ namespace Application.Services
 
             if (!passwordRecoveryResult.Succeeded)
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greška = "Neuspešna izmena šifre." });
-
-            return user;
         }
 
         public async Task ChangeUserPasswordAsync(string email, string oldPassword, string newPassword)

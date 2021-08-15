@@ -203,7 +203,7 @@ namespace Application.Tests.Services
             // Act
             Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(user.Email, _fixture.Create<string>());
             // adding token as parameters adds name as prefix causing string to possibly have odd number of caracters
-            // we cannot decode even odd token
+            // we cannot decode odd numbered token
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();

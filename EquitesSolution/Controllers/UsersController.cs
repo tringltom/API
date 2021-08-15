@@ -111,9 +111,10 @@ namespace API.Controllers
 
         [HttpPost("verifyPasswordRecovery")]
         [AllowAnonymous]
-        public async Task<ActionResult<User>> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationDtoRequest passwordRecoveryVerify)
+        public async Task<ActionResult> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationDtoRequest passwordRecoveryVerify)
         {
-            return await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
+            await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
+            return Ok("Zahtev za izmenu šifre verifikovan. Molimo unesite novu šifru");
         }
 
         [HttpPost("changePassword")]

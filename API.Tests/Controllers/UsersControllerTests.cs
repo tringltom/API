@@ -2,11 +2,14 @@
 using System.Threading.Tasks;
 using API.Controllers;
 using API.DTOs.User;
+using API.Tests.Attributes;
 using Application.Models;
 using Application.Services;
 using AutoFixture;
+using AutoFixture.NUnit3;
 using AutoMapper;
 using Domain.Entities;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -27,228 +30,187 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        public void Register_Successfull()
+        [UsersControllerTestsAttribute]
+        public void Register_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock, string origin,
+           UserForRegistrationRequestDto userForReg, User user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            var mapperMock = new Mock<IMapper>();
-            mapperMock.Setup(x => x.Map<User>(It.IsAny<UserForRegistrationRequestDto>()))
-                .Returns(_fixture.Create<User>());
+            mapperMock.Setup(x => x.Map<User>(userForReg))
+                .Returns(user);
 
-            var userServiceMock = new Mock<IUserService>();
-            //userServiceMock.Setup(x => x.RegisterAsync(It.IsAny<User>(), It.IsAny<string>(), It.IsAny<string>()))
+            // userServiceMock.Setup(x => x.RegisterAsync(user, userForReg.Password, "EkvitiOrigin"));
             //    .Returns(Task.CompletedTask);
 
-            var request = new Mock<HttpRequest>();
-            request.SetupGet(x => x.Headers["origin"]).Returns("EkvitiOrigin");
-
-            var context = new Mock<HttpContext>();
+            request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
-
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object)
+            sut.ControllerContext = new ControllerContext
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context.Object
-                }
+                HttpContext = context.Object
             };
 
             // Act
-            var res = sut.Register(_fixture.Create<UserForRegistrationRequestDto>());
+            var res = sut.Register(userForReg);
 
             // Assert
-            Assert.IsTrue(res.Result is OkObjectResult);
-            Assert.AreEqual(((OkObjectResult)res.Result).StatusCode, (int)HttpStatusCode.OK);
+            res.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
 
         [Test]
-        public void ResendEmailVerification_Successfull()
+        [UsersControllerTestsAttribute]
+        public void ResendEmailVerification_Successfull([Frozen] Mock<IUserService> userServiceMock, string origin,
+           UserForResendEmailVerificationRequestDto user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            var mapperMock = new Mock<IMapper>();
-            var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(x => x.ResendConfirmationEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+            userServiceMock.Setup(x => x.ResendConfirmationEmailAsync(user.Email, origin))
                 .Returns(Task.CompletedTask);
-
-            var request = new Mock<HttpRequest>();
-            request.SetupGet(x => x.Headers["origin"]).Returns("EkvitiOrigin");
-
-            var context = new Mock<HttpContext>();
+            request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
 
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object)
+            sut.ControllerContext = new ControllerContext
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context.Object
-                }
+                HttpContext = context.Object
             };
 
             // Act
-            var res = sut.ResendEmailVerification(_fixture.Create<UserForResendEmailVerificationRequestDto>());
+            var res = sut.ResendEmailVerification(user);
 
             // Assert
-            Assert.IsTrue(res.Result is OkObjectResult);
-            Assert.AreEqual(((OkObjectResult)res.Result).StatusCode, (int)HttpStatusCode.OK);
+            res.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
         [Test]
-        public void VerifyEmail_Successfull()
+        [UsersControllerTestsAttribute]
+        public void VerifyEmail_Successfull([Frozen] Mock<IUserService> userServiceMock,
+           UserForEmailVerificationRequestDto user, [Greedy] UsersController sut)
         {
             // Arrange
-            var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(x => x.ConfirmEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+            userServiceMock.Setup(x => x.ConfirmEmailAsync(user.Email, user.Token))
                 .Returns(Task.CompletedTask);
 
-            var mapperMock = new Mock<IMapper>();
-
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object);
-
             // Act
-            var res = sut.VerifyEmail(_fixture.Create<UserForEmailVerificationRequestDto>());
+            var res = sut.VerifyEmail(user);
 
             // Assert
-            Assert.IsTrue(res.Result is OkObjectResult);
-            Assert.AreEqual(((OkObjectResult)res.Result).StatusCode, (int)HttpStatusCode.OK);
+            res.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
         [Test]
-        public void Login_Successfull()
+        [UsersControllerTestsAttribute]
+        public void Login_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
+           UserForLoginRequestDto user, UserBaseServiceResponse userResponse, Mock<IResponseCookies> cookiesMock,
+           UserBaseResponseDto userResponseDto, Mock<HttpResponse> response, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(x => x.LoginAsync(It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(_fixture.Create<UserBaseServiceResponse>());
+            userServiceMock.Setup(x => x.LoginAsync(user.Email, user.Password))
+                .ReturnsAsync(userResponse);
+            mapperMock.Setup(x => x.Map<UserBaseResponseDto>(userResponse))
+                .Returns(userResponseDto);
 
-            var mapperMock = new Mock<IMapper>();
-            mapperMock.Setup(x => x.Map<UserBaseResponseDto>(It.IsAny<UserBaseServiceResponse>()))
-                .Returns(_fixture.Create<UserBaseResponseDto>());
-
-            var cookiesMock = new Mock<IResponseCookies>();
-
-            var response = new Mock<HttpResponse>();
             response.Setup(x => x.Cookies).Returns(cookiesMock.Object);
-
-            var context = new Mock<HttpContext>();
             context.Setup(x => x.Response).Returns(response.Object);
-
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object)
+            sut.ControllerContext = new ControllerContext
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context.Object
-                }
+                HttpContext = context.Object
             };
 
+
             // Act
-            var result = sut.Login(_fixture.Create<UserForLoginRequestDto>());
+            var result = sut.Login(user);
 
             // Assert
-            Assert.IsNotNull(result);
+            result.Should().NotBeNull();
+            result.Should().BeOfType<Task<ActionResult<UserBaseResponseDto>>>();
         }
 
         [Test]
-        public void RefreshToken_Successfull()
+        [UsersControllerTestsAttribute]
+        public void RefreshToken_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
+           UserBaseServiceResponse userResponse, UserBaseResponseDto userResponseDto,
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            var userServiceMock = new Mock<IUserService>();
-
-            var mapperMock = new Mock<IMapper>();
-            mapperMock.Setup(x => x.Map<UserBaseResponseDto>(It.IsAny<UserBaseServiceResponse>()))
-                .Returns(_fixture.Create<UserBaseResponseDto>());
-
-            var request = new Mock<HttpRequest>();
-            request.SetupGet(x => x.Cookies["refreshToken"]).Returns(_fixture.Create<string>());
-
-            var context = new Mock<HttpContext>();
+            var token = _fixture.Create<string>();
+            mapperMock.Setup(x => x.Map<UserBaseResponseDto>(userResponse))
+                .Returns(userResponseDto);
+            userServiceMock.Setup(x => x.RefreshTokenAsync(token)).ReturnsAsync(userResponse);
+            request.SetupGet(x => x.Cookies["refreshToken"]).Returns(token);
             context.SetupGet(x => x.Request).Returns(request.Object);
 
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object)
+            sut.ControllerContext = new ControllerContext
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context.Object
-                }
+                HttpContext = context.Object
             };
 
             // Act
             var result = sut.RefreshToken();
 
             // Assert
-            Assert.IsNotNull(result);
+            result.Should().NotBeNull();
+            result.Should().BeOfType<Task<ActionResult<UserBaseResponseDto>>>();
         }
 
         [Test]
-        public void RecoverPassword_Successfull()
+        [UsersControllerTestsAttribute]
+        public void RecoverPassword_Successfull([Frozen] Mock<IUserService> userServiceMock,
+           UserForRecoverPasswordRequestDto user, string origin,
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Assert
-
-            var mapperMock = new Mock<IMapper>();
-
-            var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(x => x.RecoverUserPasswordViaEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+            userServiceMock.Setup(x => x.RecoverUserPasswordViaEmailAsync(user.Email, origin))
                 .Returns(Task.CompletedTask);
 
-            var request = new Mock<HttpRequest>();
-            request.SetupGet(x => x.Headers["origin"]).Returns("EkvitiOrigin");
-
-            var context = new Mock<HttpContext>();
+            request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
 
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object)
+            sut.ControllerContext = new ControllerContext
             {
-                ControllerContext = new ControllerContext
-                {
-                    HttpContext = context.Object
-                }
+                HttpContext = context.Object
             };
 
             // Act
-            var res = sut.RecoverPassword(_fixture.Create<UserForRecoverPasswordRequestDto>());
+            var res = sut.RecoverPassword(user);
 
             // Arrange
-            Assert.IsTrue(res.Result is OkObjectResult);
-            Assert.AreEqual(((OkObjectResult)res.Result).StatusCode, (int)HttpStatusCode.OK);
+            res.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
         [Test]
-        public void VerifyPasswordRecovery_Successfull()
+        [UsersControllerTestsAttribute]
+        public void VerifyPasswordRecovery_Successfull([Frozen] Mock<IUserService> userServiceMock,
+            UserForPasswordRecoveryEmailVerificationDtoRequest user, User userResult, [Greedy] UsersController sut)
         {
             // Arrange
-            var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
-                    .ReturnsAsync(_fixture.Create<User>());
-
-            var mapperMock = new Mock<IMapper>();
-
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object);
+            userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(user.Email, user.Token, user.NewPassword))
+                    .Returns(Task.CompletedTask);
 
             // Act
-            var result = sut.VerifyPasswordRecovery(_fixture.Create<UserForPasswordRecoveryEmailVerificationDtoRequest>());
+            var res = sut.VerifyPasswordRecovery(user);
 
             // Assert
-            Assert.IsNotNull(result);
+            res.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
         [Test]
-        public void ChangePassword_Successfull()
+        [UsersControllerTestsAttribute]
+        public void ChangePassword_Successfull([Frozen] Mock<IUserService> userServiceMock,
+           UserForPasswordChangeRequestDto user, [Greedy] UsersController sut)
         {
             // Arrange
-            var mapperMock = new Mock<IMapper>();
-
-            var userServiceMock = new Mock<IUserService>();
-            userServiceMock.Setup(x => x.ChangeUserPasswordAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            userServiceMock.Setup(x => x.ChangeUserPasswordAsync(user.Email, user.OldPassword, user.NewPassword))
                 .Returns(Task.CompletedTask);
 
-            var sut = new UsersController(userServiceMock.Object, mapperMock.Object);
-
             // Act
-            var res = sut.ChangePassword(_fixture.Create<UserForPasswordChangeRequestDto>());
+            var res = sut.ChangePassword(user);
 
             // Assert
-            Assert.IsTrue(res.Result is OkObjectResult);
-            Assert.AreEqual(((OkObjectResult)res.Result).StatusCode, (int)HttpStatusCode.OK);
+            res.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
         //TODO implement test for facebook login
