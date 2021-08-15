@@ -173,7 +173,7 @@ namespace Application.Services
 
             if (oldToken != null)
             {
-                oldToken.Revoked = DateTime.UtcNow;
+                oldToken.Revoked = DateTimeOffset.UtcNow;
             }
 
             var newRefreshToken = _jwtGenerator.GetRefreshToken();
