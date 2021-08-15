@@ -1,5 +1,9 @@
-﻿using Application.Errors;
+﻿using System;
+using System.Threading.Tasks;
+using Application.Errors;
 using Application.Services;
+using AutoFixture.NUnit3;
+using FluentAssertions;
 using NUnit.Framework;
 
 namespace Application.Tests.Services
@@ -14,59 +18,59 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [TestCase(null, "email@email")]
-        [TestCase("", "email@email")]
-        [TestCase("   ", "email@email")]
-        public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email)
+        [InlineAutoData(null, "email@email")]
+        [InlineAutoData("", "email@email")]
+        [InlineAutoData("   ", "email@email")]
+        public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
-            var sut = new EmailService();
-
             // Act
+            Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(url, email);
+
             // Assert
-            Assert.ThrowsAsync<RestException>(async () => await sut.SendConfirmationEmailAsync(url, email));
+            methodInTest.Should().Throw<RestException>();
         }
 
         [Test]
-        [TestCase("someGoodUrl", null)]
-        [TestCase("someGoodUrl", "")]
-        [TestCase("someGoodUrl", "   ")]
-        public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email)
+        [InlineAutoData("someGoodUrl", null)]
+        [InlineAutoData("someGoodUrl", "")]
+        [InlineAutoData("someGoodUrl", "   ")]
+        public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange
-            var sut = new EmailService();
-
             // Act
+            Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(url, email);
+
             // Assert
-            Assert.ThrowsAsync<RestException>(async () => await sut.SendConfirmationEmailAsync(url, email));
+            methodInTest.Should().Throw<RestException>();
         }
 
         [Test]
-        [TestCase(null, "email@email")]
-        [TestCase("", "email@email")]
-        [TestCase("   ", "email@email")]
-        public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email)
+        [InlineAutoData(null, "email@email")]
+        [InlineAutoData("", "email@email")]
+        [InlineAutoData("   ", "email@email")]
+        public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
-            var sut = new EmailService();
-
             // Act
+            Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
+
             // Assert
-            Assert.ThrowsAsync<RestException>(async () => await sut.SendPasswordRecoveryEmailAsync(url, email));
+            methodInTest.Should().Throw<RestException>();
         }
 
         [Test]
-        [TestCase("someGoodUrl", null)]
-        [TestCase("someGoodUrl", "")]
-        [TestCase("someGoodUrl", "   ")]
-        public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email)
+        [InlineAutoData("someGoodUrl", null)]
+        [InlineAutoData("someGoodUrl", "")]
+        [InlineAutoData("someGoodUrl", "   ")]
+        public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange
-            var sut = new EmailService();
-
             // Act
+            Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
+
             // Assert
-            Assert.ThrowsAsync<RestException>(async () => await sut.SendPasswordRecoveryEmailAsync(url, email));
+            methodInTest.Should().Throw<RestException>();
         }
     }
 }
