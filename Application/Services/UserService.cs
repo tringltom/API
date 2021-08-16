@@ -41,7 +41,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.BadRequest, new { Username = "Korisničko ime već postoji." });
 
             if (!await _userRepository.CreateUserAsync(user, password))
-                throw new RestException(HttpStatusCode.BadRequest, new { Greška = "Neuspešno dodavanje korisnika." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešno dodavanje korisnika." });
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyEmailUrl(origin, token, user.Email);
@@ -72,7 +72,7 @@ namespace Application.Services
             var decodedToken = DecodeToken(token);
 
             if (!await _userRepository.ConfirmUserEmailAsync(user, decodedToken))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greška = "Neuspešno slanje verifikacionog emaila." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešno slanje verifikacionog emaila." });
         }
 
 
@@ -101,7 +101,7 @@ namespace Application.Services
             var passwordRecoveryResult = await _userRepository.RecoverUserPasswordAsync(user, decodedToken, newPassword);
 
             if (!passwordRecoveryResult.Succeeded)
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greška = "Neuspešna izmena šifre." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešna izmena šifre." });
         }
 
         public async Task ChangeUserPasswordAsync(string email, string oldPassword, string newPassword)
@@ -114,7 +114,7 @@ namespace Application.Services
             var changePassword = await _userRepository.ChangeUserPasswordAsync(user, oldPassword, newPassword);
 
             if (!changePassword.Succeeded)
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greška = "Neuspešna izmena šifre." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešna izmena šifre." });
         }
 
         public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
@@ -133,11 +133,11 @@ namespace Application.Services
             {
                 if (signInResult.IsLockedOut)
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Greška = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Greska = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
                 }
                 else
                 {
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Greška = "Nevalidan email ili nevalidna šifra." });
+                    throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Nevalidan email ili nevalidna šifra." });
                 }
             }
 
@@ -146,7 +146,7 @@ namespace Application.Services
             user.RefreshTokens.Add(refreshToken);
 
             if (!await _userRepository.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greška = $"Neuspešna izmena za korisnika {user.UserName}." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
             var userToken = _jwtGenerator.CreateToken(user);
 
@@ -165,7 +165,7 @@ namespace Application.Services
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
             if (oldToken != null && !oldToken.IsActive)
-                throw new RestException(HttpStatusCode.Unauthorized, new { Greška = "Niste autorizovani." });
+                throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Niste autorizovani." });
 
             if (oldToken != null)
             {
@@ -177,7 +177,7 @@ namespace Application.Services
             user.RefreshTokens.Add(newRefreshToken);
 
             if (!await _userRepository.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greška = $"Neuspešna izmena za korisnika {user.UserName}." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
 
             var userToken = _jwtGenerator.CreateToken(user);
@@ -202,7 +202,7 @@ namespace Application.Services
             {
                 user.RefreshTokens.Add(refreshToken);
                 if (!await _userRepository.UpdateUserAsync(user))
-                    throw new RestException(HttpStatusCode.InternalServerError, new { Greška = $"Neuspešna izmena za korisnika {user.UserName}." });
+                    throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
                 return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
             }
