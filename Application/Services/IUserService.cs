@@ -11,7 +11,7 @@ namespace Application.Services
         Task ResendConfirmationEmailAsync(string email, string origin);
         Task ConfirmEmailAsync(string email, string token);
         Task RecoverUserPasswordViaEmailAsync(string email, string origin);
-        Task<User> ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword);
+        Task ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword);
         Task ChangeUserPasswordAsync(string email, string oldPassword, string newPassword);
         Task<UserBaseServiceResponse> LoginAsync(string email, string password);
         Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken);
