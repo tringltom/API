@@ -765,5 +765,122 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Never);
         }
+
+        [Test]
+        [UserServiceTestsAttribute]
+        public void LogoutUserAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
+            User user, UserService sut)
+        {
+            // Arrange
+            user.RefreshTokens = new List<RefreshToken>
+            {
+                _fixture.Build<RefreshToken>().With(x => x.Expires, DateTime.UtcNow.AddDays(7))
+                .Without(x => x.Revoked).Create()
+            };
+
+            userRepoMock.Setup(x => x.GetCurrentUsername()).Returns(user.UserName);
+            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
+                    .ReturnsAsync(user);
+            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(user.RefreshTokens.ElementAt(0).Token);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
+            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+        }
+
+        [Test]
+        [UserServiceTestsAttribute]
+        public void LogoutUserAsync_NoTokenFound([Frozen] Mock<IUserRepository> userRepoMock,
+           string oldToken, UserService sut)
+        {
+            // Arrange
+            var user = _fixture.Build<User>().With(x => x.RefreshTokens, new List<RefreshToken>()).Create();
+
+            userRepoMock.Setup(x => x.GetCurrentUsername()).Returns(user.UserName);
+            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
+                    .ReturnsAsync(user);
+            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
+            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+        }
+
+        [Test]
+        [UserServiceTestsAttribute]
+        public void LogoutUserAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
+           string oldToken, User user, UserService sut)
+        {
+            // Arrange
+            userRepoMock.Setup(x => x.GetCurrentUsername()).Returns(user.UserName);
+            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
+                    .ReturnsAsync((User)null);
+            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
+            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+        }
+
+        [Test]
+        [UserServiceTestsAttribute]
+        public void LogoutUserAsync_TokenInactive([Frozen] Mock<IUserRepository> userRepoMock,
+           string oldToken, User user, UserService sut)
+        {
+            // Arrange
+            user.RefreshTokens = new List<RefreshToken>
+            {
+                _fixture.Build<RefreshToken>().With(x => x.Token, oldToken).With(x => x.Revoked, DateTime.Today.AddDays(-1)).Create()
+            };
+            userRepoMock.Setup(x => x.GetCurrentUsername()).Returns(user.UserName);
+            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
+                    .ReturnsAsync(user);
+            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
+            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+        }
+
+        [Test]
+        [UserServiceTestsAttribute]
+        public void LogoutUserAsync_UpdateUserFailed([Frozen] Mock<IUserRepository> userRepoMock,
+           string oldToken, User user, UserService sut)
+        {
+            // Arrange
+            userRepoMock.Setup(x => x.GetCurrentUsername()).Returns(user.UserName);
+            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
+                    .ReturnsAsync(user);
+            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
+            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+        }
     }
 }
