@@ -187,7 +187,7 @@ namespace Application.Services
 
         public async Task LogoutUserAsync(string refreshToken)
         {
-            var currentUserName = GetCurrentUsername();
+            var currentUserName = _userRepository.GetCurrentUsername();
 
             var user = await _userRepository.FindUserByNameAsync(currentUserName);
 
