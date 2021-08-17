@@ -74,7 +74,8 @@ namespace API.Controllers
         {
             var refreshToken = Request.Cookies["refreshToken"];
 
-            await _userService.LogoutUserAsync(refreshToken);
+            if (refreshToken != null)
+                await _userService.LogoutUserAsync(refreshToken);
 
             return Ok("Uspešno ste izlogovani.");
         }
