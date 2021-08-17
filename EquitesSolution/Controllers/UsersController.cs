@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using API.DTOs.User;
+using Application.Models;
 using Application.Services;
 using AutoMapper;
 using Domain.Entities;
@@ -57,7 +58,7 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<UserBaseServiceResponse>> CurrentUser()
+        public async Task<ActionResult<CurrentlyLoggedInUser>> CurrentUser()
         {
             return await _userService.GetCurrentlyLoggedInUser();
         }
