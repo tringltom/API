@@ -34,12 +34,13 @@ namespace Application.Services
             _facebookAccessor = facebookAccessor;
         }
 
-        public async Task<UserBaseServiceResponse> GetCurrentlyLoggedInUser()
+        public async Task<User> GetCurrentlyLoggedInUser()
         {
-            var refreshToken = _jwtGenerator.GetRefreshToken();
-            var test = await RefreshTokenAsync(refreshToken.Token);
-            return test;
+            var username = GetCurrentUsername();
+            var user = await _userRepository.FindUserByNameAsync(username);
+            return user;
         }
+
         public async Task RegisterAsync(User user, string password, string origin)
         {
             if (await _userRepository.ExistsWithEmailAsync(user.Email))
