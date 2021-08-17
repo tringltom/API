@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Application.Models;
 using Application.Repositories;
 using Application.Security;
 using Domain.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Application.Services
@@ -34,7 +32,7 @@ namespace Application.Services
 
         public async Task<CurrentlyLoggedInUser> GetCurrentlyLoggedInUser()
         {
-            var username = GetCurrentUsername();
+            var username = _userRepository.GetCurrentUsername();
             var user = await _userRepository.FindUserByNameAsync(username);
             var token = _jwtGenerator.CreateToken(user);
 
