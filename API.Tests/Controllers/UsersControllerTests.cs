@@ -100,6 +100,26 @@ namespace API.Tests.Controllers
 
         [Test]
         [UsersControllerTestsAttribute]
+        public void GetCurrentlyLoggedInUser_Successfull([Frozen] Mock<IUserService> userServiceMock, [Frozen] Mock<IMapper> mapperMock,
+            CurrentUserServiceResponse currentUserServiceResponse, UserForCurrentlyLoggedInUserResponseDto userForCurrentlyLoggedInUserResponseDto, [Greedy] UsersController sut)
+        {
+            // Arrange
+            userServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync())
+                .ReturnsAsync(currentUserServiceResponse);
+            mapperMock.Setup(x => x.Map<UserForCurrentlyLoggedInUserResponseDto>(currentUserServiceResponse))
+                .Returns(userForCurrentlyLoggedInUserResponseDto);
+
+            // Act
+            var result = sut.GetCurrentlyLoggedInUser();
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().BeOfType<Task<ActionResult<UserForCurrentlyLoggedInUserResponseDto>>>();
+
+        }
+
+        [Test]
+        [UsersControllerTestsAttribute]
         public void Login_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
            UserForLoginRequestDto user, UserBaseServiceResponse userResponse, Mock<IResponseCookies> cookiesMock,
            UserBaseResponseDto userResponseDto, Mock<HttpResponse> response, Mock<HttpContext> context, [Greedy] UsersController sut)
@@ -182,7 +202,7 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void VerifyPasswordRecovery_Successfull([Frozen] Mock<IUserService> userServiceMock,
-            UserForPasswordRecoveryEmailVerificationDtoRequest user, User userResult, [Greedy] UsersController sut)
+            UserForPasswordRecoveryEmailVerificationRequestDto user, User userResult, [Greedy] UsersController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(user.Email, user.Token, user.NewPassword))
