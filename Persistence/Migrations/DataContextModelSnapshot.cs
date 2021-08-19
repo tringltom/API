@@ -21,12 +21,12 @@ namespace Persistence.Migrations
 
             modelBuilder.Entity("Domain.Entities.Activity", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ActivityTypeId")
+                    b.Property<int>("ActivityTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Answer")
@@ -62,7 +62,7 @@ namespace Persistence.Migrations
                     b.Property<int?>("XpReward")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.HasIndex("ActivityTypeId");
 
@@ -78,7 +78,7 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ActivityID")
+                    b.Property<int?>("ActivityId")
                         .HasColumnType("int");
 
                     b.Property<string>("PublicId")
@@ -89,7 +89,7 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActivityID");
+                    b.HasIndex("ActivityId");
 
                     b.ToTable("ActivityMedia");
                 });
@@ -97,9 +97,7 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.ActivityType", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -148,7 +146,7 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ActivityTypeId")
+                    b.Property<int>("ActivityTypeId")
                         .HasColumnType("int");
 
                     b.Property<string>("Answer")
@@ -447,7 +445,9 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.Entities.ActivityType", "ActivityType")
                         .WithMany("Activities")
-                        .HasForeignKey("ActivityTypeId");
+                        .HasForeignKey("ActivityTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("Activities")
@@ -458,14 +458,16 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.Entities.Activity", "Activity")
                         .WithMany("ActivityMedias")
-                        .HasForeignKey("ActivityID");
+                        .HasForeignKey("ActivityId");
                 });
 
             modelBuilder.Entity("Domain.Entities.PendingActivity", b =>
                 {
                     b.HasOne("Domain.Entities.ActivityType", "ActivityType")
                         .WithMany("PendingActivities")
-                        .HasForeignKey("ActivityTypeId");
+                        .HasForeignKey("ActivityTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("PendingActivities")

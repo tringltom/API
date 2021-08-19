@@ -11,8 +11,7 @@ namespace Persistence.Migrations
                 name: "ActivityTypes",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -86,10 +85,10 @@ namespace Persistence.Migrations
                 name: "Activities",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(nullable: true),
-                    ActivityTypeId = table.Column<int>(nullable: true),
+                    ActivityTypeId = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Answer = table.Column<string>(nullable: true),
@@ -103,13 +102,13 @@ namespace Persistence.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Activities", x => x.ID);
+                    table.PrimaryKey("PK_Activities", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Activities_ActivityTypes_ActivityTypeId",
                         column: x => x.ActivityTypeId,
                         principalTable: "ActivityTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Activities_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -210,7 +209,7 @@ namespace Persistence.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(nullable: true),
-                    ActivityTypeId = table.Column<int>(nullable: true),
+                    ActivityTypeId = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Answer = table.Column<string>(nullable: true),
@@ -230,7 +229,7 @@ namespace Persistence.Migrations
                         column: x => x.ActivityTypeId,
                         principalTable: "ActivityTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PendingActivities_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -267,7 +266,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ActivityID = table.Column<int>(nullable: true),
+                    ActivityId = table.Column<int>(nullable: true),
                     PublicId = table.Column<string>(nullable: true),
                     Url = table.Column<string>(nullable: true)
                 },
@@ -275,10 +274,10 @@ namespace Persistence.Migrations
                 {
                     table.PrimaryKey("PK_ActivityMedia", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ActivityMedia_Activities_ActivityID",
-                        column: x => x.ActivityID,
+                        name: "FK_ActivityMedia_Activities_ActivityId",
+                        column: x => x.ActivityId,
                         principalTable: "Activities",
-                        principalColumn: "ID",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -327,9 +326,9 @@ namespace Persistence.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ActivityMedia_ActivityID",
+                name: "IX_ActivityMedia_ActivityId",
                 table: "ActivityMedia",
-                column: "ActivityID");
+                column: "ActivityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

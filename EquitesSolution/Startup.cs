@@ -42,6 +42,7 @@ namespace API
             {
                 opt.UseLazyLoadingProxies();
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                opt.EnableSensitiveDataLogging();
             });
 
 

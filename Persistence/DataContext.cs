@@ -1,4 +1,6 @@
-﻿using Domain.Entities;
+﻿using System;
+using System.Linq;
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -23,15 +25,31 @@ namespace Persistence
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<ActivityType>()
-               .HasData(
-                   new ActivityType { Id = 1, Name = "GoodDeed" },
-                   new ActivityType { Id = 2, Name = "Joke" },
-                   new ActivityType { Id = 3, Name = "Quote" },
-                   new ActivityType { Id = 4, Name = "Puzzle" },
-                   new ActivityType { Id = 5, Name = "Happening" },
-                   new ActivityType { Id = 6, Name = "Challenge" }
-               );
+            builder
+           .Entity<Activity>()
+           .Property(e => e.ActivityTypeId)
+           .HasConversion<int>();
+
+            builder
+           .Entity<PendingActivity>()
+           .Property(e => e.ActivityTypeId)
+           .HasConversion<int>();
+
+            builder
+                .Entity<ActivityType>()
+                .Property(e => e.Id)
+                .HasConversion<int>();
+
+            builder
+                .Entity<ActivityType>().HasData(
+                    Enum.GetValues(typeof(ActivityTypeId))
+                        .Cast<ActivityTypeId>()
+                        .Select(e => new ActivityType()
+                        {
+                            Id = e,
+                            Name = e.ToString()
+                        })
+                );
         }
     }
 }

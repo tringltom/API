@@ -7,7 +7,7 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
         public virtual User User { get; set; }
-        //public ActivityTypeId ActivityTypeId { get; set; }
+        public ActivityTypeId ActivityTypeId { get; set; }
         public virtual ActivityType ActivityType { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
