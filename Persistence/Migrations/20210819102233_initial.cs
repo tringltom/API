@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Persistence.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,13 +11,13 @@ namespace Persistence.Migrations
                 name: "ActivityTypes",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ActivityTypes", x => x.ID);
+                    table.PrimaryKey("PK_ActivityTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -62,19 +62,6 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Values",
-                columns: table => new
-                {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Values", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -102,25 +89,26 @@ namespace Persistence.Migrations
                     ID = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(nullable: true),
-                    ActivityTypeID = table.Column<int>(nullable: false),
-                    ActivityTypeID1 = table.Column<int>(nullable: true),
+                    ActivityTypeId = table.Column<int>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Answer = table.Column<string>(nullable: true),
                     Location = table.Column<string>(nullable: true),
-                    Latitude = table.Column<double>(nullable: false),
-                    Longitude = table.Column<double>(nullable: false),
-                    XpReward = table.Column<int>(nullable: false),
+                    Latitude = table.Column<double>(nullable: true),
+                    Longitude = table.Column<double>(nullable: true),
+                    XpReward = table.Column<int>(nullable: true),
+                    StartDate = table.Column<DateTimeOffset>(nullable: true),
+                    EndDate = table.Column<DateTimeOffset>(nullable: true),
                     DateApproved = table.Column<DateTimeOffset>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Activities", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Activities_ActivityTypes_ActivityTypeID1",
-                        column: x => x.ActivityTypeID1,
+                        name: "FK_Activities_ActivityTypes_ActivityTypeId",
+                        column: x => x.ActivityTypeId,
                         principalTable: "ActivityTypes",
-                        principalColumn: "ID",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Activities_AspNetUsers_UserId",
@@ -219,28 +207,29 @@ namespace Persistence.Migrations
                 name: "PendingActivities",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(nullable: true),
-                    ActivityTypeID = table.Column<int>(nullable: false),
-                    ActivityTypeID1 = table.Column<int>(nullable: true),
+                    ActivityTypeId = table.Column<int>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Description = table.Column<string>(nullable: true),
                     Answer = table.Column<string>(nullable: true),
                     Location = table.Column<string>(nullable: true),
-                    Latitude = table.Column<double>(nullable: false),
-                    Longitude = table.Column<double>(nullable: false),
-                    XpReward = table.Column<int>(nullable: false),
+                    Latitude = table.Column<double>(nullable: true),
+                    Longitude = table.Column<double>(nullable: true),
+                    XpReward = table.Column<int>(nullable: true),
+                    StartDate = table.Column<DateTimeOffset>(nullable: true),
+                    EndDate = table.Column<DateTimeOffset>(nullable: true),
                     DateCreated = table.Column<DateTimeOffset>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PendingActivities", x => x.ID);
+                    table.PrimaryKey("PK_PendingActivities", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PendingActivities_ActivityTypes_ActivityTypeID1",
-                        column: x => x.ActivityTypeID1,
+                        name: "FK_PendingActivities_ActivityTypes_ActivityTypeId",
+                        column: x => x.ActivityTypeId,
                         principalTable: "ActivityTypes",
-                        principalColumn: "ID",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PendingActivities_AspNetUsers_UserId",
@@ -276,15 +265,15 @@ namespace Persistence.Migrations
                 name: "ActivityMedia",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     ActivityID = table.Column<int>(nullable: true),
-                    PublicID = table.Column<string>(nullable: true),
+                    PublicId = table.Column<string>(nullable: true),
                     Url = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ActivityMedia", x => x.ID);
+                    table.PrimaryKey("PK_ActivityMedia", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ActivityMedia_Activities_ActivityID",
                         column: x => x.ActivityID,
@@ -297,26 +286,26 @@ namespace Persistence.Migrations
                 name: "PendingActivityMedia",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ActivityPendingID = table.Column<int>(nullable: true),
-                    PublicID = table.Column<string>(nullable: true),
+                    ActivityPendingId = table.Column<int>(nullable: true),
+                    PublicId = table.Column<string>(nullable: true),
                     Url = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PendingActivityMedia", x => x.ID);
+                    table.PrimaryKey("PK_PendingActivityMedia", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PendingActivityMedia_PendingActivities_ActivityPendingID",
-                        column: x => x.ActivityPendingID,
+                        name: "FK_PendingActivityMedia_PendingActivities_ActivityPendingId",
+                        column: x => x.ActivityPendingId,
                         principalTable: "PendingActivities",
-                        principalColumn: "ID",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
                 table: "ActivityTypes",
-                columns: new[] { "ID", "Name" },
+                columns: new[] { "Id", "Name" },
                 values: new object[,]
                 {
                     { 1, "GoodDeed" },
@@ -328,9 +317,9 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Activities_ActivityTypeID1",
+                name: "IX_Activities_ActivityTypeId",
                 table: "Activities",
-                column: "ActivityTypeID1");
+                column: "ActivityTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Activities_UserId",
@@ -382,9 +371,9 @@ namespace Persistence.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PendingActivities_ActivityTypeID1",
+                name: "IX_PendingActivities_ActivityTypeId",
                 table: "PendingActivities",
-                column: "ActivityTypeID1");
+                column: "ActivityTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PendingActivities_UserId",
@@ -392,9 +381,9 @@ namespace Persistence.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PendingActivityMedia_ActivityPendingID",
+                name: "IX_PendingActivityMedia_ActivityPendingId",
                 table: "PendingActivityMedia",
-                column: "ActivityPendingID");
+                column: "ActivityPendingId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",
@@ -427,9 +416,6 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "RefreshTokens");
-
-            migrationBuilder.DropTable(
-                name: "Values");
 
             migrationBuilder.DropTable(
                 name: "Activities");

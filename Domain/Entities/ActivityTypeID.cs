@@ -1,6 +1,6 @@
 ﻿namespace Domain.Entities
 {
-    public enum ActivityTypeID : int
+    public enum ActivityTypeId : int
     {
         GoodDeed = 1,
         Joke = 2,

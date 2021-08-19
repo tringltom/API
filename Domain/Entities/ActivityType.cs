@@ -4,7 +4,7 @@ namespace Domain.Entities
 {
     public class ActivityType
     {
-        public int ID { get; set; }
+        public int Id { get; set; }
         public string Name { get; set; }
 
         public virtual List<PendingActivity> PendingActivities { get; set; }
