@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +9,6 @@ using Application.Models;
 using Application.Repositories;
 using Application.Security;
 using Domain.Entities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Application.Services
@@ -30,6 +28,21 @@ namespace Application.Services
             _emailService = emailService;
             _jwtGenerator = jwtGenerator;
             _facebookAccessor = facebookAccessor;
+        }
+
+        public async Task<CurrentUserServiceResponse> GetCurrentlyLoggedInUserAsync()
+        {
+            var username = _userRepository.GetCurrentUsername();
+            if (username == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik nije pronađen." });
+
+            var user = await _userRepository.FindUserByNameAsync(username);
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
+
+            var token = _jwtGenerator.CreateToken(user);
+
+            return new CurrentUserServiceResponse(user.UserName, token);
         }
 
         public async Task RegisterAsync(User user, string password, string origin)

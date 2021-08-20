@@ -11,6 +11,7 @@ namespace API.Mappings
         {
             CreateMap<UserForRegistrationRequestDto, User>();
             CreateMap<UserBaseServiceResponse, UserBaseResponseDto>();
+            CreateMap<CurrentUserServiceResponse, UserForCurrentlyLoggedInUserResponseDto>();
         }
     }
 }
