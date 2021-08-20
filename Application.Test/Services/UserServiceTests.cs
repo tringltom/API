@@ -421,25 +421,28 @@ namespace Application.Tests.Services
 
         [Test]
         [UserServiceTestsAttribute]
-        public void GetCurrentlyLoggedInUserAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, string username, User currentUser, string token, UserService sut)
+        public void GetCurrentlyLoggedInUserAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserService sut)
         {
             //Arrange
             userRepoMock.Setup(x => x.GetCurrentUsername())
-                .Returns(username);
+                .Returns(currentUser.UserName);
 
-            userRepoMock.Setup(x => x.FindUserByNameAsync(username))
+            userRepoMock.Setup(x => x.FindUserByNameAsync(currentUser.UserName))
                 .ReturnsAsync(currentUser);
 
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
+            CurrentUserServiceResponse result = null;
+
             //Act
-            Func<Task> methodInTest = async () => await sut.GetCurrentlyLoggedInUserAsync();
+            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
 
             //Assert
-            methodInTest.Should().NotThrow<RestException>();
+            methodInTest.Should().NotThrow<Exception>();
+            result.Should().NotBeNull();
             userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(username), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateToken(currentUser), Times.Once);
         }
 
@@ -449,30 +452,34 @@ namespace Application.Tests.Services
         {
             //Arrange
             userRepoMock.Setup(x => x.GetCurrentUsername())
-                .Returns((string)(null));
+                .Returns((string)null);
 
-            userRepoMock.Setup(x => x.FindUserByNameAsync(null))
+            userRepoMock.Setup(x => x.FindUserByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((User)null);
 
             jwtGeneratorMock.Setup(x => x.CreateToken(It.IsAny<User>()))
                 .Returns(token);
 
+            CurrentUserServiceResponse result = null;
+
             //Act
-            Func<Task> methodInTest = async () => await sut.GetCurrentlyLoggedInUserAsync();
+            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
 
             //Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().Throw<RestException>();
+            result.Should().BeNull();
             userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateToken(currentUser), Times.Never);
         }
+
         [Test]
         [UserServiceTestsAttribute]
         public void GetCurrentlyLoggedInUserAsync_UserWithCurrentUsernameNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserService sut)
         {
             //Arrange
             userRepoMock.Setup(x => x.GetCurrentUsername())
-                .Returns((currentUser.UserName));
+                .Returns(currentUser.UserName);
 
             userRepoMock.Setup(x => x.FindUserByNameAsync(currentUser.UserName))
                 .ReturnsAsync((User)null);
@@ -480,16 +487,18 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
+            CurrentUserServiceResponse result = null;
+
             //Act
-            Func<Task> methodInTest = async () => await sut.GetCurrentlyLoggedInUserAsync();
+            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
 
             //Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().Throw<RestException>();
+            result.Should().BeNull();
             userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateToken(currentUser), Times.Never);
         }
-
 
         [Test]
         [UserServiceTestsAttribute]

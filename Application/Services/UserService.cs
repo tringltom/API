@@ -33,7 +33,13 @@ namespace Application.Services
         public async Task<CurrentUserServiceResponse> GetCurrentlyLoggedInUserAsync()
         {
             var username = _userRepository.GetCurrentUsername();
+            if (username == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik nije pronađen." });
+
             var user = await _userRepository.FindUserByNameAsync(username);
+            if (user == null)
+                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
+
             var token = _jwtGenerator.CreateToken(user);
 
             return new CurrentUserServiceResponse(user.UserName, token);
