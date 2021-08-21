@@ -3,7 +3,7 @@ using FluentValidation;
 
 namespace API.Validations
 {
-    public class UserForPasswordRecoveryEmailVerificationDtoRequestValidation : AbstractValidator<UserForPasswordRecoveryEmailVerificationDtoRequest>
+    public class UserForPasswordRecoveryEmailVerificationDtoRequestValidation : AbstractValidator<UserForPasswordRecoveryEmailVerificationRequestDto>
     {
         public UserForPasswordRecoveryEmailVerificationDtoRequestValidation()
         {
