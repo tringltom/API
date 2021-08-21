@@ -1,30 +1,54 @@
-﻿using Domain.Entities;
+﻿using System;
+using System.Linq;
+using Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Persistence
 {
-    public class DataContext : IdentityDbContext<User>
+    public class DataContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
         public DataContext(DbContextOptions<DataContext> options) : base(options)
         {
 
         }
 
-        public virtual DbSet<Value> Values { get; set; }
+        public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+        public virtual DbSet<ActivityType> ActivityTypes { get; set; }
+        public virtual DbSet<PendingActivity> PendingActivities { get; set; }
+        public virtual DbSet<Activity> Activities { get; set; }
+        public virtual DbSet<ActivityMedia> ActivityMedia { get; set; }
+        public virtual DbSet<PendingActivityMedia> PendingActivityMedia { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            builder.Entity<Value>()
-                .HasData(
-                    new Value { Id = 1, Name = "Value 101" },
-                    new Value { Id = 2, Name = "Value 102" },
-                    new Value { Id = 3, Name = "Value 103" },
-                    new Value { Id = 4, Name = "Value 104" },
-                    new Value { Id = 5, Name = "Value 105" },
-                    new Value { Id = 6, Name = "Value 106" }
+            builder
+           .Entity<Activity>()
+           .Property(e => e.ActivityTypeId)
+           .HasConversion<int>();
+
+            builder
+           .Entity<PendingActivity>()
+           .Property(e => e.ActivityTypeId)
+           .HasConversion<int>();
+
+            builder
+                .Entity<ActivityType>()
+                .Property(e => e.Id)
+                .HasConversion<int>();
+
+            builder
+                .Entity<ActivityType>().HasData(
+                    Enum.GetValues(typeof(ActivityTypeId))
+                        .Cast<ActivityTypeId>()
+                        .Select(e => new ActivityType()
+                        {
+                            Id = e,
+                            Name = e.ToString()
+                        })
                 );
         }
     }
