@@ -1,6 +1,6 @@
 ﻿namespace API.DTOs.User
 {
-    public class UserForPasswordRecoveryEmailVerificationDtoRequest
+    public class UserForPasswordRecoveryEmailVerificationRequestDto
     {
         public string Email { get; set; }
         public string Token { get; set; }

@@ -1,13 +1,13 @@
-﻿using API.DTOs.User;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using API.DTOs.User;
 using Application.Services;
 using AutoMapper;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 
 
 namespace API.Controllers
@@ -54,6 +54,16 @@ namespace API.Controllers
             await _userService.ConfirmEmailAsync(emailverification.Email, emailverification.Token);
 
             return Ok("Email adresa potvrđena. Možete se ulogovati.");
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<UserForCurrentlyLoggedInUserResponseDto>> GetCurrentlyLoggedInUser()
+        {
+            var result = await _userService.GetCurrentlyLoggedInUserAsync();
+
+            var user = _mapper.Map<UserForCurrentlyLoggedInUserResponseDto>(result);
+
+            return user;
         }
 
         [AllowAnonymous]
@@ -111,7 +121,7 @@ namespace API.Controllers
 
         [HttpPost("verifyPasswordRecovery")]
         [AllowAnonymous]
-        public async Task<ActionResult> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationDtoRequest passwordRecoveryVerify)
+        public async Task<ActionResult> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationRequestDto passwordRecoveryVerify)
         {
             await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
             return Ok("Uspešna izmena šifre. Molimo Vas da se ulogujete sa novim kredencijalima.");
