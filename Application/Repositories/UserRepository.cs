@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Domain.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -10,15 +13,17 @@ namespace Application.Repositories
     {
         private readonly UserManager<User> _userIdentityManager;
         private readonly SignInManager<User> _userSigninManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         private readonly DataContext _context;
 
         public UserRepository(UserManager<User> userIdentityManager, DataContext context,
-            SignInManager<User> userSigninManager)
+            SignInManager<User> userSigninManager, IHttpContextAccessor httpContextAccessor)
         {
             _userIdentityManager = userIdentityManager;
             _userSigninManager = userSigninManager;
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> CreateUserAsync(User user, string password)
@@ -65,7 +70,7 @@ namespace Application.Repositories
             return result.Succeeded;
         }
 
-        public async Task<string> GenerateUserEmailConfirmationTokenAsyn(User user)
+        public async Task<string> GenerateUserEmailConfirmationTokenAsync(User user)
         {
             return await _userIdentityManager.GenerateEmailConfirmationTokenAsync(user);
         }
@@ -93,6 +98,13 @@ namespace Application.Repositories
         public async Task<SignInResult> SignInUserViaPasswordWithLockoutAsync(User user, string password)
         {
             return await _userSigninManager.CheckPasswordSignInAsync(user, password, true);
+        }
+
+        public string GetCurrentUsername()
+        {
+            var username = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
+
+            return username;
         }
     }
 }
