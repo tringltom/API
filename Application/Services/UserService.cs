@@ -145,13 +145,9 @@ namespace Application.Services
             if (!signInResult.Succeeded)
             {
                 if (signInResult.IsLockedOut)
-                {
                     throw new RestException(HttpStatusCode.Unauthorized, new { Greska = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
-                }
                 else
-                {
                     throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Nevalidan email ili nevalidna šifra." });
-                }
             }
 
             var refreshToken = _jwtGenerator.GetRefreshToken();
@@ -181,9 +177,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Niste autorizovani." });
 
             if (oldToken != null)
-            {
                 oldToken.Revoked = DateTime.UtcNow;
-            }
 
             var newRefreshToken = _jwtGenerator.GetRefreshToken();
 
@@ -213,9 +207,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
 
             if (oldToken != null)
-            {
                 oldToken.Revoked = DateTime.UtcNow;
-            }
 
             if (!await _userRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
