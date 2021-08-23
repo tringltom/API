@@ -854,7 +854,7 @@ namespace Application.Tests.Services
             // Arrange
             user.RefreshTokens = new List<RefreshToken>
             {
-                _fixture.Build<RefreshToken>().With(x => x.Expires, DateTime.UtcNow.AddDays(7))
+                _fixture.Build<RefreshToken>().With(x => x.Expires, DateTimeOffset.UtcNow.AddDays(7))
                 .Without(x => x.Revoked).Create()
             };
 

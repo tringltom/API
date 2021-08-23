@@ -207,7 +207,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
 
             if (oldToken != null)
-                oldToken.Revoked = DateTime.UtcNow;
+                oldToken.Revoked = DateTimeOffset.UtcNow;
 
             if (!await _userRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
