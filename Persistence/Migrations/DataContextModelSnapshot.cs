@@ -221,11 +221,11 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime>("Expires")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("Expires")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("Revoked")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("Revoked")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Token")
                         .HasColumnType("nvarchar(max)");
