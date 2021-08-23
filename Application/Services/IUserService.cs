@@ -17,5 +17,6 @@ namespace Application.Services
         Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken);
         Task<UserBaseServiceResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
         Task<CurrentUserServiceResponse> GetCurrentlyLoggedInUserAsync();
+        Task LogoutUserAsync(string refreshToken);
     }
 }
