@@ -246,8 +246,8 @@ namespace Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(nullable: true),
                     Token = table.Column<string>(nullable: true),
-                    Expires = table.Column<DateTime>(nullable: false),
-                    Revoked = table.Column<DateTime>(nullable: true)
+                    Expires = table.Column<DateTimeOffset>(nullable: false),
+                    Revoked = table.Column<DateTimeOffset>(nullable: true)
                 },
                 constraints: table =>
                 {
