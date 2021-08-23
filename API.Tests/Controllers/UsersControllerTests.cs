@@ -233,6 +233,55 @@ namespace API.Tests.Controllers
             ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
         }
 
+        [Test]
+        [UsersControllerTestsAttribute]
+        public void Logout_Successfull([Frozen] Mock<IUserService> userServiceMock,
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+        {
+            // Arrange
+            var token = _fixture.Create<string>();
+            userServiceMock.Setup(x => x.LogoutUserAsync(token)).Returns(Task.CompletedTask);
+            request.SetupGet(x => x.Cookies["refreshToken"]).Returns(token);
+            context.SetupGet(x => x.Request).Returns(request.Object);
+
+            sut.ControllerContext = new ControllerContext
+            {
+                HttpContext = context.Object
+            };
+
+            // Act
+            var result = sut.Logout();
+
+            // Assert
+            result.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)result.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+        }
+
+        [Test]
+        [UsersControllerTestsAttribute]
+        public void Logout_TokenIsNull([Frozen] Mock<IUserService> userServiceMock,
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+        {
+            // Arrange
+            var token = _fixture.Create<string>();
+            userServiceMock.Setup(x => x.LogoutUserAsync(token)).Returns(Task.CompletedTask);
+            request.SetupGet(x => x.Cookies["refreshToken"]).Returns((string)null);
+            context.SetupGet(x => x.Request).Returns(request.Object);
+
+            sut.ControllerContext = new ControllerContext
+            {
+                HttpContext = context.Object
+            };
+
+            // Act
+            var result = sut.Logout();
+
+            // Assert
+            result.Result.Should().BeOfType<OkObjectResult>();
+            ((OkObjectResult)result.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+            userServiceMock.Verify(x => x.LogoutUserAsync(It.IsAny<string>()), Times.Never);
+        }
+
         //TODO implement test for facebook login
     }
 }

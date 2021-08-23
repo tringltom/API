@@ -42,6 +42,7 @@ namespace API
             {
                 opt.UseLazyLoadingProxies();
                 opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                opt.EnableSensitiveDataLogging();
             });
 
 
@@ -56,11 +57,9 @@ namespace API
             services.AddAutoMapper(typeof(UserProfile));
 
             //Add Transient Repositories
-            services.AddTransient<IValueRepository, ValueRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
 
             //Add Scoped Managers
-            services.AddScoped<IValueManager, ValueManager>();
             services.AddScoped<IUserManager, UserManager>();
 
             services.AddScoped<IEmailService, EmailService>();
