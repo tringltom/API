@@ -12,10 +12,10 @@ namespace Application.Services
 
         // this should be dynamic somehow without adding coupling with API layer
         // also domain email should be created and those credentials used for production
-        private const string _sender = "EkvitiDev@outlook.com";
-        private const string _senderPassword = "Ekviti2021";
-        private const string _outlookSmtp = "smtp-mail.outlook.com";
-        private const int _outlookPort = 587;
+        private const string _sender = "no-reply@ekviti.rs";
+        private const string _senderPassword = "EQWitty202!Q#3";
+        private const string _outlookSmtp = "hgws26.win.hostgator.com";
+        private const int _outlookPort = 26;
 
         public EmailService()
         {
