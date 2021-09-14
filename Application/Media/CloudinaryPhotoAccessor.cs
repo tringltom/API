@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Application.Settings;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Application.Media
 {
     public class CloudinaryPhotoAccessor : IPhotoAccessor
     {
         private readonly Cloudinary _cloudinary;
-        public CloudinaryPhotoAccessor(IConfiguration config)
+        public CloudinaryPhotoAccessor(IOptions<CloudinarySettings> settings)
         {
             var acc = new Account(
-                config.GetSection("ClCloudName").Value,
-                config.GetSection("ClApiKey").Value,
-                config.GetSection("ClApiSecret").Value
+                settings.Value.CloudName,
+                settings.Value.APIKey,
+                settings.Value.APISecret
                 );
 
             _cloudinary = new Cloudinary(acc);
