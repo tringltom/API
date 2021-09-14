@@ -1,6 +1,7 @@
-﻿namespace API.DTOs.User
+﻿
+namespace Models.User
 {
-    public class UserForPasswordRecoveryEmailVerificationRequestDto
+    public class UserPasswordRecoveryVerification
     {
         public string Email { get; set; }
         public string Token { get; set; }

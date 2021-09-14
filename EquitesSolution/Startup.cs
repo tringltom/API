@@ -108,7 +108,7 @@ namespace API
                 opt.Filters.Add(new AuthorizeFilter(policy));
             }).AddFluentValidation(cfg =>
             {
-                cfg.RegisterValidatorsFromAssemblyContaining<UserForEmailVerificationRequestDtoValidation>();
+                cfg.RegisterValidatorsFromAssemblyContaining<UserEmailVerificationValidation>();
             }).AddNewtonsoftJson(options =>
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
             services.AddSwaggerGen(c =>

@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using API.DTOs.User;
 using Application.Services;
 using AutoMapper;
 using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-
+using Models.User;
 
 namespace API.Controllers
 {
-
+    // TODO - remove coupling between API and Envity by moving User entity somewhere in Application layer
     [Route("users")]
     public class UsersController : BaseController
     {
@@ -26,7 +25,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult> Register(UserForRegistrationRequestDto userToRegister)
+        public async Task<ActionResult> Register(UserRegister userToRegister)
         {
             var user = _mapper.Map<User>(userToRegister);
             var origin = Request.Headers["origin"];
@@ -38,7 +37,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpGet("resendEmailVerification")]
-        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserForResendEmailVerificationRequestDto user)
+        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserEmail user)
         {
             var origin = Request.Headers["origin"];
 
@@ -49,7 +48,7 @@ namespace API.Controllers
 
         [HttpPost("verifyEmail")]
         [AllowAnonymous]
-        public async Task<ActionResult> VerifyEmail(UserForEmailVerificationRequestDto emailverification)
+        public async Task<ActionResult> VerifyEmail(UserEmailVerification emailverification)
         {
             await _userService.ConfirmEmailAsync(emailverification.Email, emailverification.Token);
 
@@ -57,22 +56,22 @@ namespace API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<UserForCurrentlyLoggedInUserResponseDto>> GetCurrentlyLoggedInUser()
+        public async Task<ActionResult<UserCurrentlyLoggedIn>> GetCurrentlyLoggedInUser()
         {
             var result = await _userService.GetCurrentlyLoggedInUserAsync();
 
-            var user = _mapper.Map<UserForCurrentlyLoggedInUserResponseDto>(result);
+            var user = _mapper.Map<UserCurrentlyLoggedIn>(result);
 
             return user;
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public async Task<ActionResult<UserBaseResponseDto>> Login(UserForLoginRequestDto userLogin)
+        public async Task<ActionResult<UserBaseResponse>> Login(UserLogin userLogin)
         {
             var result = await _userService.LoginAsync(userLogin.Email, userLogin.Password);
 
-            var user = _mapper.Map<UserBaseResponseDto>(result);
+            var user = _mapper.Map<UserBaseResponse>(result);
 
             SetTokenCookie(user.RefreshToken);
 
@@ -92,11 +91,11 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("facebook")]
-        public async Task<ActionResult<UserBaseResponseDto>> FacebookLogin(string accessToken, CancellationToken cancellationToken)
+        public async Task<ActionResult<UserBaseResponse>> FacebookLogin(string accessToken, CancellationToken cancellationToken)
         {
             //var result = await _userService.FacebookLoginAsync(accessToken, cancellationToken);
 
-            //var user = _mapper.Map<UserBaseResponseDto>(result);
+            //var user = _mapper.Map<UserBaseResponse>(result);
 
             //SetTokenCookie(user.RefreshToken);
             //return user;
@@ -105,14 +104,14 @@ namespace API.Controllers
         }
 
         [HttpPost("refreshToken")]
-        public async Task<ActionResult<UserBaseResponseDto>> RefreshToken()
+        public async Task<ActionResult<UserBaseResponse>> RefreshToken()
         {
 
             var refreshToken = Request.Cookies["refreshToken"];
 
             var result = await _userService.RefreshTokenAsync(refreshToken);
 
-            var user = _mapper.Map<UserBaseResponseDto>(result);
+            var user = _mapper.Map<UserBaseResponse>(result);
 
             SetTokenCookie(user.RefreshToken);
 
@@ -121,7 +120,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("recoverPassword")]
-        public async Task<ActionResult> RecoverPassword(UserForRecoverPasswordRequestDto user)
+        public async Task<ActionResult> RecoverPassword(UserEmail user)
         {
             var origin = Request.Headers["origin"];
 
@@ -132,14 +131,14 @@ namespace API.Controllers
 
         [HttpPost("verifyPasswordRecovery")]
         [AllowAnonymous]
-        public async Task<ActionResult> VerifyPasswordRecovery(UserForPasswordRecoveryEmailVerificationRequestDto passwordRecoveryVerify)
+        public async Task<ActionResult> VerifyPasswordRecovery(UserPasswordRecoveryVerification passwordRecoveryVerify)
         {
             await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
             return Ok("Uspešna izmena šifre. Molimo Vas da se ulogujete sa novim kredencijalima.");
         }
 
         [HttpPost("changePassword")]
-        public async Task<ActionResult> ChangePassword(UserForPasswordChangeRequestDto user)
+        public async Task<ActionResult> ChangePassword(UserPasswordChange user)
         {
             await _userService.ChangeUserPasswordAsync(user.Email, user.OldPassword, user.NewPassword);
 

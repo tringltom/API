@@ -1,12 +1,12 @@
-﻿using API.DTOs.User;
+﻿using Models.User;
 using FluentValidation;
 
 namespace API.Validations
 {
-    public class UserForPasswordChangeRequestDtoValidation : AbstractValidator<UserForPasswordChangeRequestDto>
+    public class UserPasswordChangeValidation : AbstractValidator<UserPasswordChange>
     {
 
-        public UserForPasswordChangeRequestDtoValidation()
+        public UserPasswordChangeValidation()
         {
             RuleFor(x => x.NewPassword).Password();
             RuleFor(x => x.OldPassword).NotEmpty().WithMessage("Šifra ne sme biti prazna");

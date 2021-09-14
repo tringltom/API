@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Application.Models;
 using Domain.Entities;
+using Models.User;
 
 namespace Application.Services
 {
@@ -13,10 +13,10 @@ namespace Application.Services
         Task RecoverUserPasswordViaEmailAsync(string email, string origin);
         Task ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword);
         Task ChangeUserPasswordAsync(string email, string oldPassword, string newPassword);
-        Task<UserBaseServiceResponse> LoginAsync(string email, string password);
-        Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken);
-        Task<UserBaseServiceResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
-        Task<CurrentUserServiceResponse> GetCurrentlyLoggedInUserAsync();
+        Task<UserBaseResponse> LoginAsync(string email, string password);
+        Task<UserBaseResponse> RefreshTokenAsync(string refreshToken);
+        Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
+        Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync();
         Task LogoutUserAsync(string refreshToken);
     }
 }

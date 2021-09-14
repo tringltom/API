@@ -5,11 +5,11 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Models;
 using Application.Repositories;
 using Application.Security;
 using Domain.Entities;
 using Microsoft.AspNetCore.WebUtilities;
+using Models.User;
 
 namespace Application.Services
 {
@@ -30,7 +30,7 @@ namespace Application.Services
             _facebookAccessor = facebookAccessor;
         }
 
-        public async Task<CurrentUserServiceResponse> GetCurrentlyLoggedInUserAsync()
+        public async Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync()
         {
             var username = _userRepository.GetCurrentUsername();
             if (username == null)
@@ -42,7 +42,7 @@ namespace Application.Services
 
             var token = _jwtGenerator.CreateToken(user);
 
-            return new CurrentUserServiceResponse(user.UserName, token);
+            return new UserCurrentlyLoggedIn() { Username = user.UserName, Token = token };
         }
 
         public async Task RegisterAsync(User user, string password, string origin)
@@ -130,7 +130,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešna izmena šifre." });
         }
 
-        public async Task<UserBaseServiceResponse> LoginAsync(string email, string password)
+        public async Task<UserBaseResponse> LoginAsync(string email, string password)
         {
             var user = await _userRepository.FindUserByEmailAsync(email);
 
@@ -159,10 +159,10 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
         }
 
-        public async Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
         {
             var currentUserName = _userRepository.GetCurrentUsername();
 
@@ -189,7 +189,7 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseServiceResponse(userToken, user.UserName, newRefreshToken.Token);
+            return new UserBaseResponse(userToken, user.UserName, newRefreshToken.Token);
         }
 
         public async Task LogoutUserAsync(string refreshToken)
@@ -213,7 +213,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
         }
 
-        public async Task<UserBaseServiceResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)
+        public async Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)
         {
             var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
 
@@ -232,7 +232,7 @@ namespace Application.Services
                 if (!await _userRepository.UpdateUserAsync(user))
                     throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
-                return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
+                return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
             }
 
             user = new User
@@ -248,7 +248,7 @@ namespace Application.Services
             if (await _userRepository.CreateUserWithoutPasswordAsync(user))
                 throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
 
-            return new UserBaseServiceResponse(userToken, user.UserName, refreshToken.Token);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
         }
 
         private async Task<string> GenerateUserTokenForEmailConfirmationAsync(User user)

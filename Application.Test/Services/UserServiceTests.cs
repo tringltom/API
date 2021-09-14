@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Models;
 using Application.Repositories;
 using Application.Security;
 using Application.Services;
@@ -14,6 +13,7 @@ using AutoFixture.NUnit3;
 using Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using Models.User;
 using Moq;
 using NUnit.Framework;
 
@@ -433,7 +433,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
-            CurrentUserServiceResponse result = null;
+            UserCurrentlyLoggedIn result = null;
 
             //Act
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
@@ -460,7 +460,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(It.IsAny<User>()))
                 .Returns(token);
 
-            CurrentUserServiceResponse result = null;
+            UserCurrentlyLoggedIn result = null;
 
             //Act
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
@@ -487,7 +487,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
-            CurrentUserServiceResponse result = null;
+            UserCurrentlyLoggedIn result = null;
 
             //Act
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
@@ -711,7 +711,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(user.RefreshTokens.ElementAt(0).Token);
@@ -742,7 +742,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -770,7 +770,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -803,7 +803,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -831,7 +831,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
