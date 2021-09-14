@@ -33,7 +33,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RegisterAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             User user, string password, string origin, UserService sut)
         {
@@ -60,7 +60,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RegisterAsync_UserEmailTaken([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             User user, string password, string origin, UserService sut)
         {
@@ -86,7 +86,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RegisterAsync_UserNameTaken([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             User user, string password, string origin, UserService sut)
         {
@@ -112,7 +112,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RegisterAsync_UserCreationFails([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             User user, string password, string origin, UserService sut)
         {
@@ -138,7 +138,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ResendConfirmationEmailAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string origin, User user, UserService sut)
         {
@@ -164,7 +164,7 @@ namespace Application.Tests.Services
 
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ResendConfirmationEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string origin, User user, UserService sut)
         {
@@ -190,7 +190,7 @@ namespace Application.Tests.Services
 
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ConfirmEmailAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserService sut)
         {
@@ -212,7 +212,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ConfirmEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserService sut)
         {
@@ -231,7 +231,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ConfirmEmailAsync_ConfirmUserMailFailed([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserService sut)
         {
@@ -252,7 +252,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RecoverUserPasswordViaEmailAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string token, string origin, User user, UserService sut)
         {
@@ -276,7 +276,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RecoverUserPasswordViaEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string token, string origin, User user, UserService sut)
         {
@@ -300,7 +300,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
              string newPassword, User user, UserService sut)
         {
@@ -320,7 +320,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ConfirmUserPasswordRecoveryAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
              string newPassword, User user, UserService sut)
         {
@@ -340,7 +340,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ConfirmUserPasswordRecoveryAsync_PasswordRecoveryFailed([Frozen] Mock<IUserRepository> userRepoMock,
              string newPassword, User user, UserService sut)
         {
@@ -360,7 +360,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ChangeUserPasswordAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
              string oldPassword, string newPassword, User user, UserService sut)
         {
@@ -380,7 +380,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ChangeUserPasswordAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
              string oldPassword, string newPassword, User user, UserService sut)
         {
@@ -400,7 +400,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void ChangeUserPasswordAsync_ChangePasswordFailed([Frozen] Mock<IUserRepository> userRepoMock,
              string oldPassword, string newPassword, User user, UserService sut)
         {
@@ -420,7 +420,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void GetCurrentlyLoggedInUserAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserService sut)
         {
             //Arrange
@@ -447,7 +447,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void GetCurrentlyLoggedInUserAsync_UsernameNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserService sut)
         {
             //Arrange
@@ -474,7 +474,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void GetCurrentlyLoggedInUserAsync_UserWithCurrentUsernameNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserService sut)
         {
             //Arrange
@@ -501,7 +501,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LoginAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string password, RefreshToken refreshToken, UserService sut)
         {
@@ -533,7 +533,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LoginAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string password, RefreshToken refreshToken, UserService sut)
         {
@@ -565,7 +565,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LoginAsync_UserEmailNotConfirmed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string password, RefreshToken refreshToken, UserService sut)
         {
@@ -597,7 +597,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LoginAsync_SignInFailedGeneral([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string password, RefreshToken refreshToken, UserService sut)
         {
@@ -629,7 +629,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LoginAsync_SignInFailedUserLockedOut([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string password, RefreshToken refreshToken, UserService sut)
         {
@@ -661,7 +661,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LoginAsync_UpdateUserFailed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string password, RefreshToken refreshToken, UserService sut)
         {
@@ -693,7 +693,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RefreshTokenAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             User user, RefreshToken newToken, UserService sut)
         {
@@ -728,7 +728,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RefreshTokenAsync_NoTokenFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, RefreshToken newToken, UserService sut)
         {
@@ -758,7 +758,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RefreshTokenAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, User user, RefreshToken newToken, UserService sut)
         {
@@ -786,7 +786,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RefreshTokenAsync_TokenInactive([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, User user, RefreshToken newToken, UserService sut)
         {
@@ -819,7 +819,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void RefreshTokenAsync_UserUpdateFailed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, User user, RefreshToken newToken, UserService sut)
         {
@@ -847,7 +847,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LogoutUserAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserService sut)
         {
@@ -874,7 +874,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LogoutUserAsync_NoTokenFound([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, UserService sut)
         {
@@ -897,7 +897,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LogoutUserAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, User user, UserService sut)
         {
@@ -918,7 +918,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LogoutUserAsync_TokenInactive([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, User user, UserService sut)
         {
@@ -943,7 +943,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServiceTestsAttribute]
+        [UserServiceTests]
         public void LogoutUserAsync_UpdateUserFailed([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, User user, UserService sut)
         {

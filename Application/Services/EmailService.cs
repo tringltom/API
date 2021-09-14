@@ -2,24 +2,26 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
+using Application.Settings;
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
 namespace Application.Services
 {
     public class EmailService : IEmailService
     {
+        private readonly string _sender;
+        private readonly string _senderPassword;
+        private readonly string _smtpServer;
+        private readonly int _serverPort;
 
-        // this should be dynamic somehow without adding coupling with API layer
-        // also domain email should be created and those credentials used for production
-        private const string _sender = "EkvitiDev@outlook.com";
-        private const string _senderPassword = "Ekviti2021";
-        private const string _outlookSmtp = "smtp-mail.outlook.com";
-        private const int _outlookPort = 587;
-
-        public EmailService()
+        public EmailService(IOptions<EmailSettings> settings)
         {
-
+            _sender = settings.Value.Sender;
+            _senderPassword = settings.Value.Password;
+            _smtpServer = settings.Value.Server;
+            _serverPort = settings.Value.Port;
         }
 
         private MimeMessage ComposeMessage(string email)
@@ -38,7 +40,7 @@ namespace Application.Services
         private async Task FinalizeMessageAsync(MimeMessage message)
         {
             var client = new SmtpClient();
-            await client.ConnectAsync(_outlookSmtp, _outlookPort, false);
+            await client.ConnectAsync(_smtpServer, _serverPort, false);
             await client.AuthenticateAsync(_sender, _senderPassword);
             await client.SendAsync(message);
             client.Disconnect(true);
