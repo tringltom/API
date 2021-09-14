@@ -76,6 +76,9 @@ namespace API
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<DataContext>();
 
+            services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
+
+
             services.Configure<IdentityOptions>(options =>
             {
                 // Lockout settings.

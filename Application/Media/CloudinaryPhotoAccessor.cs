@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
@@ -6,10 +7,10 @@ using Microsoft.Extensions.Configuration;
 
 namespace Application.Media
 {
-    public class PhotoAccessor : IPhotoAccessor
+    public class CloudinaryPhotoAccessor : IPhotoAccessor
     {
         private readonly Cloudinary _cloudinary;
-        public PhotoAccessor(IConfiguration config)
+        public CloudinaryPhotoAccessor(IConfiguration config)
         {
             var acc = new Account(
                 config.GetSection("ClCloudName").Value,
@@ -20,7 +21,7 @@ namespace Application.Media
             _cloudinary = new Cloudinary(acc);
         }
 
-        public PhotoUploadResult AddPhoto(IFormFile file)
+        public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file)
         {
             var uploadResult = new ImageUploadResult();
 
@@ -33,7 +34,7 @@ namespace Application.Media
                         File = new FileDescription(file.FileName, stream),
                         Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
                     };
-                    uploadResult = _cloudinary.Upload(uploadParams);
+                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
                 }
             }
 
@@ -47,13 +48,13 @@ namespace Application.Media
             };
         }
 
-        public string DeletePhoto(string publicId)
+        public async Task<bool> DeletePhotoAsync(string publicId)
         {
             var deleteParams = new DeletionParams(publicId);
 
-            var result = _cloudinary.Destroy(deleteParams);
+            var result = await _cloudinary.DestroyAsync(deleteParams);
 
-            return result.Result == "ok" ? result.Result : null;
+            return result.Result == "ok";
         }
     }
 }
