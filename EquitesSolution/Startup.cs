@@ -8,6 +8,7 @@ using Application.Managers;
 using Application.Repositories;
 using Application.Security;
 using Application.Services;
+using Application.Settings;
 using Domain.Entities;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,6 +77,7 @@ namespace API
                 .AddDefaultTokenProviders()
                 .AddEntityFrameworkStores<DataContext>();
 
+            services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
             services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
 
 
