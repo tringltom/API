@@ -6,7 +6,6 @@ using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -30,15 +29,13 @@ namespace API.Tests.Controllers
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void Register_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock, string origin,
-           UserRegister userForReg, User user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+        public void Register_Successfull(string origin, UserRegister userForReg, Mock<HttpRequest> request,
+            Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            mapperMock.Setup(x => x.Map<User>(userForReg))
-                .Returns(user);
 
-            // userServiceMock.Setup(x => x.RegisterAsync(user, userForReg.Password, "EkvitiOrigin"));
-            //    .Returns(Task.CompletedTask);
+            //userServiceMock.Setup(x => x.RegisterAsync(userForReg, origin))
+            //   .Returns(Task.CompletedTask);
 
             request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
@@ -86,7 +83,7 @@ namespace API.Tests.Controllers
            UserEmailVerification user, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.ConfirmEmailAsync(user.Email, user.Token))
+            userServiceMock.Setup(x => x.ConfirmEmailAsync(user))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -119,15 +116,13 @@ namespace API.Tests.Controllers
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void Login_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
+        public void Login_Successfull([Frozen] Mock<IUserService> userServiceMock,
            UserLogin user, UserBaseResponse userResponse, Mock<IResponseCookies> cookiesMock,
-           UserBaseResponse userResponseDto, Mock<HttpResponse> response, Mock<HttpContext> context, [Greedy] UsersController sut)
+           Mock<HttpResponse> response, UserLogin userLogin, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.LoginAsync(user.Email, user.Password))
+            userServiceMock.Setup(x => x.LoginAsync(userLogin))
                 .ReturnsAsync(userResponse);
-            mapperMock.Setup(x => x.Map<UserBaseResponse>(userResponse))
-                .Returns(userResponseDto);
 
             response.Setup(x => x.Cookies).Returns(cookiesMock.Object);
             context.Setup(x => x.Response).Returns(response.Object);
@@ -147,14 +142,11 @@ namespace API.Tests.Controllers
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void RefreshToken_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
-           UserBaseResponse userResponse, UserBaseResponse userResponseDto,
+        public void RefreshToken_Successfull([Frozen] Mock<IUserService> userServiceMock, UserBaseResponse userResponse,
            Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
             var token = _fixture.Create<string>();
-            mapperMock.Setup(x => x.Map<UserBaseResponse>(userResponse))
-                .Returns(userResponseDto);
             userServiceMock.Setup(x => x.RefreshTokenAsync(token)).ReturnsAsync(userResponse);
             request.SetupGet(x => x.Cookies["refreshToken"]).Returns(token);
             context.SetupGet(x => x.Request).Returns(request.Object);
@@ -201,10 +193,10 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void VerifyPasswordRecovery_Successfull([Frozen] Mock<IUserService> userServiceMock,
-            UserPasswordRecoveryVerification user, User userResult, [Greedy] UsersController sut)
+            UserPasswordRecoveryVerification user, UserPasswordRecoveryVerification userPasswordRecovery, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(user.Email, user.Token, user.NewPassword))
+            userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery))
                     .Returns(Task.CompletedTask);
 
             // Act
@@ -221,7 +213,7 @@ namespace API.Tests.Controllers
            UserPasswordChange user, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.ChangeUserPasswordAsync(user.Email, user.OldPassword, user.NewPassword))
+            userServiceMock.Setup(x => x.ChangeUserPasswordAsync(user))
                 .Returns(Task.CompletedTask);
 
             // Act

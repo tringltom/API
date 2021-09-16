@@ -27,10 +27,10 @@ namespace API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> Register(UserRegister userToRegister)
         {
-            var user = _mapper.Map<User>(userToRegister);
+
             var origin = Request.Headers["origin"];
 
-            // await _userService.RegisterAsync(user, userToRegister.Password, origin);
+            // await _userService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
@@ -50,7 +50,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> VerifyEmail(UserEmailVerification emailverification)
         {
-            await _userService.ConfirmEmailAsync(emailverification.Email, emailverification.Token);
+            await _userService.ConfirmEmailAsync(emailverification);
 
             return Ok("Email adresa potvrđena. Možete se ulogovati.");
         }
@@ -58,24 +58,20 @@ namespace API.Controllers
         [HttpGet]
         public async Task<ActionResult<UserCurrentlyLoggedIn>> GetCurrentlyLoggedInUser()
         {
-            var result = await _userService.GetCurrentlyLoggedInUserAsync();
+            var userCurrentlyLoggedInUser = await _userService.GetCurrentlyLoggedInUserAsync();
 
-            var user = _mapper.Map<UserCurrentlyLoggedIn>(result);
-
-            return user;
+            return userCurrentlyLoggedInUser;
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<UserBaseResponse>> Login(UserLogin userLogin)
         {
-            var result = await _userService.LoginAsync(userLogin.Email, userLogin.Password);
+            var userReponse = await _userService.LoginAsync(userLogin);
 
-            var user = _mapper.Map<UserBaseResponse>(result);
+            SetTokenCookie(userReponse.RefreshToken);
 
-            SetTokenCookie(user.RefreshToken);
-
-            return user;
+            return userReponse;
         }
 
         [HttpPost("logout")]
@@ -109,13 +105,11 @@ namespace API.Controllers
 
             var refreshToken = Request.Cookies["refreshToken"];
 
-            var result = await _userService.RefreshTokenAsync(refreshToken);
+            var userResponse = await _userService.RefreshTokenAsync(refreshToken);
 
-            var user = _mapper.Map<UserBaseResponse>(result);
+            SetTokenCookie(userResponse.RefreshToken);
 
-            SetTokenCookie(user.RefreshToken);
-
-            return user;
+            return userResponse;
         }
 
         [AllowAnonymous]
@@ -133,14 +127,14 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult> VerifyPasswordRecovery(UserPasswordRecoveryVerification passwordRecoveryVerify)
         {
-            await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify.Email, passwordRecoveryVerify.Token, passwordRecoveryVerify.NewPassword);
+            await _userService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify);
             return Ok("Uspešna izmena šifre. Molimo Vas da se ulogujete sa novim kredencijalima.");
         }
 
         [HttpPost("changePassword")]
         public async Task<ActionResult> ChangePassword(UserPasswordChange user)
         {
-            await _userService.ChangeUserPasswordAsync(user.Email, user.OldPassword, user.NewPassword);
+            await _userService.ChangeUserPasswordAsync(user);
 
             return Ok("Uspešna izmena šifre.");
         }
