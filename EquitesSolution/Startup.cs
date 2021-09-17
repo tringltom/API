@@ -78,6 +78,9 @@ namespace API
                 .AddEntityFrameworkStores<DataContext>();
 
             services.Configure<EmailSettings>(Configuration.GetSection("EmailSettings"));
+            services.Configure<CloudinarySettings>(Configuration.GetSection("Cloudinary"));
+
+
             services.Configure<IdentityOptions>(options =>
             {
                 // Lockout settings.
