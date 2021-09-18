@@ -29,13 +29,12 @@ namespace API.Tests.Controllers
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void Register_Successfull(string origin, UserRegister userForReg, Mock<HttpRequest> request,
+        public void Register_Successfull([Frozen] Mock<IUserService> userServiceMock, string origin, UserRegister userForReg, Mock<HttpRequest> request,
             Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-
-            //userServiceMock.Setup(x => x.RegisterAsync(userForReg, origin))
-            //   .Returns(Task.CompletedTask);
+            userServiceMock.Setup(x => x.RegisterAsync(userForReg, origin))
+               .Returns(Task.CompletedTask);
 
             request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
