@@ -1,9 +1,9 @@
-﻿namespace API.DTOs.User
+﻿
+namespace Models.User
 {
-    public class UserForCurrentlyLoggedInUserResponseDto
+    public class UserCurrentlyLoggedIn
     {
         public string Token { get; set; }
         public string Username { get; set; }
-
     }
 }

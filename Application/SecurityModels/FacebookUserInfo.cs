@@ -1,4 +1,4 @@
-﻿namespace Application.Models
+﻿namespace Application.SecurityModels
 {
     public class FacebookUserInfo
     {
