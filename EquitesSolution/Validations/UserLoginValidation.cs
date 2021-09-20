@@ -1,11 +1,11 @@
-﻿using API.DTOs.User;
-using FluentValidation;
+﻿using FluentValidation;
+using Models.User;
 
 namespace API.Validations
 {
-    public class UserForLoginRequestDtoValidation : AbstractValidator<UserForLoginRequestDto>
+    public class UserLoginValidation : AbstractValidator<UserLogin>
     {
-        public UserForLoginRequestDtoValidation()
+        public UserLoginValidation()
         {
             RuleFor(x => x.Email).NotEmpty().EmailAddress().Configure(rule => rule.MessageBuilder = _ => "Neispravna email adresa");
             RuleFor(x => x.Password).NotEmpty().WithMessage("Šifra ne sme biti prazna");

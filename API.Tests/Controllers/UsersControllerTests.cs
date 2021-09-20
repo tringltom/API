@@ -1,17 +1,15 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
-using API.DTOs.User;
 using API.Tests.Attributes;
-using Application.Models;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Models.User;
 using Moq;
 using NUnit.Framework;
 
@@ -31,15 +29,12 @@ namespace API.Tests.Controllers
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void Register_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock, string origin,
-           UserForRegistrationRequestDto userForReg, User user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+        public void Register_Successfull([Frozen] Mock<IUserService> userServiceMock, string origin, UserRegister userForReg, Mock<HttpRequest> request,
+            Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            mapperMock.Setup(x => x.Map<User>(userForReg))
-                .Returns(user);
-
-            // userServiceMock.Setup(x => x.RegisterAsync(user, userForReg.Password, "EkvitiOrigin"));
-            //    .Returns(Task.CompletedTask);
+            userServiceMock.Setup(x => x.RegisterAsync(userForReg, origin))
+               .Returns(Task.CompletedTask);
 
             request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
@@ -60,7 +55,7 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void ResendEmailVerification_Successfull([Frozen] Mock<IUserService> userServiceMock, string origin,
-           UserForResendEmailVerificationRequestDto user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+           UserEmail user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.ResendConfirmationEmailAsync(user.Email, origin))
@@ -84,10 +79,10 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void VerifyEmail_Successfull([Frozen] Mock<IUserService> userServiceMock,
-           UserForEmailVerificationRequestDto user, [Greedy] UsersController sut)
+           UserEmailVerification user, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.ConfirmEmailAsync(user.Email, user.Token))
+            userServiceMock.Setup(x => x.ConfirmEmailAsync(user))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -101,34 +96,32 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void GetCurrentlyLoggedInUser_Successfull([Frozen] Mock<IUserService> userServiceMock, [Frozen] Mock<IMapper> mapperMock,
-            CurrentUserServiceResponse currentUserServiceResponse, UserForCurrentlyLoggedInUserResponseDto userForCurrentlyLoggedInUserResponseDto, [Greedy] UsersController sut)
+            UserCurrentlyLoggedIn currentUser, [Greedy] UsersController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync())
-                .ReturnsAsync(currentUserServiceResponse);
-            mapperMock.Setup(x => x.Map<UserForCurrentlyLoggedInUserResponseDto>(currentUserServiceResponse))
-                .Returns(userForCurrentlyLoggedInUserResponseDto);
+                .ReturnsAsync(currentUser);
+            mapperMock.Setup(x => x.Map<UserCurrentlyLoggedIn>(currentUser))
+                .Returns(currentUser);
 
             // Act
             var result = sut.GetCurrentlyLoggedInUser();
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserForCurrentlyLoggedInUserResponseDto>>>();
+            result.Should().BeOfType<Task<ActionResult<UserCurrentlyLoggedIn>>>();
 
         }
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void Login_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
-           UserForLoginRequestDto user, UserBaseServiceResponse userResponse, Mock<IResponseCookies> cookiesMock,
-           UserBaseResponseDto userResponseDto, Mock<HttpResponse> response, Mock<HttpContext> context, [Greedy] UsersController sut)
+        public void Login_Successfull([Frozen] Mock<IUserService> userServiceMock,
+           UserLogin user, UserBaseResponse userResponse, Mock<IResponseCookies> cookiesMock,
+           Mock<HttpResponse> response, UserLogin userLogin, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.LoginAsync(user.Email, user.Password))
+            userServiceMock.Setup(x => x.LoginAsync(userLogin))
                 .ReturnsAsync(userResponse);
-            mapperMock.Setup(x => x.Map<UserBaseResponseDto>(userResponse))
-                .Returns(userResponseDto);
 
             response.Setup(x => x.Cookies).Returns(cookiesMock.Object);
             context.Setup(x => x.Response).Returns(response.Object);
@@ -143,19 +136,16 @@ namespace API.Tests.Controllers
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserBaseResponseDto>>>();
+            result.Should().BeOfType<Task<ActionResult<UserBaseResponse>>>();
         }
 
         [Test]
         [UsersControllerTestsAttribute]
-        public void RefreshToken_Successfull([Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserService> userServiceMock,
-           UserBaseServiceResponse userResponse, UserBaseResponseDto userResponseDto,
+        public void RefreshToken_Successfull([Frozen] Mock<IUserService> userServiceMock, UserBaseResponse userResponse,
            Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Arrange
             var token = _fixture.Create<string>();
-            mapperMock.Setup(x => x.Map<UserBaseResponseDto>(userResponse))
-                .Returns(userResponseDto);
             userServiceMock.Setup(x => x.RefreshTokenAsync(token)).ReturnsAsync(userResponse);
             request.SetupGet(x => x.Cookies["refreshToken"]).Returns(token);
             context.SetupGet(x => x.Request).Returns(request.Object);
@@ -170,13 +160,13 @@ namespace API.Tests.Controllers
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserBaseResponseDto>>>();
+            result.Should().BeOfType<Task<ActionResult<UserBaseResponse>>>();
         }
 
         [Test]
         [UsersControllerTestsAttribute]
         public void RecoverPassword_Successfull([Frozen] Mock<IUserService> userServiceMock,
-           UserForRecoverPasswordRequestDto user, string origin,
+           UserEmail user, string origin,
            Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
         {
             // Assert
@@ -202,10 +192,10 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void VerifyPasswordRecovery_Successfull([Frozen] Mock<IUserService> userServiceMock,
-            UserForPasswordRecoveryEmailVerificationRequestDto user, User userResult, [Greedy] UsersController sut)
+            UserPasswordRecoveryVerification user, UserPasswordRecoveryVerification userPasswordRecovery, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(user.Email, user.Token, user.NewPassword))
+            userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery))
                     .Returns(Task.CompletedTask);
 
             // Act
@@ -219,10 +209,10 @@ namespace API.Tests.Controllers
         [Test]
         [UsersControllerTestsAttribute]
         public void ChangePassword_Successfull([Frozen] Mock<IUserService> userServiceMock,
-           UserForPasswordChangeRequestDto user, [Greedy] UsersController sut)
+           UserPasswordChange user, [Greedy] UsersController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.ChangeUserPasswordAsync(user.Email, user.OldPassword, user.NewPassword))
+            userServiceMock.Setup(x => x.ChangeUserPasswordAsync(user))
                 .Returns(Task.CompletedTask);
 
             // Act

@@ -1,22 +1,21 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using Application.Models;
-using Domain.Entities;
+using Models.User;
 
 namespace Application.Services
 {
     public interface IUserService
     {
-        Task RegisterAsync(User user, string password, string origin);
+        Task RegisterAsync(UserRegister user, string origin);
         Task ResendConfirmationEmailAsync(string email, string origin);
-        Task ConfirmEmailAsync(string email, string token);
+        Task ConfirmEmailAsync(UserEmailVerification userEmailVerify);
         Task RecoverUserPasswordViaEmailAsync(string email, string origin);
-        Task ConfirmUserPasswordRecoveryAsync(string email, string token, string newPassword);
-        Task ChangeUserPasswordAsync(string email, string oldPassword, string newPassword);
-        Task<UserBaseServiceResponse> LoginAsync(string email, string password);
-        Task<UserBaseServiceResponse> RefreshTokenAsync(string refreshToken);
-        Task<UserBaseServiceResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
-        Task<CurrentUserServiceResponse> GetCurrentlyLoggedInUserAsync();
+        Task ConfirmUserPasswordRecoveryAsync(UserPasswordRecoveryVerification userPasswordRecovery);
+        Task ChangeUserPasswordAsync(UserPasswordChange userPassChange);
+        Task<UserBaseResponse> LoginAsync(UserLogin userLogin);
+        Task<UserBaseResponse> RefreshTokenAsync(string refreshToken);
+        Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
+        Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync();
         Task LogoutUserAsync(string refreshToken);
     }
 }

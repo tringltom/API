@@ -1,7 +1,6 @@
-﻿using API.DTOs.User;
-using Application.Models;
-using AutoMapper;
+﻿using AutoMapper;
 using Domain.Entities;
+using Models.User;
 
 namespace API.Mappings
 {
@@ -9,9 +8,7 @@ namespace API.Mappings
     {
         public UserProfile()
         {
-            CreateMap<UserForRegistrationRequestDto, User>();
-            CreateMap<UserBaseServiceResponse, UserBaseResponseDto>();
-            CreateMap<CurrentUserServiceResponse, UserForCurrentlyLoggedInUserResponseDto>();
+            CreateMap<UserRegister, User>();
         }
     }
 }

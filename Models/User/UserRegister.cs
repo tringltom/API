@@ -1,6 +1,7 @@
-﻿namespace API.DTOs.User
+﻿
+namespace Models.User
 {
-    public class UserForRegistrationRequestDto
+    public class UserRegister
     {
         public string UserName { get; set; }
         public string Email { get; set; }

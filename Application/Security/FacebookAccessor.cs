@@ -1,7 +1,8 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Application.Models;
+using Application.SecurityModels;
+using Application.Settings;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 

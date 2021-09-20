@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Models;
 using Application.Repositories;
 using Application.Security;
 using Application.Services;
@@ -14,6 +13,7 @@ using AutoFixture.NUnit3;
 using Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
+using Models.User;
 using Moq;
 using NUnit.Framework;
 
@@ -35,106 +35,106 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void RegisterAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-            User user, string password, string origin, UserService sut)
+            UserRegister userRegister, string origin, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(user.Email)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(user.UserName)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.CreateUserAsync(user, password)).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(user))
+            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
-            emailServiceMock.Setup(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
+            emailServiceMock.Setup(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.RegisterAsync(user, password, origin);
+            Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
 
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(user.UserName), Times.Once);
-            userRepoMock.Verify(x => x.CreateUserAsync(user, password), Times.Once);
-            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), user.Email), Times.Once);
+            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once);
+            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Once);
+            userRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Once);
+            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Once);
         }
 
         [Test]
         [UserServiceTests]
         public void RegisterAsync_UserEmailTaken([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-            User user, string password, string origin, UserService sut)
+            UserRegister userRegister, string origin, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(user.Email)).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(user.UserName)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.CreateUserAsync(user, password)).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(user))
+            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(true);
+            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             emailServiceMock.Setup(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.RegisterAsync(user, password, origin);
+            Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(user.Email), Times.Once());
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(user.UserName), Times.Never());
-            userRepoMock.Verify(x => x.CreateUserAsync(user, password), Times.Never);
-            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
+            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Never());
+            userRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Never);
+            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
         }
 
         [Test]
         [UserServiceTests]
         public void RegisterAsync_UserNameTaken([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-            User user, string password, string origin, UserService sut)
+            UserRegister userRegister, string origin, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(user.Email)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(user.UserName)).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.CreateUserAsync(user, password)).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(user))
+            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(true);
+            userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             emailServiceMock.Setup(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.RegisterAsync(user, password, origin);
+            Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(user.Email), Times.Once());
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(user.UserName), Times.Once());
-            userRepoMock.Verify(x => x.CreateUserAsync(user, password), Times.Never);
-            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
+            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
+            userRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Never);
+            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
         }
 
         [Test]
         [UserServiceTests]
         public void RegisterAsync_UserCreationFails([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-            User user, string password, string origin, UserService sut)
+            UserRegister userRegister, string origin, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(user.Email)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(user.UserName)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.CreateUserAsync(user, password)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(user))
+            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(false);
+            userRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
 
             emailServiceMock.Setup(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.RegisterAsync(user, password, origin);
+            Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(user.Email), Times.Once());
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(user.UserName), Times.Once());
-            userRepoMock.Verify(x => x.CreateUserAsync(user, password), Times.Once());
-            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
+            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
+            userRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Once());
+            emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
         }
 
         [Test]
@@ -192,62 +192,66 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void ConfirmEmailAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock,
-            User user, UserService sut)
+            User user, UserEmailVerification userEmailVerify, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userEmailVerify.Email))
                 .ReturnsAsync(user);
             userRepoMock.Setup(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()))
                 .ReturnsAsync(true);
 
+            userEmailVerify.Token = _fixture.Create<string>();
+
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(user.Email, _fixture.Create<string>());
+            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(userEmailVerify);
             // adding token as parameters adds name as prefix causing string to possibly have odd number of caracters
             // we cannot decode odd numbered token
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userEmailVerify.Email), Times.Once);
             userRepoMock.Verify(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()), Times.Once);
         }
 
         [Test]
         [UserServiceTests]
         public void ConfirmEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
-            User user, UserService sut)
+            User user, UserEmailVerification userEmailVerify, UserService sut)
         {
 
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userEmailVerify.Email))
                 .ReturnsAsync(() => (User)null);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(user.Email, _fixture.Create<string>());
+            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(userEmailVerify);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userEmailVerify.Email), Times.Once);
             userRepoMock.Verify(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()), Times.Never);
         }
 
         [Test]
         [UserServiceTests]
         public void ConfirmEmailAsync_ConfirmUserMailFailed([Frozen] Mock<IUserRepository> userRepoMock,
-            User user, UserService sut)
+            User user, UserEmailVerification userEmailVerify, UserService sut)
         {
 
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userEmailVerify.Email))
                 .ReturnsAsync(() => user);
             userRepoMock.Setup(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()))
                 .ReturnsAsync(() => false);
 
+            userEmailVerify.Token = _fixture.Create<string>();
+
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(user.Email, _fixture.Create<string>());
+            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(userEmailVerify);
 
             // Assert
-            Assert.ThrowsAsync<RestException>(async () => await sut.ConfirmEmailAsync(user.Email, _fixture.Create<string>()));
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
+            methodInTest.Should().Throw<RestException>();
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userEmailVerify.Email), Times.Once);
             userRepoMock.Verify(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()), Times.Once);
         }
 
@@ -302,121 +306,127 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-             string newPassword, User user, UserService sut)
+             string newPassword, User user, UserPasswordRecoveryVerification userPasswordRecovery, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userPasswordRecovery.Email))
                 .ReturnsAsync(() => user);
-            userRepoMock.Setup(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), newPassword))
+            userRepoMock.Setup(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
 
+            userPasswordRecovery.Token = _fixture.Create<string>();
+
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(user.Email, _fixture.Create<string>(), newPassword);
+            Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), newPassword), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userPasswordRecovery.Email), Times.Once);
+            userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword), Times.Once);
         }
 
         [Test]
         [UserServiceTests]
         public void ConfirmUserPasswordRecoveryAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-             string newPassword, User user, UserService sut)
+             User user, UserPasswordRecoveryVerification userPasswordRecovery, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userPasswordRecovery.Email))
                 .ReturnsAsync(() => (User)null);
-            userRepoMock.Setup(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), newPassword))
+            userRepoMock.Setup(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
 
+            userPasswordRecovery.Token = _fixture.Create<string>();
+
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(user.Email, _fixture.Create<string>(), newPassword);
+            Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), newPassword), Times.Never);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userPasswordRecovery.Email), Times.Once);
+            userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword), Times.Never);
         }
 
         [Test]
         [UserServiceTests]
         public void ConfirmUserPasswordRecoveryAsync_PasswordRecoveryFailed([Frozen] Mock<IUserRepository> userRepoMock,
-             string newPassword, User user, UserService sut)
+             UserPasswordRecoveryVerification userPasswordRecovery, User user, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userPasswordRecovery.Email))
                 .ReturnsAsync(() => user);
-            userRepoMock.Setup(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), newPassword))
+            userRepoMock.Setup(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword))
                 .ReturnsAsync(IdentityResult.Failed());
 
+            userPasswordRecovery.Token = _fixture.Create<string>();
+
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(user.Email, _fixture.Create<string>(), newPassword);
+            Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), newPassword), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userPasswordRecovery.Email), Times.Once);
+            userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword), Times.Once);
         }
 
         [Test]
         [UserServiceTests]
         public void ChangeUserPasswordAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
-             string oldPassword, string newPassword, User user, UserService sut)
+             User user, UserPasswordChange userPassChange, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userPassChange.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.ChangeUserPasswordAsync(user, oldPassword, newPassword))
+            userRepoMock.Setup(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(user.Email, oldPassword, newPassword);
+            Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(userPassChange);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, oldPassword, newPassword), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userPassChange.Email), Times.Once);
+            userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword), Times.Once);
         }
 
         [Test]
         [UserServiceTests]
         public void ChangeUserPasswordAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
-             string oldPassword, string newPassword, User user, UserService sut)
+             User user, UserPasswordChange userPassChange, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userPassChange.Email))
                 .ReturnsAsync((User)null);
-            userRepoMock.Setup(x => x.ChangeUserPasswordAsync(user, oldPassword, newPassword))
+            userRepoMock.Setup(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword))
                 .ReturnsAsync(IdentityResult.Success);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(user.Email, oldPassword, newPassword);
+            Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(userPassChange);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, oldPassword, newPassword), Times.Never);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userPassChange.Email), Times.Once);
+            userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword), Times.Never);
         }
 
         [Test]
         [UserServiceTests]
         public void ChangeUserPasswordAsync_ChangePasswordFailed([Frozen] Mock<IUserRepository> userRepoMock,
-             string oldPassword, string newPassword, User user, UserService sut)
+             User user, UserPasswordChange userPassChange, UserService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userPassChange.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.ChangeUserPasswordAsync(user, oldPassword, newPassword))
+            userRepoMock.Setup(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword))
                 .ReturnsAsync(IdentityResult.Failed());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(user.Email, oldPassword, newPassword);
+            Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(userPassChange);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, oldPassword, newPassword), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userPassChange.Email), Times.Once);
+            userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword), Times.Once);
         }
 
         [Test]
@@ -433,7 +443,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
-            CurrentUserServiceResponse result = null;
+            UserCurrentlyLoggedIn result = null;
 
             //Act
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
@@ -460,7 +470,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(It.IsAny<User>()))
                 .Returns(token);
 
-            CurrentUserServiceResponse result = null;
+            UserCurrentlyLoggedIn result = null;
 
             //Act
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
@@ -487,7 +497,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
-            CurrentUserServiceResponse result = null;
+            UserCurrentlyLoggedIn result = null;
 
             //Act
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
@@ -503,7 +513,7 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void LoginAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
-            string password, RefreshToken refreshToken, UserService sut)
+            RefreshToken refreshToken, UserLogin userLogin, UserService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -511,9 +521,9 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, password))
+            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
@@ -521,12 +531,12 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(user.Email, password);
+            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, password), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.GetRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Once);
@@ -535,7 +545,7 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void LoginAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
-            string password, RefreshToken refreshToken, UserService sut)
+            RefreshToken refreshToken, UserLogin userLogin, UserService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -543,9 +553,9 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync((User)null);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, password))
+            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
@@ -553,12 +563,12 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(user.Email, password);
+            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, password), Times.Never);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
             jwtGeneratorMock.Verify(x => x.GetRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Never);
@@ -567,7 +577,7 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void LoginAsync_UserEmailNotConfirmed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
-            string password, RefreshToken refreshToken, UserService sut)
+            RefreshToken refreshToken, UserLogin userLogin, UserService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -575,9 +585,9 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, password))
+            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
@@ -585,12 +595,12 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(user.Email, password);
+            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, password), Times.Never);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
             jwtGeneratorMock.Verify(x => x.GetRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Never);
@@ -599,7 +609,7 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void LoginAsync_SignInFailedGeneral([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
-            string password, RefreshToken refreshToken, UserService sut)
+            RefreshToken refreshToken, UserLogin userLogin, UserService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -607,9 +617,9 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, password))
+            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Failed);
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
@@ -617,12 +627,12 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(user.Email, password);
+            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, password), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.GetRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Never);
@@ -631,7 +641,7 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void LoginAsync_SignInFailedUserLockedOut([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
-            string password, RefreshToken refreshToken, UserService sut)
+            RefreshToken refreshToken, UserLogin userLogin, UserService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -639,9 +649,9 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, password))
+            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.LockedOut);
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
@@ -649,12 +659,12 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(user.Email, password);
+            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, password), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.GetRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Never);
@@ -663,7 +673,7 @@ namespace Application.Tests.Services
         [Test]
         [UserServiceTests]
         public void LoginAsync_UpdateUserFailed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
-            string password, RefreshToken refreshToken, UserService sut)
+            RefreshToken refreshToken, UserLogin userLogin, UserService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -671,9 +681,9 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(user.Email))
+            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, password))
+            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
 
@@ -681,12 +691,12 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(user.Email, password);
+            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, password), Times.Once);
+            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.GetRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateToken(user), Times.Never);
@@ -711,7 +721,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(user.RefreshTokens.ElementAt(0).Token);
@@ -742,7 +752,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -770,7 +780,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -803,7 +813,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -831,7 +841,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.GetRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateToken(user)).Returns(_fixture.Create<string>());
-            UserBaseServiceResponse result = null;
+            UserBaseResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
