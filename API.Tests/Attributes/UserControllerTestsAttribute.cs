@@ -1,12 +1,15 @@
-﻿using AutoFixture;
+﻿using System;
+using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.NUnit3;
 
-namespace Application.Tests.Attributes
+namespace API.Tests.Attributes
 {
-    public class EmailServiceTestsAttribute : InlineAutoDataAttribute
+    [AttributeUsage(AttributeTargets.Method)]
+    public class UserControllerTestsAttribute : AutoDataAttribute
     {
-        public EmailServiceTestsAttribute(params object[] arguments) : base(CreateFixture) { }
+
+        public UserControllerTestsAttribute() : base(CreateFixture) { }
 
         private static IFixture CreateFixture()
         {
@@ -19,3 +22,4 @@ namespace Application.Tests.Attributes
         }
     }
 }
+

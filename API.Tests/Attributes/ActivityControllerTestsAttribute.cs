@@ -6,10 +6,10 @@ using AutoFixture.NUnit3;
 namespace API.Tests.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class UsersControllerTestsAttribute : AutoDataAttribute
+    public class ActivityControllerTestsAttribute : AutoDataAttribute
     {
 
-        public UsersControllerTestsAttribute() : base(CreateFixture) { }
+        public ActivityControllerTestsAttribute() : base(CreateFixture) { }
 
         private static IFixture CreateFixture()
         {

@@ -5,6 +5,7 @@ using API.Mappings;
 using API.Middleware;
 using API.Validations;
 using Application.Managers;
+using Application.Media;
 using Application.Repositories;
 using Application.Security;
 using Application.Services;
@@ -59,13 +60,16 @@ namespace API
 
             //Add Transient Repositories
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IActivityRepository, ActivityRepository>();
 
             //Add Scoped Managers
             services.AddScoped<IUserManager, UserManager>();
 
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
 
             services.AddDefaultIdentity<User>(options =>
