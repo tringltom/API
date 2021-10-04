@@ -56,7 +56,7 @@ namespace API
                 });
             });
 
-            services.AddAutoMapper(typeof(UserProfile));
+            services.AddAutoMapper(typeof(ActivityProfile));
 
             //Add Transient Repositories
             services.AddTransient<IUserRepository, UserRepository>();

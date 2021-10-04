@@ -19,6 +19,7 @@ namespace Application.Services
             _activityRepository = activityRepository;
             _mapper = mapper;
         }
+
         public async Task CreateActivityAsync(ActivityCreate activityCreate)
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);

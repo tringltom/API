@@ -11,6 +11,7 @@ namespace Application.Repositories
         {
             _context = context;
         }
+
         public async Task CreateActivityAsync(PendingActivity activity)
         {
             await _context.PendingActivities.AddAsync(activity);

@@ -2,7 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Services;
-using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +13,10 @@ namespace API.Controllers
     [Route("users")]
     public class UserController : BaseController
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        public UserController(IUserService registrationService, IMapper mapper)
+        public UserController(IUserService registrationService)
         {
             _userService = registrationService;
-            _mapper = mapper;
         }
 
         [AllowAnonymous]

@@ -20,7 +20,7 @@ namespace API.Controllers
         {
             await _activityService.CreateActivityAsync(activityCreate);
 
-            return Ok("Uspešno kreiranje, molimo vas da sačekate odobrenje");
+            return Ok("Uspešno kreiranje, molimo Vas da sačekate odobrenje");
         }
     }
 }
