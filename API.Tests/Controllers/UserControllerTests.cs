@@ -101,8 +101,6 @@ namespace API.Tests.Controllers
             // Arrange
             userServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync())
                 .ReturnsAsync(currentUser);
-            mapperMock.Setup(x => x.Map<UserCurrentlyLoggedIn>(currentUser))
-                .Returns(currentUser);
 
             // Act
             var result = sut.GetCurrentlyLoggedInUser();

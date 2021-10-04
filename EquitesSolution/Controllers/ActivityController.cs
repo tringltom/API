@@ -16,7 +16,7 @@ namespace API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult> CreateActivity([FromForm]ActivityCreate activityCreate)
+        public async Task<ActionResult> CreateActivity([FromForm] ActivityCreate activityCreate)
         {
             await _activityService.CreateActivityAsync(activityCreate);
 

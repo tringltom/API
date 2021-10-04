@@ -6,6 +6,7 @@ using Application.Tests.Attributes;
 using AutoFixture;
 using AutoFixture.AutoMoq;
 using AutoFixture.NUnit3;
+using AutoMapper;
 using Domain.Entities;
 using FluentAssertions;
 using Models.Activity;
@@ -48,7 +49,7 @@ namespace Application.Tests.Services
         [ActivityServiceTests]
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-            [Frozen] Mock<AutoMapper.IMapper> mapperMock,
+            [Frozen] Mock<IMapper> mapperMock,
             ActivityCreate activityCreate,
             PhotoUploadResult photoUploadResult,
             PendingActivity activity,
@@ -57,16 +58,20 @@ namespace Application.Tests.Services
 
             // Arrange
 
-            mapperMock.Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
+            mapperMock
+                .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
                 .Returns(activity);
 
-            photoAccessorMock.Setup(x => x.AddPhotoAsync(activityCreate.Image)).ReturnsAsync(photoUploadResult);
+            photoAccessorMock
+                .Setup(x => x.AddPhotoAsync(activityCreate.Image))
+                .ReturnsAsync(photoUploadResult);
 
             // Act
             Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
+            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Image), Times.Once);
         }
     }
 }

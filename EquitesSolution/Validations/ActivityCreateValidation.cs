@@ -14,12 +14,13 @@ namespace API.Validations
 
             RuleFor(x => x.Description)
                 .MaximumLength(250).WithMessage("Opis ne sme imati više od 250 karaktera")
-                .NotEmpty().WithMessage("Opis ne sme biti prazan ako slika nije priložena").When(x => x.Image == null, ApplyConditionTo.CurrentValidator);
+                .NotEmpty().WithMessage("Opis ne sme biti prazan ako slika nije priložena")
+                    .When(x => x.Image == null, ApplyConditionTo.CurrentValidator);
 
             RuleFor(x => x.Answer)
                 .NotEmpty().WithMessage("Odgovor ne sme biti prazan")
                 .MaximumLength(100).WithMessage("Odgovor ne sme imati više od 100 karaktera")
-                .When(x => x.Type == (int)ActivityTypeId.Puzzle);
+                .When(x => x.Type == ActivityTypeId.Puzzle);
         }
     }
 }
