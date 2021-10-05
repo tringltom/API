@@ -24,7 +24,8 @@ namespace Application.Security
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, user.UserName)
+                new Claim(JwtRegisteredClaimNames.NameId, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString())
             };
 
             // generate signin credentials

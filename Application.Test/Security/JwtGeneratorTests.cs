@@ -1,11 +1,9 @@
-﻿using Application.Errors;
-using Application.Security;
+﻿using Application.Security;
 using AutoFixture;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
-using System;
 
 namespace Application.Tests.Security
 {

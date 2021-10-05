@@ -15,7 +15,7 @@ using NUnit.Framework;
 
 namespace API.Tests.Controllers
 {
-    public class UsersControllerTests
+    public class UserControllerTests
     {
 
         private Fixture _fixture;
@@ -28,9 +28,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void Register_Successfull([Frozen] Mock<IUserService> userServiceMock, string origin, UserRegister userForReg, Mock<HttpRequest> request,
-            Mock<HttpContext> context, [Greedy] UsersController sut)
+            Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.RegisterAsync(userForReg, origin))
@@ -53,9 +53,9 @@ namespace API.Tests.Controllers
 
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void ResendEmailVerification_Successfull([Frozen] Mock<IUserService> userServiceMock, string origin,
-           UserEmail user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+           UserEmail user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.ResendConfirmationEmailAsync(user.Email, origin))
@@ -77,9 +77,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void VerifyEmail_Successfull([Frozen] Mock<IUserService> userServiceMock,
-           UserEmailVerification user, [Greedy] UsersController sut)
+           UserEmailVerification user, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.ConfirmEmailAsync(user))
@@ -94,15 +94,13 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void GetCurrentlyLoggedInUser_Successfull([Frozen] Mock<IUserService> userServiceMock, [Frozen] Mock<IMapper> mapperMock,
-            UserCurrentlyLoggedIn currentUser, [Greedy] UsersController sut)
+            UserCurrentlyLoggedIn currentUser, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync())
                 .ReturnsAsync(currentUser);
-            mapperMock.Setup(x => x.Map<UserCurrentlyLoggedIn>(currentUser))
-                .Returns(currentUser);
 
             // Act
             var result = sut.GetCurrentlyLoggedInUser();
@@ -114,10 +112,10 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void Login_Successfull([Frozen] Mock<IUserService> userServiceMock,
            UserLogin user, UserBaseResponse userResponse, Mock<IResponseCookies> cookiesMock,
-           Mock<HttpResponse> response, UserLogin userLogin, Mock<HttpContext> context, [Greedy] UsersController sut)
+           Mock<HttpResponse> response, UserLogin userLogin, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.LoginAsync(userLogin))
@@ -140,9 +138,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void RefreshToken_Successfull([Frozen] Mock<IUserService> userServiceMock, UserBaseResponse userResponse,
-           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
             var token = _fixture.Create<string>();
@@ -164,10 +162,10 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void RecoverPassword_Successfull([Frozen] Mock<IUserService> userServiceMock,
            UserEmail user, string origin,
-           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Assert
             userServiceMock.Setup(x => x.RecoverUserPasswordViaEmailAsync(user.Email, origin))
@@ -190,9 +188,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void VerifyPasswordRecovery_Successfull([Frozen] Mock<IUserService> userServiceMock,
-            UserPasswordRecoveryVerification user, UserPasswordRecoveryVerification userPasswordRecovery, [Greedy] UsersController sut)
+            UserPasswordRecoveryVerification user, UserPasswordRecoveryVerification userPasswordRecovery, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery))
@@ -207,9 +205,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void ChangePassword_Successfull([Frozen] Mock<IUserService> userServiceMock,
-           UserPasswordChange user, [Greedy] UsersController sut)
+           UserPasswordChange user, [Greedy] UserController sut)
         {
             // Arrange
             userServiceMock.Setup(x => x.ChangeUserPasswordAsync(user))
@@ -224,9 +222,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void Logout_Successfull([Frozen] Mock<IUserService> userServiceMock,
-           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
             var token = _fixture.Create<string>();
@@ -248,9 +246,9 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [UsersControllerTestsAttribute]
+        [UserControllerTests]
         public void Logout_TokenIsNull([Frozen] Mock<IUserService> userServiceMock,
-           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UsersController sut)
+           Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
             var token = _fixture.Create<string>();

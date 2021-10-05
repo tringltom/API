@@ -305,8 +305,8 @@ namespace Application.Tests.Services
 
         [Test]
         [UserServiceTests]
-        public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
-             string newPassword, User user, UserPasswordRecoveryVerification userPasswordRecovery, UserService sut)
+        public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
+             User user, UserPasswordRecoveryVerification userPasswordRecovery, UserService sut)
         {
             // Arrange
             userRepoMock.Setup(x => x.FindUserByEmailAsync(userPasswordRecovery.Email))
