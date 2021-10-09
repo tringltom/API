@@ -2,8 +2,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Services;
-using AutoMapper;
-using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -13,14 +11,12 @@ namespace API.Controllers
 {
     // TODO - remove coupling between API and Envity by moving User entity somewhere in Application layer
     [Route("users")]
-    public class UsersController : BaseController
+    public class UserController : BaseController
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        public UsersController(IUserService registrationService, IMapper mapper)
+        public UserController(IUserService registrationService)
         {
             _userService = registrationService;
-            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -30,7 +26,7 @@ namespace API.Controllers
 
             var origin = Request.Headers["origin"];
 
-            // await _userService.RegisterAsync(userToRegister, origin);
+            //await _userService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }

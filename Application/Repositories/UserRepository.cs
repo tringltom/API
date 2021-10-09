@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Domain.Entities;
@@ -110,6 +111,12 @@ namespace Application.Repositories
             var username = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier)?.Value;
 
             return username;
+        }
+
+        public async Task<User> GetUserByID()
+        {
+            var userID = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
+            return await _context.Users.SingleOrDefaultAsync(x => x.Id == int.Parse(userID));
         }
     }
 }

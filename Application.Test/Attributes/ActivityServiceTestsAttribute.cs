@@ -4,9 +4,9 @@ using AutoFixture.NUnit3;
 
 namespace Application.Tests.Attributes
 {
-    public class EmailServiceTestsAttribute : InlineAutoDataAttribute
+    public class ActivityServiceTestsAttribute : InlineAutoDataAttribute
     {
-        public EmailServiceTestsAttribute(params object[] arguments) : base(CreateFixture) { }
+        public ActivityServiceTestsAttribute(params object[] arguments) : base(CreateFixture) { }
 
         private static IFixture CreateFixture()
         {

@@ -23,5 +23,6 @@ namespace Application.Repositories
         Task<bool> UpdateUserAsync(User user);
         Task SignOutUserAsync();
         string GetCurrentUsername();
+        Task<User> GetUserByID();
     }
 }
