@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Application.Errors;
 using Application.Media;
 using Application.Repositories;
 using AutoMapper;
@@ -29,7 +31,34 @@ namespace Application.Services
             if (photoResult != null)
                 activity.PendingActivityMedias.Add(new PendingActivityMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
 
-            await _activityRepository.CreateActivityAsync(activity);
+            await _activityRepository.CreatePendingActivityAsync(activity);
         }
+
+        public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)
+        {
+            var pendingActivities = await _activityRepository.GetPendingActivitiesAsync(limit, offset);
+
+            return new PendingActivityEnvelope
+            {
+                Activities = pendingActivities,
+                ActivityCount = await _activityRepository.GetPendingActivitiesCountAsync(),
+            };
+        }
+
+        public async Task<bool> ReslovePendingActivityAsync(int pendingActivityID, bool approve)
+        {
+            var pendingActivity = await _activityRepository.GetPendingActivityByIDAsync(pendingActivityID)
+                ?? throw new NotFound("Aktivnost nije pronadjena");
+
+            var activity = _mapper.Map<Activity>(pendingActivity);
+
+            if (approve)
+                await _activityRepository.CreatActivityAsync(activity);
+            else
+                activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
+
+            return await _activityRepository.DeletePendingActivity(pendingActivity);
+        }
+
     }
 }

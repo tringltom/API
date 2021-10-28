@@ -16,6 +16,10 @@ namespace API.Mappings
                 .BeforeMap((s, d) => d.PendingActivityMedias = new List<PendingActivityMedia>())
                 .ForMember(d => d.ActivityTypeId, o => o.MapFrom(s => s.Type))
                 .ForMember(d => d.User, o => o.MapFrom<UserResolver>());
+
+            CreateMap<PendingActivity, Activity>()
+                .BeforeMap((s, d) => d.DateApproved = DateTimeOffset.Now)
+                .ForMember(d => d.ActivityMedias, o => o.MapFrom(s => s.PendingActivityMedias));
         }
     }
 }

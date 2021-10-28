@@ -22,5 +22,19 @@ namespace API.Controllers
 
             return Ok("Uspešno kreiranje, molimo Vas da sačekate odobrenje");
         }
+
+        // TODO - Add checking if user is Admin
+        [HttpGet]
+        public async Task<ActionResult<PendingActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
+        {
+            return await _activityService.GetPendingActivitiesAsync(limit, offset);
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPost("resolve/{id}")]
+        public async Task<ActionResult<bool>> ResolvePendingActivity(int pendingActivityID, bool approve)
+        {
+            return await _activityService.ReslovePendingActivityAsync(pendingActivityID, approve);
+        }
     }
 }

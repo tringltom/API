@@ -52,7 +52,7 @@ namespace API
             {
                 opt.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("http://localhost:3000", "https://ekviti.rs").AllowCredentials();
+                    policy.AllowAnyHeader().AllowAnyMethod().WithExposedHeaders("WWW-Authenticate").WithOrigins("http://localhost:3000", "https://ekviti.rs", "http://192.168.0.15:19002").AllowCredentials();
                 });
             });
 
