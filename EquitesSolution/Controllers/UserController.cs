@@ -65,7 +65,7 @@ namespace API.Controllers
         {
             var userReponse = await _userService.LoginAsync(userLogin);
 
-            SetTokenCookie(userReponse.RefreshToken);
+            SetTokenCookie(userReponse.RefreshToken, userLogin.StayLoggedIn);
 
             return userReponse;
         }
@@ -98,12 +98,12 @@ namespace API.Controllers
         [HttpPost("refreshToken")]
         public async Task<ActionResult<UserBaseResponse>> RefreshToken()
         {
-
             var refreshToken = Request.Cookies["refreshToken"];
+            bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
 
             var userResponse = await _userService.RefreshTokenAsync(refreshToken);
 
-            SetTokenCookie(userResponse.RefreshToken);
+            SetTokenCookie(userResponse.RefreshToken, stayLoggedIn);
 
             return userResponse;
         }
@@ -135,14 +135,16 @@ namespace API.Controllers
             return Ok("Uspešna izmena šifre.");
         }
 
-        private void SetTokenCookie(string refreshToken)
+        private void SetTokenCookie(string refreshToken, bool stayLoggedIn)
         {
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
+                Expires = stayLoggedIn ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.MinValue
             };
+
             Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+            Response.Cookies.Append("stayLoggedIn", stayLoggedIn.ToString(), cookieOptions);
         }
     }
 }
