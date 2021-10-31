@@ -446,7 +446,8 @@ namespace Application.Tests.Services
             UserCurrentlyLoggedIn result = null;
 
             //Act
-            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
+            var refreshToken = _fixture.Create<string>();
+            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
 
             //Assert
             methodInTest.Should().NotThrow<Exception>();
@@ -462,7 +463,7 @@ namespace Application.Tests.Services
         {
             //Arrange
             userRepoMock.Setup(x => x.GetCurrentUsername())
-                .Returns((string)null);
+                .Returns(currentUser.UserName);
 
             userRepoMock.Setup(x => x.FindUserByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((User)null);
@@ -473,13 +474,14 @@ namespace Application.Tests.Services
             UserCurrentlyLoggedIn result = null;
 
             //Act
-            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
+            var refreshToken = _fixture.Create<string>();
+            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
 
             //Assert
             methodInTest.Should().Throw<RestException>();
             result.Should().BeNull();
             userRepoMock.Verify(x => x.GetCurrentUsername(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Never);
+            userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateToken(currentUser), Times.Never);
         }
 
@@ -500,7 +502,8 @@ namespace Application.Tests.Services
             UserCurrentlyLoggedIn result = null;
 
             //Act
-            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync();
+            var refreshToken = _fixture.Create<string>();
+            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
 
             //Assert
             methodInTest.Should().Throw<RestException>();

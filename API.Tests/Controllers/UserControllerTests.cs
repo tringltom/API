@@ -99,7 +99,8 @@ namespace API.Tests.Controllers
             UserCurrentlyLoggedIn currentUser, [Greedy] UserController sut)
         {
             // Arrange
-            userServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync())
+            var token = _fixture.Create<string>();
+            userServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync(false, token))
                 .ReturnsAsync(currentUser);
 
             // Act
