@@ -51,12 +51,14 @@ namespace API.Controllers
             return Ok("Email adresa potvrđena. Možete se ulogovati.");
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<UserCurrentlyLoggedIn>> GetCurrentlyLoggedInUser()
         {
-            var userCurrentlyLoggedInUser = await _userService.GetCurrentlyLoggedInUserAsync();
+            bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
+            var refreshToken = Request.Cookies["refreshToken"];
 
-            return userCurrentlyLoggedInUser;
+            return await _userService.GetCurrentlyLoggedInUserAsync(stayLoggedIn, refreshToken);
         }
 
         [AllowAnonymous]

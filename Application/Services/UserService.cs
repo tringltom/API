@@ -30,13 +30,33 @@ namespace Application.Services
             _facebookAccessor = facebookAccessor;
         }
 
-        public async Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync()
+        public async Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
         {
             var username = _userRepository.GetCurrentUsername();
-            if (username == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik nije pronađen." });
 
-            var user = await _userRepository.FindUserByNameAsync(username);
+            User user;
+
+            if (username != null)
+            {
+                user = await _userRepository.FindUserByNameAsync(username);
+            }
+            else
+            {
+                if (stayLoggedIn)
+                {
+                    var oldRefreshToken = await _userRepository.GetOldRefreshToken(refreshToken);
+
+                    if (oldRefreshToken != null && !oldRefreshToken.IsActive)
+                        throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Niste autorizovani." });
+
+                    user = oldRefreshToken.User;
+                }
+                else
+                {
+                    return new UserCurrentlyLoggedIn();
+                }
+            }
+
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
 
