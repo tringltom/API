@@ -24,5 +24,6 @@ namespace Application.Repositories
         Task SignOutUserAsync();
         string GetCurrentUsername();
         Task<User> GetUserByID();
+        Task<RefreshToken> GetOldRefreshToken(string refreshToken);
     }
 }

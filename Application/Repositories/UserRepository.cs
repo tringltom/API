@@ -118,5 +118,10 @@ namespace Application.Repositories
             var userID = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
             return await _context.Users.SingleOrDefaultAsync(x => x.Id == int.Parse(userID));
         }
+
+        public async Task<RefreshToken> GetOldRefreshToken(string refreshToken)
+        {
+            return await _context.RefreshTokens.SingleOrDefaultAsync(r => r.Token == refreshToken);
+        }
     }
 }
