@@ -23,9 +23,9 @@ namespace API.Validations
                 .When(x => x.Type == ActivityTypeId.Puzzle);
 
             RuleFor(x => x.StartDate)
-                .NotEmpty().WithMessage("Datum početka aktivnosti ne sme biti prazan ukoliko je kraj iste definisan")
+                .NotEmpty().WithMessage("Mora postojati početni datum aktivnosti ukoliko je kraj iste određen")
                 .When(x => x.EndDate != null)
-                .LessThan(x => x.EndDate).WithMessage("Datum završetka aktivnosti ne sme biti skoriji nego li početak iste")
+                .LessThan(x => x.EndDate).WithMessage("Datum završetka aktivnosti ne sme biti pre početnog datuma iste")
                 .When(x => x.EndDate != null);
         }
     }
