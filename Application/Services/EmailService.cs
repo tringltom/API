@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
+using Application.ServiceInterfaces;
 using Application.Settings;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;

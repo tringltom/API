@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.Services;
 using Application.Tests.Attributes;
-using AutoFixture.NUnit3;
 using FluentAssertions;
 using NUnit.Framework;
 
@@ -21,9 +20,9 @@ namespace Application.Tests.Services
         // TODO - extract FinalizeMessageAsync/ComposeMessage from EmailService and create success tests
 
         [Test]
-        [EmailServiceTests(null, "email@email")]
-        [EmailServiceTests("", "email@email")]
-        [EmailServiceTests("   ", "email@email")]
+        [BaseServiceTest((string)null, "email@email")]
+        [BaseServiceTest("", "email@email")]
+        [BaseServiceTest("   ", "email@email")]
         public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
@@ -35,9 +34,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [EmailServiceTests("someGoodUrl", null)]
-        [EmailServiceTests("someGoodUrl", "")]
-        [EmailServiceTests("someGoodUrl", "   ")]
+        [BaseServiceTest("someGoodUrl", null)]
+        [BaseServiceTest("someGoodUrl", "")]
+        [BaseServiceTest("someGoodUrl", "   ")]
         public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange
@@ -49,9 +48,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [EmailServiceTests(null, "email@email")]
-        [EmailServiceTests("", "email@email")]
-        [EmailServiceTests("   ", "email@email")]
+        [BaseServiceTest((string)null, "email@email")]
+        [BaseServiceTest("", "email@email")]
+        [BaseServiceTest("   ", "email@email")]
         public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
@@ -63,9 +62,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [EmailServiceTests("someGoodUrl", null)]
-        [EmailServiceTests("someGoodUrl", "")]
-        [EmailServiceTests("someGoodUrl", "   ")]
+        [BaseServiceTest("someGoodUrl", null)]
+        [BaseServiceTest("someGoodUrl", "")]
+        [BaseServiceTest("someGoodUrl", "   ")]
         public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange

@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 using Application.Media;
 using Application.Services;
 using Application.Tests.Attributes;
+using Application.Tests.Fixtures;
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using AutoFixture.NUnit3;
 using AutoMapper;
 using Domain.Entities;
@@ -17,18 +17,16 @@ namespace Application.Tests.Services
 {
     public class ActivityServiceTests
     {
-        private Fixture _fixture;
+        private IFixture _fixture;
 
         [SetUp]
         public void SetUp()
         {
-            _fixture = new Fixture();
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            _fixture.Customize(new AutoMoqCustomization());
+            _fixture = BaseFixture.GetBaseFixture();
         }
 
         [Test]
-        [ActivityServiceTests]
+        [UserServicesTest]
         public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
         {
 
@@ -46,7 +44,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [ActivityServiceTests]
+        [UserServicesTest]
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,
@@ -57,7 +55,6 @@ namespace Application.Tests.Services
         {
 
             // Arrange
-
             mapperMock
                 .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
                 .Returns(activity);

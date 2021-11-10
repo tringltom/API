@@ -12,6 +12,7 @@ namespace Application.Tests.Security
         private IConfiguration _config;
         private Fixture _fixture;
         private readonly string _tokenKey = "EkvitiDevSuperSecretKey";
+
         [SetUp]
         public void SetUp()
         {
