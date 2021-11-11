@@ -24,7 +24,7 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = BaseFixture.GetBaseFixture();
+            _fixture = new FixtureBuilder().BuildFromScratch().WithAutoMoq().WithOmitRecursion().Create();
         }
 
         [Test]
