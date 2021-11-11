@@ -5,19 +5,19 @@ using AutoFixture.NUnit3;
 
 namespace Application.Tests.Attributes
 {
-    public class BaseServiceTestAttribute : InlineAutoDataAttribute
+    public class BaseServicesTestAttribute : InlineAutoDataAttribute
     {
 
         private static Func<IFixture> s_fixtureFactory = null;
-        public BaseServiceTestAttribute(params object[] arguments) : base(CreateFixture) { }
-        public BaseServiceTestAttribute(Func<IFixture> fixtureFactory, params object[] arguments) : base(CreateFixture)
+        public BaseServicesTestAttribute(params object[] arguments) : base(CreateFixture) { }
+        public BaseServicesTestAttribute(Func<IFixture> fixtureFactory, params object[] arguments) : base(CreateFixture)
         {
             s_fixtureFactory = fixtureFactory;
         }
 
         private static IFixture CreateFixture()
         {
-            var fixture = s_fixtureFactory.Invoke() ?? new Fixture();
+            var fixture = s_fixtureFactory?.Invoke() ?? new Fixture();
 
             fixture.Customize(new AutoMoqCustomization());
 

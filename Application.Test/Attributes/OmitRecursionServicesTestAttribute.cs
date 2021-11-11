@@ -2,9 +2,9 @@
 
 namespace Application.Tests.Attributes
 {
-    public class UserServicesTestAttribute : BaseServiceTestAttribute
+    public class OmitRecursionServicesTestAttribute : BaseServicesTestAttribute
     {
-        public UserServicesTestAttribute(params object[] arguments) : base(CreateFixture) { }
+        public OmitRecursionServicesTestAttribute(params object[] arguments) : base(CreateFixture) { }
 
         private static IFixture CreateFixture()
         {

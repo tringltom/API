@@ -26,7 +26,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServicesTest]
+        [BaseServicesTest]
         public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
         {
 
@@ -44,7 +44,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [UserServicesTest]
+        [OmitRecursionServicesTestAttribute]
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,
