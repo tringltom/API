@@ -24,11 +24,11 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureBuilder().BuildFromScratch().WithOmitRecursion().Create();
+            _fixture = new FixtureBuilder().WithOmitRecursion().Create();
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMock]
         public void RegisterAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
@@ -55,7 +55,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMock]
         public void RegisterAsync_UserEmailTaken([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
@@ -81,7 +81,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMock]
         public void RegisterAsync_UserNameTaken([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
@@ -107,7 +107,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMock]
         public void RegisterAsync_UserCreationFails([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
@@ -133,7 +133,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ResendConfirmationEmailAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string origin, User user, UserRegistrationService sut)
         {
@@ -159,7 +159,7 @@ namespace Application.Tests.Services
 
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ResendConfirmationEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string origin, User user, UserRegistrationService sut)
         {
@@ -184,7 +184,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ConfirmEmailAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserEmailVerification userEmailVerify, UserRegistrationService sut)
         {
@@ -208,7 +208,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ConfirmEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserEmailVerification userEmailVerify, UserRegistrationService sut)
         {
@@ -227,7 +227,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ConfirmEmailAsync_ConfirmUserMailFailed([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserEmailVerification userEmailVerify, UserRegistrationService sut)
         {

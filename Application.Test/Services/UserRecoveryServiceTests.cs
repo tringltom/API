@@ -24,11 +24,11 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureBuilder().BuildFromScratch().WithOmitRecursion().Create();
+            _fixture = new FixtureBuilder().WithOmitRecursion().Create();
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void RecoverUserPasswordViaEmailAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string token, string origin, User user, UserRecoveryService sut)
         {
@@ -52,7 +52,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void RecoverUserPasswordViaEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string token, string origin, User user, UserRecoveryService sut)
         {
@@ -76,7 +76,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordRecoveryVerification userPasswordRecovery, UserRecoveryService sut)
         {
@@ -98,7 +98,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ConfirmUserPasswordRecoveryAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
              User user, UserPasswordRecoveryVerification userPasswordRecovery, UserRecoveryService sut)
         {
@@ -120,7 +120,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ConfirmUserPasswordRecoveryAsync_PasswordRecoveryFailed([Frozen] Mock<IUserRepository> userRepoMock,
              UserPasswordRecoveryVerification userPasswordRecovery, User user, UserRecoveryService sut)
         {
@@ -142,7 +142,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ChangeUserPasswordAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
@@ -162,7 +162,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ChangeUserPasswordAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
@@ -182,7 +182,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServiceTest]
+        [AutoMockOmitRecursion]
         public void ChangeUserPasswordAsync_ChangePasswordFailed([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
