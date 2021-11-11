@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using AutoFixture.AutoMoq;
 
 namespace Application.Tests.Fixtures
 {
@@ -19,7 +20,7 @@ namespace Application.Tests.Fixtures
 
         public FixtureBuilder WithAutoMoq()
         {
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _fixture.Customize(new AutoMoqCustomization());
             return this;
         }
 
