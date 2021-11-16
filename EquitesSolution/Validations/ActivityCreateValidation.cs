@@ -21,6 +21,12 @@ namespace API.Validations
                 .NotEmpty().WithMessage("Odgovor ne sme biti prazan")
                 .MaximumLength(100).WithMessage("Odgovor ne sme imati više od 100 karaktera")
                 .When(x => x.Type == ActivityTypeId.Puzzle);
+
+            RuleFor(x => x.StartDate)
+                .NotEmpty().WithMessage("Mora postojati početni datum aktivnosti ukoliko je kraj iste određen")
+                .When(x => x.EndDate != null)
+                .LessThan(x => x.EndDate).WithMessage("Datum završetka aktivnosti ne sme biti pre početnog datuma iste")
+                .When(x => x.EndDate != null);
         }
     }
 }
