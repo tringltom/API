@@ -20,7 +20,7 @@ namespace Application.Tests.Security
             var mockConfig = new Mock<IConfiguration>();
             mockConfig.Setup(x => x.GetSection("TokenKey").Value).Returns(_tokenKey);
             _config = mockConfig.Object;
-            _fixture = new FixtureBuilder().BuildFromScratch().WithOmitRecursion().Create();
+            _fixture = new FixtureBuilder().WithOmitRecursion().Create();
         }
 
         [Test]

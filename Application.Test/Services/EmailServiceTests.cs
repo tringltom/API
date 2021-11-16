@@ -20,9 +20,9 @@ namespace Application.Tests.Services
         // TODO - extract FinalizeMessageAsync/ComposeMessage from EmailService and create success tests
 
         [Test]
-        [BaseServicesTest((string)null, "email@email")]
-        [BaseServicesTest("", "email@email")]
-        [BaseServicesTest("   ", "email@email")]
+        [AutoMock((string)null, "email@email")]
+        [AutoMock("", "email@email")]
+        [AutoMock("   ", "email@email")]
         public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
@@ -34,9 +34,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServicesTest("someGoodUrl", null)]
-        [BaseServicesTest("someGoodUrl", "")]
-        [BaseServicesTest("someGoodUrl", "   ")]
+        [AutoMock("someGoodUrl", null)]
+        [AutoMock("someGoodUrl", "")]
+        [AutoMock("someGoodUrl", "   ")]
         public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange
@@ -48,9 +48,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServicesTest((string)null, "email@email")]
-        [BaseServicesTest("", "email@email")]
-        [BaseServicesTest("   ", "email@email")]
+        [AutoMock((string)null, "email@email")]
+        [AutoMock("", "email@email")]
+        [AutoMock("   ", "email@email")]
         public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
@@ -62,9 +62,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseServicesTest("someGoodUrl", null)]
-        [BaseServicesTest("someGoodUrl", "")]
-        [BaseServicesTest("someGoodUrl", "   ")]
+        [AutoMock("someGoodUrl", null)]
+        [AutoMock("someGoodUrl", "")]
+        [AutoMock("someGoodUrl", "   ")]
         public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange

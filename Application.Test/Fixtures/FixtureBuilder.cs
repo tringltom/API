@@ -5,11 +5,10 @@ namespace Application.Tests.Fixtures
 {
     public class FixtureBuilder
     {
-        private IFixture _fixture;
-        public FixtureBuilder BuildFromScratch()
+        private readonly IFixture _fixture;
+        public FixtureBuilder()
         {
             _fixture = new Fixture();
-            return this;
         }
 
         public FixtureBuilder WithOmitRecursion()
