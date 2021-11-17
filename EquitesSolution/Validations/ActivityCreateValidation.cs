@@ -30,7 +30,7 @@ namespace API.Validations
 
             RuleFor(x => x.Location)
                 .NotEmpty().WithMessage("Događaj mora imati lokaciju")
-                .MaximumLength(100).WithMessage("Naziv lokacije ne može imati više od 300 karaktera")
+                .MaximumLength(300).WithMessage("Naziv lokacije ne može imati više od 300 karaktera")
                 .When(x => x.Type == ActivityTypeId.Happening);
         }
     }
