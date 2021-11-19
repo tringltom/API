@@ -22,11 +22,11 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureBuilder().WithAutoMoq().WithOmitRecursion().Create();
+            _fixture = new FixtureDirector().FixtureWithAutoMoqAndOmitRecursion();
         }
 
         [Test]
-        [AutoMock]
+        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq))]
         public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
         {
 
@@ -44,7 +44,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [AutoMockOmitRecursion]
+        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,
