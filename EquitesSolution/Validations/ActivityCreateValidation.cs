@@ -21,6 +21,16 @@ namespace API.Validations
                 .NotEmpty().WithMessage("Odgovor ne sme biti prazan")
                 .MaximumLength(100).WithMessage("Odgovor ne sme imati više od 100 karaktera")
                 .When(x => x.Type == ActivityTypeId.Puzzle);
+
+            RuleFor(x => x.StartDate)
+                .NotEmpty().WithMessage("Mora postojati početni datum aktivnosti ukoliko je kraj iste određen")
+                .LessThan(x => x.EndDate).WithMessage("Datum završetka aktivnosti ne sme biti pre početnog datuma iste")
+                .When(x => x.EndDate != null, ApplyConditionTo.CurrentValidator);
+
+            RuleFor(x => x.Location)
+                .NotEmpty().WithMessage("Događaj mora imati lokaciju")
+                .MaximumLength(300).WithMessage("Naziv lokacije ne može imati više od 300 karaktera")
+                .When(x => x.Type == ActivityTypeId.Happening);
         }
     }
 }
