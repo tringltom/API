@@ -24,9 +24,8 @@ namespace API.Validations
 
             RuleFor(x => x.StartDate)
                 .NotEmpty().WithMessage("Mora postojati početni datum aktivnosti ukoliko je kraj iste određen")
-                .When(x => x.EndDate != null)
                 .LessThan(x => x.EndDate).WithMessage("Datum završetka aktivnosti ne sme biti pre početnog datuma iste")
-                .When(x => x.EndDate != null);
+                .When(x => x.EndDate != null, ApplyConditionTo.CurrentValidator);
 
             RuleFor(x => x.Location)
                 .NotEmpty().WithMessage("Događaj mora imati lokaciju")
