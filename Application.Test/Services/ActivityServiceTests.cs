@@ -35,7 +35,7 @@ namespace Application.Tests.Services
             // Arrange
             var activityCreate = _fixture
                 .Build<ActivityCreate>()
-                .Without(p => p.Image)
+                .Without(p => p.Images)
                 .Create();
 
             // Act
@@ -63,7 +63,7 @@ namespace Application.Tests.Services
                 .Returns(activity);
 
             photoAccessorMock
-                .Setup(x => x.AddPhotoAsync(activityCreate.Image))
+                .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
                 .ReturnsAsync(photoUploadResult);
 
             // Act
@@ -71,7 +71,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Image), Times.Once);
+            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
         }
     }
 }

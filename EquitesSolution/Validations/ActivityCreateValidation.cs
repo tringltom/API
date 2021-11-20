@@ -15,7 +15,7 @@ namespace API.Validations
             RuleFor(x => x.Description)
                 .MaximumLength(250).WithMessage("Opis ne sme imati više od 250 karaktera")
                 .NotEmpty().WithMessage("Opis ne sme biti prazan ako slika nije priložena")
-                    .When(x => x.Image == null, ApplyConditionTo.CurrentValidator);
+                    .When(x => x.Images == null, ApplyConditionTo.CurrentValidator);
 
             RuleFor(x => x.Answer)
                 .NotEmpty().WithMessage("Odgovor ne sme biti prazan")

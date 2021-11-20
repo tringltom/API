@@ -24,10 +24,12 @@ namespace Application.Services
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);
 
-            var photoResult = activityCreate.Image != null ? await _photoAccessor.AddPhotoAsync(activityCreate.Image) : null;
-
-            if (photoResult != null)
-                activity.PendingActivityMedias.Add(new PendingActivityMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
+            foreach (var image in activityCreate?.Images)
+            {
+                var photoResult = image != null ? await _photoAccessor.AddPhotoAsync(image) : null;
+                if (photoResult != null)
+                    activity.PendingActivityMedias.Add(new PendingActivityMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
+            }
 
             await _activityRepository.CreateActivityAsync(activity);
         }
