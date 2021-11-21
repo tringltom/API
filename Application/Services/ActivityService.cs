@@ -24,6 +24,12 @@ namespace Application.Services
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);
 
+            if (activityCreate.Images == null)
+            {
+                await _activityRepository.CreateActivityAsync(activity);
+                return;
+            }
+
             foreach (var image in activityCreate?.Images)
             {
                 var photoResult = image != null ? await _photoAccessor.AddPhotoAsync(image) : null;
