@@ -2,8 +2,6 @@
 using System.Threading.Tasks;
 using Application.Media;
 using Application.Services;
-using Application.Tests.Attributes;
-using Application.Tests.Fixtures;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
@@ -12,6 +10,7 @@ using FluentAssertions;
 using Models.Activity;
 using Moq;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace Application.Tests.Services
 {
@@ -22,11 +21,11 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureDirector().FixtureWithAutoMoqAndOmitRecursion();
+            _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq))]
+        [Fixture(FixtureType.WithAutoMoq)]
         public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
         {
 
@@ -44,7 +43,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,

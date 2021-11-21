@@ -1,10 +1,10 @@
 ﻿using Application.Security;
-using Application.Tests.Fixtures;
 using AutoFixture;
 using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace Application.Tests.Security
 {
@@ -20,7 +20,7 @@ namespace Application.Tests.Security
             var mockConfig = new Mock<IConfiguration>();
             mockConfig.Setup(x => x.GetSection("TokenKey").Value).Returns(_tokenKey);
             _config = mockConfig.Object;
-            _fixture = new FixtureDirector().FixtureWithOmitRecursion();
+            _fixture = new FixtureDirector().WithOmitRecursion();
         }
 
         [Test]

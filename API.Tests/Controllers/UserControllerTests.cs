@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
-using API.Tests.Attributes;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using AutoMapper;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.User;
 using Moq;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace API.Tests.Controllers
 {
@@ -21,7 +21,7 @@ namespace API.Tests.Controllers
         public void SetUp() { }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void Register_Successfull([Frozen] Mock<IUserRegistrationService> userRegistrationServiceMock, string origin, UserRegister userForReg, Mock<HttpRequest> request,
             Mock<HttpContext> context, [Greedy] UserController sut)
         {
@@ -46,7 +46,7 @@ namespace API.Tests.Controllers
 
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResendEmailVerification_Successfull([Frozen] Mock<IUserRegistrationService> userRegistrationServiceMock, string origin,
            UserEmail user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
@@ -70,7 +70,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void VerifyEmail_Successfull([Frozen] Mock<IUserRegistrationService> userRegistrationServiceMock,
            UserEmailVerification user, [Greedy] UserController sut)
         {
@@ -87,7 +87,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetCurrentlyLoggedInUser_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock, [Frozen] Mock<IMapper> mapperMock,
             UserCurrentlyLoggedIn currentUser, string token, [Greedy] UserController sut)
         {
@@ -105,7 +105,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void Login_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock,
            UserLogin user, UserBaseResponse userResponse, Mock<IResponseCookies> cookiesMock,
            Mock<HttpResponse> response, UserLogin userLogin, Mock<HttpContext> context, [Greedy] UserController sut)
@@ -131,7 +131,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RefreshToken_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock, UserBaseResponse userResponse,
            Mock<HttpRequest> request, Mock<HttpContext> context, string token, [Greedy] UserController sut)
         {
@@ -154,7 +154,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RecoverPassword_Successfull([Frozen] Mock<IUserRecoveryService> userRecoveryServiceMock,
            UserEmail user, string origin,
            Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
@@ -180,7 +180,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void VerifyPasswordRecovery_Successfull([Frozen] Mock<IUserRecoveryService> userRecoveryServiceMock,
             UserPasswordRecoveryVerification user, UserPasswordRecoveryVerification userPasswordRecovery, [Greedy] UserController sut)
         {
@@ -197,7 +197,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ChangePassword_Successfull([Frozen] Mock<IUserRecoveryService> userRecoveryServiceMock,
            UserPasswordChange user, [Greedy] UserController sut)
         {
@@ -214,7 +214,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void Logout_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock,
            Mock<HttpRequest> request, Mock<HttpContext> context, string token, [Greedy] UserController sut)
         {
@@ -237,7 +237,7 @@ namespace API.Tests.Controllers
         }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void Logout_TokenIsNull([Frozen] Mock<IUserSessionService> userSessionServiceMock,
            Mock<HttpRequest> request, Mock<HttpContext> context, string token, [Greedy] UserController sut)
         {

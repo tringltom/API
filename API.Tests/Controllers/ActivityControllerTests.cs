@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
-using API.Tests.Attributes;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using FluentAssertions;
@@ -9,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Models.Activity;
 using Moq;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace API.Tests.Controllers
 {
@@ -19,7 +19,7 @@ namespace API.Tests.Controllers
         public void SetUp() { }
 
         [Test]
-        [BaseControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateActivity_Successfull(
             [Frozen] Mock<IActivityService> activityServiceMock,
             ActivityCreate activityCreate,

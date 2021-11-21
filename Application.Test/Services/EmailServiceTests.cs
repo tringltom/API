@@ -2,10 +2,9 @@
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.Services;
-using Application.Tests.Attributes;
-using Application.Tests.Fixtures;
 using FluentAssertions;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace Application.Tests.Services
 {
@@ -21,9 +20,9 @@ namespace Application.Tests.Services
         // TODO - extract FinalizeMessageAsync/ComposeMessage from EmailService and create success tests
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), (string)null, "email@email")]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "", "email@email")]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "   ", "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, null, "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, "", "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, "   ", "email@email")]
         public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
@@ -35,9 +34,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "someGoodUrl", null)]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "someGoodUrl", "")]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "someGoodUrl", "   ")]
+        [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", null)]
+        [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "")]
+        [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "   ")]
         public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange
@@ -49,9 +48,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), (string)null, "email@email")]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "", "email@email")]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "   ", "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, (string)null, "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, "", "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, "   ", "email@email")]
         public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
         {
             // Arrange
@@ -63,9 +62,9 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "someGoodUrl", null)]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "someGoodUrl", "")]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq), "someGoodUrl", "   ")]
+        [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", null)]
+        [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "")]
+        [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "   ")]
         public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
         {
             // Arrange

@@ -29,6 +29,7 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\EquitesSolution\API.csproj" />
     <ProjectReference Include="..\Models\Models.csproj" />
+    <ProjectReference Include="..\SuperFixture\SuperFixture.csproj" />
   </ItemGroup>
 
 </Project>

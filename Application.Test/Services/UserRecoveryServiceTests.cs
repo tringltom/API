@@ -4,8 +4,6 @@ using Application.Errors;
 using Application.Repositories;
 using Application.ServiceInterfaces;
 using Application.Services;
-using Application.Tests.Attributes;
-using Application.Tests.Fixtures;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using Domain.Entities;
@@ -14,6 +12,7 @@ using Microsoft.AspNetCore.Identity;
 using Models.User;
 using Moq;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace Application.Tests.Services
 {
@@ -24,11 +23,11 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureDirector().FixtureWithOmitRecursion();
+            _fixture = new FixtureDirector().WithOmitRecursion();
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RecoverUserPasswordViaEmailAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string token, string origin, User user, UserRecoveryService sut)
         {
@@ -52,7 +51,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RecoverUserPasswordViaEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
             string token, string origin, User user, UserRecoveryService sut)
         {
@@ -76,7 +75,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordRecoveryVerification userPasswordRecovery, UserRecoveryService sut)
         {
@@ -98,7 +97,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ConfirmUserPasswordRecoveryAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
              User user, UserPasswordRecoveryVerification userPasswordRecovery, UserRecoveryService sut)
         {
@@ -120,7 +119,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ConfirmUserPasswordRecoveryAsync_PasswordRecoveryFailed([Frozen] Mock<IUserRepository> userRepoMock,
              UserPasswordRecoveryVerification userPasswordRecovery, User user, UserRecoveryService sut)
         {
@@ -142,7 +141,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ChangeUserPasswordAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
@@ -162,7 +161,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ChangeUserPasswordAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
@@ -182,7 +181,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ChangeUserPasswordAsync_ChangePasswordFailed([Frozen] Mock<IUserRepository> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {

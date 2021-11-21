@@ -6,8 +6,6 @@ using Application.Errors;
 using Application.Repositories;
 using Application.Security;
 using Application.Services;
-using Application.Tests.Attributes;
-using Application.Tests.Fixtures;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using Domain.Entities;
@@ -16,6 +14,7 @@ using Microsoft.AspNetCore.Identity;
 using Models.User;
 using Moq;
 using NUnit.Framework;
+using SuperFixture.Fixtures;
 
 namespace Application.Tests.Services
 {
@@ -27,11 +26,11 @@ namespace Application.Tests.Services
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureDirector().FixtureWithOmitRecursion();
+            _fixture = new FixtureDirector().WithOmitRecursion();
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetCurrentlyLoggedInUserAsync_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserSessionService sut)
         {
             //Arrange
@@ -59,7 +58,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetCurrentlyLoggedInUserAsync_UsernameNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserSessionService sut)
         {
             //Arrange
@@ -87,7 +86,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetCurrentlyLoggedInUserAsync_UserWithCurrentUsernameNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock, User currentUser, string token, UserSessionService sut)
         {
             //Arrange
@@ -115,7 +114,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
         {
@@ -147,7 +146,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
         {
@@ -179,7 +178,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_UserEmailNotConfirmed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
         {
@@ -211,7 +210,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_SignInFailedGeneral([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
         {
@@ -243,7 +242,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_SignInFailedUserLockedOut([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
         {
@@ -275,7 +274,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_UpdateUserFailed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
         {
@@ -307,7 +306,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RefreshTokenAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             User user, RefreshToken newToken, UserSessionService sut)
         {
@@ -342,7 +341,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RefreshTokenAsync_NoTokenFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, RefreshToken newToken, UserSessionService sut)
         {
@@ -372,7 +371,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RefreshTokenAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, User user, RefreshToken newToken, UserSessionService sut)
         {
@@ -400,7 +399,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RefreshTokenAsync_TokenInactive([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, User user, RefreshToken newToken, UserSessionService sut)
         {
@@ -433,7 +432,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RefreshTokenAsync_UserUpdateFailed([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IJwtGenerator> jwtGeneratorMock,
             string oldToken, User user, RefreshToken newToken, UserSessionService sut)
         {
@@ -461,7 +460,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LogoutUserAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
             User user, UserSessionService sut)
         {
@@ -488,7 +487,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoq))]
+        [Fixture(FixtureType.WithAutoMoq)]
         public void LogoutUserAsync_NoTokenFound([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, UserSessionService sut)
         {
@@ -511,7 +510,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LogoutUserAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, User user, UserSessionService sut)
         {
@@ -532,7 +531,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LogoutUserAsync_TokenInactive([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, User user, UserSessionService sut)
         {
@@ -557,7 +556,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [BaseFixture(nameof(FixtureDirector.Methods.FixtureWithAutoMoqAndOmitRecursion))]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LogoutUserAsync_UpdateUserFailed([Frozen] Mock<IUserRepository> userRepoMock,
            string oldToken, User user, UserSessionService sut)
         {

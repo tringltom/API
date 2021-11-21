@@ -1,7 +1,7 @@
 ﻿using AutoFixture;
 using AutoFixture.AutoMoq;
 
-namespace Application.Tests.Fixtures
+namespace SuperFixture.Fixtures
 {
     public class FixtureBuilder
     {
