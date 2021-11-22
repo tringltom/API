@@ -1,4 +1,4 @@
-﻿namespace SuperFixture.Fixtures
+﻿namespace FixtureShared
 {
     public enum FixtureType
     {

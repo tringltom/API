@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.Services;
+using FixtureShared;
 using FluentAssertions;
 using NUnit.Framework;
-using SuperFixture.Fixtures;
 
 namespace Application.Tests.Services
 {

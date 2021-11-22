@@ -1,6 +1,6 @@
 ﻿using AutoFixture;
 
-namespace SuperFixture.Fixtures
+namespace FixtureShared
 {
     public class FixtureDirector
     {

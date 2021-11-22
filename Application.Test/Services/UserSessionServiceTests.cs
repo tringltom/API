@@ -9,12 +9,12 @@ using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using Domain.Entities;
+using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Models.User;
 using Moq;
 using NUnit.Framework;
-using SuperFixture.Fixtures;
 
 namespace Application.Tests.Services
 {

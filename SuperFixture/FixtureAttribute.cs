@@ -1,6 +1,6 @@
 ﻿using AutoFixture.NUnit3;
 
-namespace SuperFixture.Fixtures
+namespace FixtureShared
 {
     public class FixtureAttribute : InlineAutoDataAttribute
     {

@@ -4,13 +4,13 @@ using API.Controllers;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using AutoMapper;
+using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Models.User;
 using Moq;
 using NUnit.Framework;
-using SuperFixture.Fixtures;
 
 namespace API.Tests.Controllers
 {
