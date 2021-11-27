@@ -1,10 +1,9 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
-using API.Tests.Attributes;
-using Application.Services;
-using AutoFixture;
+using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
+using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Models.Activity;
@@ -15,17 +14,12 @@ namespace API.Tests.Controllers
 {
     public class ActivityControllerTests
     {
-        private Fixture _fixture;
 
         [SetUp]
-        public void SetUp()
-        {
-            _fixture = new Fixture();
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-        }
+        public void SetUp() { }
 
         [Test]
-        [ActivityControllerTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateActivity_Successfull(
             [Frozen] Mock<IActivityService> activityServiceMock,
             ActivityCreate activityCreate,

@@ -8,6 +8,8 @@ using Application.Managers;
 using Application.Media;
 using Application.Repositories;
 using Application.Security;
+using Application.ServiceHelpers;
+using Application.ServiceInterfaces;
 using Application.Services;
 using Application.Settings;
 using Domain.Entities;
@@ -58,6 +60,8 @@ namespace API
 
             services.AddAutoMapper(typeof(ActivityProfile));
 
+            services.AddSingleton<IUserServiceHelper, UserServiceHelper>();
+
             //Add Transient Repositories
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IActivityRepository, ActivityRepository>();
@@ -66,7 +70,9 @@ namespace API
             services.AddScoped<IUserManager, UserManager>();
 
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserRecoveryService, UserRecoveryService>();
+            services.AddScoped<IUserRegistrationService, UserRegistrationService>();
+            services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Models.Activity;
 
-namespace Application.Services
+namespace Application.ServiceInterfaces
 {
     public interface IActivityService
     {

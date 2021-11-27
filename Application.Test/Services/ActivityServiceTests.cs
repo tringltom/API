@@ -2,12 +2,11 @@
 using System.Threading.Tasks;
 using Application.Media;
 using Application.Services;
-using Application.Tests.Attributes;
 using AutoFixture;
-using AutoFixture.AutoMoq;
 using AutoFixture.NUnit3;
 using AutoMapper;
 using Domain.Entities;
+using FixtureShared;
 using FluentAssertions;
 using Models.Activity;
 using Moq;
@@ -17,25 +16,23 @@ namespace Application.Tests.Services
 {
     public class ActivityServiceTests
     {
-        private Fixture _fixture;
+        private IFixture _fixture;
 
         [SetUp]
         public void SetUp()
         {
-            _fixture = new Fixture();
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
-            _fixture.Customize(new AutoMoqCustomization());
+            _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
         }
 
         [Test]
-        [ActivityServiceTests]
+        [Fixture(FixtureType.WithAutoMoq)]
         public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
         {
 
             // Arrange
             var activityCreate = _fixture
                 .Build<ActivityCreate>()
-                .Without(p => p.Image)
+                .Without(p => p.Images)
                 .Create();
 
             // Act
@@ -46,7 +43,7 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [ActivityServiceTests]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,
@@ -57,13 +54,12 @@ namespace Application.Tests.Services
         {
 
             // Arrange
-
             mapperMock
                 .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
                 .Returns(activity);
 
             photoAccessorMock
-                .Setup(x => x.AddPhotoAsync(activityCreate.Image))
+                .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
                 .ReturnsAsync(photoUploadResult);
 
             // Act
@@ -71,7 +67,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Image), Times.Once);
+            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
         }
     }
 }

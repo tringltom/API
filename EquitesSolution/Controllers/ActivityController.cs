@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Application.Services;
+using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Activity;
 
