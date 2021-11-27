@@ -15,7 +15,7 @@ namespace API.Validations
             RuleFor(x => x.Description)
                 .MaximumLength(250).WithMessage("Opis ne sme imati više od 250 karaktera")
                 .NotEmpty().WithMessage("Opis ne sme biti prazan ako slika nije priložena")
-                    .When(x => x.Image == null, ApplyConditionTo.CurrentValidator);
+                    .When(x => x.Images == null, ApplyConditionTo.CurrentValidator);
 
             RuleFor(x => x.Answer)
                 .NotEmpty().WithMessage("Odgovor ne sme biti prazan")
@@ -25,12 +25,15 @@ namespace API.Validations
             RuleFor(x => x.StartDate)
                 .NotEmpty().WithMessage("Mora postojati početni datum aktivnosti ukoliko je kraj iste određen")
                 .LessThan(x => x.EndDate).WithMessage("Datum završetka aktivnosti ne sme biti pre početnog datuma iste")
-                .When(x => x.EndDate != null, ApplyConditionTo.CurrentValidator);
+                .When(x => x.EndDate != null);
 
             RuleFor(x => x.Location)
                 .NotEmpty().WithMessage("Događaj mora imati lokaciju")
-                .MaximumLength(300).WithMessage("Naziv lokacije ne može imati više od 300 karaktera")
                 .When(x => x.Type == ActivityTypeId.Happening);
+
+            RuleFor(x => x.Images)
+                .NotEmpty().WithMessage("Dobro Delo mora imati makar jednu sliku")
+                .When(x => x.Type == ActivityTypeId.GoodDeed);
         }
     }
 }
