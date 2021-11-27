@@ -1,6 +1,7 @@
 ﻿using Application.Security;
 using AutoFixture;
 using Domain.Entities;
+using FixtureShared;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
@@ -10,16 +11,16 @@ namespace Application.Tests.Security
     public class JwtGeneratorTests
     {
         private IConfiguration _config;
-        private Fixture _fixture;
+        private IFixture _fixture;
         private readonly string _tokenKey = "EkvitiDevSuperSecretKey";
+
         [SetUp]
         public void SetUp()
         {
             var mockConfig = new Mock<IConfiguration>();
             mockConfig.Setup(x => x.GetSection("TokenKey").Value).Returns(_tokenKey);
             _config = mockConfig.Object;
-            _fixture = new Fixture();
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            _fixture = new FixtureDirector().WithOmitRecursion();
         }
 
         [Test]
