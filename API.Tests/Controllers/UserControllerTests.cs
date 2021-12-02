@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using System.Threading.Tasks;
 using API.Controllers;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;

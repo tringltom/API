@@ -1,5 +1,4 @@
-﻿using System;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 
 namespace Models.Activity;

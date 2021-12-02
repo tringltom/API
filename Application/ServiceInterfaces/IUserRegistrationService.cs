@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Models.User;
+﻿using Models.User;
 
 namespace Application.ServiceInterfaces;
 

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Application.Activities;
+﻿using Application.Activities;
 using AutoMapper;
 using Domain.Entities;
 using Models.Activity;

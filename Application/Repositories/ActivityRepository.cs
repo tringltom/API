@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Domain.Entities;
+﻿using Domain.Entities;
 using Persistence;
 
 namespace Application.Repositories;

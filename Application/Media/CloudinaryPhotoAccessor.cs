@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Application.Settings;
+﻿using Application.Settings;
 using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;

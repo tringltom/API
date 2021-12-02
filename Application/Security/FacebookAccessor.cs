@@ -1,6 +1,4 @@
-﻿using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+﻿using System.Net.Http.Headers;
 using Application.SecurityModels;
 using Application.Settings;
 using Microsoft.Extensions.Options;

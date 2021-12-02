@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Application.Media;
+﻿using Application.Media;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;

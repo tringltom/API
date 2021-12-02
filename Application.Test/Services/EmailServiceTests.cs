@@ -1,6 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using Application.Errors;
+﻿using Application.Errors;
 using Application.Services;
 using FixtureShared;
 using FluentAssertions;

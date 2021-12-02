@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using Application.Media;
+﻿using Application.Media;
 using Application.Repositories;
 using Application.ServiceInterfaces;
 using AutoMapper;

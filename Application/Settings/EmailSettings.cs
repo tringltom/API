@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace Application.Settings;
+﻿namespace Application.Settings;
 
 public class EmailSettings
 {
