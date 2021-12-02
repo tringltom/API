@@ -1,10 +1,9 @@
 ﻿
-namespace Models.User
+namespace Models.User;
+
+public class UserPasswordChange
 {
-    public class UserPasswordChange
-    {
-        public string Email { get; set; }
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-    }
+    public string Email { get; set; }
+    public string OldPassword { get; set; }
+    public string NewPassword { get; set; }
 }

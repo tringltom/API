@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Media
+namespace Application.Media;
+
+public interface IPhotoAccessor
 {
-    public interface IPhotoAccessor
-    {
-        Task<PhotoUploadResult> AddPhotoAsync(IFormFile file);
-        Task<bool> DeletePhotoAsync(string publicId);
-    }
+    Task<PhotoUploadResult> AddPhotoAsync(IFormFile file);
+    Task<bool> DeletePhotoAsync(string publicId);
 }
+

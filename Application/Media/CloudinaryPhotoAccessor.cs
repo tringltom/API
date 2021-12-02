@@ -6,56 +6,55 @@ using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
-namespace Application.Media
+namespace Application.Media;
+
+public class CloudinaryPhotoAccessor : IPhotoAccessor
 {
-    public class CloudinaryPhotoAccessor : IPhotoAccessor
+    private readonly Cloudinary _cloudinary;
+    public CloudinaryPhotoAccessor(IOptions<CloudinarySettings> settings)
     {
-        private readonly Cloudinary _cloudinary;
-        public CloudinaryPhotoAccessor(IOptions<CloudinarySettings> settings)
+        var acc = new Account(
+            settings.Value.CloudName,
+            settings.Value.APIKey,
+            settings.Value.APISecret
+            );
+
+        _cloudinary = new Cloudinary(acc);
+    }
+
+    public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file)
+    {
+        var uploadResult = new ImageUploadResult();
+
+        if (file.Length > 0)
         {
-            var acc = new Account(
-                settings.Value.CloudName,
-                settings.Value.APIKey,
-                settings.Value.APISecret
-                );
-
-            _cloudinary = new Cloudinary(acc);
-        }
-
-        public async Task<PhotoUploadResult> AddPhotoAsync(IFormFile file)
-        {
-            var uploadResult = new ImageUploadResult();
-
-            if (file.Length > 0)
+            using (var stream = file.OpenReadStream())
             {
-                using (var stream = file.OpenReadStream())
+                var uploadParams = new ImageUploadParams
                 {
-                    var uploadParams = new ImageUploadParams
-                    {
-                        File = new FileDescription(file.FileName, stream),
-                        Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
-                    };
-                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                }
+                    File = new FileDescription(file.FileName, stream),
+                    Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
+                };
+                uploadResult = await _cloudinary.UploadAsync(uploadParams);
             }
-
-            if (uploadResult.Error != null)
-                throw new Exception(uploadResult.Error.Message);
-
-            return new PhotoUploadResult
-            {
-                PublicId = uploadResult.PublicId,
-                Url = uploadResult.SecureUrl.AbsoluteUri
-            };
         }
 
-        public async Task<bool> DeletePhotoAsync(string publicId)
+        if (uploadResult.Error != null)
+            throw new Exception(uploadResult.Error.Message);
+
+        return new PhotoUploadResult
         {
-            var deleteParams = new DeletionParams(publicId);
+            PublicId = uploadResult.PublicId,
+            Url = uploadResult.SecureUrl.AbsoluteUri
+        };
+    }
 
-            var result = await _cloudinary.DestroyAsync(deleteParams);
+    public async Task<bool> DeletePhotoAsync(string publicId)
+    {
+        var deleteParams = new DeletionParams(publicId);
 
-            return result.Result == "ok";
-        }
+        var result = await _cloudinary.DestroyAsync(deleteParams);
+
+        return result.Result == "ok";
     }
 }

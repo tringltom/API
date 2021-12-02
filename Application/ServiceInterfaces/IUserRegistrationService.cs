@@ -1,12 +1,12 @@
 ﻿using System.Threading.Tasks;
 using Models.User;
 
-namespace Application.ServiceInterfaces
+namespace Application.ServiceInterfaces;
+
+public interface IUserRegistrationService
 {
-    public interface IUserRegistrationService
-    {
-        Task RegisterAsync(UserRegister user, string origin);
-        Task ResendConfirmationEmailAsync(string email, string origin);
-        Task ConfirmEmailAsync(UserEmailVerification userEmailVerify);
-    }
+    Task RegisterAsync(UserRegister user, string origin);
+    Task ResendConfirmationEmailAsync(string email, string origin);
+    Task ConfirmEmailAsync(UserEmailVerification userEmailVerify);
 }
+
