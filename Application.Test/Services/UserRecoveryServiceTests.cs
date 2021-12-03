@@ -1,16 +1,7 @@
 ﻿using Application.Errors;
-using Application.Repositories;
 using Application.ServiceInterfaces;
-using Application.Services;
-using AutoFixture;
-using AutoFixture.NUnit3;
-using Domain.Entities;
-using FixtureShared;
-using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
 using Models.User;
-using Moq;
-using NUnit.Framework;
 
 namespace Application.Tests.Services;
 

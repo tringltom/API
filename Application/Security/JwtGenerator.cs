@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Domain.Entities;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 

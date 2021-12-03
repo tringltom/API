@@ -1,15 +1,6 @@
-﻿using System.Net;
-using API.Controllers;
-using Application.ServiceInterfaces;
-using AutoFixture.NUnit3;
-using AutoMapper;
-using FixtureShared;
-using FluentAssertions;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Models.User;
-using Moq;
-using NUnit.Framework;
 
 namespace API.Tests.Controllers;
 

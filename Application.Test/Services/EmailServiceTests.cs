@@ -1,8 +1,4 @@
 ﻿using Application.Errors;
-using Application.Services;
-using FixtureShared;
-using FluentAssertions;
-using NUnit.Framework;
 
 namespace Application.Tests.Services;
 

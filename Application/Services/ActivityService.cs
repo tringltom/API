@@ -1,9 +1,5 @@
 ﻿using Application.Media;
-using Application.Repositories;
-using Application.ServiceInterfaces;
 using AutoMapper;
-using Domain.Entities;
-using Models.Activity;
 
 namespace Application.Services;
 

@@ -1,5 +1,4 @@
 ﻿using Domain.Entities;
-using FluentValidation;
 using Models.Activity;
 
 namespace API.Validations;

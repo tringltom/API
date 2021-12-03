@@ -1,6 +1,4 @@
-﻿using Models.Activity;
-
-namespace Application.ServiceInterfaces;
+﻿namespace Application.ServiceInterfaces;
 
 public interface IActivityService
 {

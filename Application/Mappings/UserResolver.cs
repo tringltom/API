@@ -1,7 +1,4 @@
-﻿using Application.Repositories;
-using AutoMapper;
-using Domain.Entities;
-using Models.Activity;
+﻿using AutoMapper;
 
 namespace Application.Activities;
 

@@ -1,5 +1,4 @@
-﻿using Domain.Entities;
-using Persistence;
+﻿using Persistence;
 
 namespace Application.Repositories;
 

@@ -7,7 +7,6 @@ using Application.Media;
 using Application.Repositories;
 using Application.Security;
 using Application.ServiceHelpers;
-using Application.ServiceInterfaces;
 using Application.Services;
 using Application.Settings;
 using Domain.Entities;

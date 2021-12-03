@@ -1,6 +1,4 @@
-﻿using Models.User;
-
-namespace Application.ServiceInterfaces;
+﻿namespace Application.ServiceInterfaces;
 
 public interface IUserRegistrationService
 {

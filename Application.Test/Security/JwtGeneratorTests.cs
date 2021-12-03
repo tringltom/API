@@ -1,10 +1,5 @@
 ﻿using Application.Security;
-using AutoFixture;
-using Domain.Entities;
-using FixtureShared;
 using Microsoft.Extensions.Configuration;
-using Moq;
-using NUnit.Framework;
 
 namespace Application.Tests.Security;
 

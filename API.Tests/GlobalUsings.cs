@@ -1,0 +1,9 @@
+﻿global using System.Net;
+global using API.Controllers;
+global using Application.ServiceInterfaces;
+global using AutoFixture.NUnit3;
+global using FixtureShared;
+global using FluentAssertions;
+global using Microsoft.AspNetCore.Mvc;
+global using Moq;
+global using NUnit.Framework;

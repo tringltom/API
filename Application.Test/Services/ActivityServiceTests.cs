@@ -1,14 +1,6 @@
 ﻿using Application.Media;
-using Application.Services;
-using AutoFixture;
-using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
-using FixtureShared;
-using FluentAssertions;
 using Models.Activity;
-using Moq;
-using NUnit.Framework;
 
 namespace Application.Tests.Services;
 public class ActivityServiceTests

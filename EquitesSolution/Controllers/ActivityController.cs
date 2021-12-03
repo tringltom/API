@@ -1,6 +1,4 @@
-﻿using Application.ServiceInterfaces;
-using Microsoft.AspNetCore.Mvc;
-using Models.Activity;
+﻿using Models.Activity;
 
 namespace API.Controllers;
 

@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using Models.User;
+﻿using Models.User;
 
 namespace API.Validations;
 

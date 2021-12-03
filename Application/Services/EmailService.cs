@@ -1,9 +1,4 @@
-﻿using System.Net;
-using Application.Errors;
-using Application.ServiceInterfaces;
-using Application.Settings;
-using MailKit.Net.Smtp;
-using Microsoft.Extensions.Options;
+﻿using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace Application.Services;

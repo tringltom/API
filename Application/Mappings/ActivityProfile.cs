@@ -1,7 +1,5 @@
 ﻿using Application.Activities;
 using AutoMapper;
-using Domain.Entities;
-using Models.Activity;
 
 namespace API.Mappings;
 

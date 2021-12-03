@@ -1,0 +1,10 @@
+﻿global using System.Net;
+global using Application.Errors;
+global using Application.Repositories;
+global using Application.ServiceInterfaces;
+global using Application.Settings;
+global using Domain.Entities;
+global using Microsoft.AspNetCore.WebUtilities;
+global using Microsoft.Extensions.Options;
+global using Models.Activity;
+global using Models.User;

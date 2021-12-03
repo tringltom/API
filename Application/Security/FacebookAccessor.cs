@@ -1,7 +1,5 @@
 ﻿using System.Net.Http.Headers;
 using Application.SecurityModels;
-using Application.Settings;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace Application.Security;
