@@ -1,10 +1,10 @@
 ﻿
-namespace Models.User
+namespace Models.User;
+
+public class UserPasswordRecoveryVerification
 {
-    public class UserPasswordRecoveryVerification
-    {
-        public string Email { get; set; }
-        public string Token { get; set; }
-        public string NewPassword { get; set; }
-    }
+    public string Email { get; set; }
+    public string Token { get; set; }
+    public string NewPassword { get; set; }
 }
+

@@ -1,0 +1,9 @@
+﻿global using Application.Repositories;
+global using Application.Services;
+global using AutoFixture;
+global using AutoFixture.NUnit3;
+global using Domain.Entities;
+global using FixtureShared;
+global using FluentAssertions;
+global using Moq;
+global using NUnit.Framework;

@@ -1,9 +1,9 @@
 ﻿
-namespace Models.User
+namespace Models.User;
+
+public class UserEmailVerification
 {
-    public class UserEmailVerification
-    {
-        public string Token { get; set; }
-        public string Email { get; set; }
-    }
+    public string Token { get; set; }
+    public string Email { get; set; }
 }
+

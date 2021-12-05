@@ -1,9 +1,9 @@
 ﻿
-namespace Models.User
+namespace Models.User;
+
+public class UserCurrentlyLoggedIn
 {
-    public class UserCurrentlyLoggedIn
-    {
-        public string Token { get; set; }
-        public string Username { get; set; }
-    }
+    public string Token { get; set; }
+    public string Username { get; set; }
 }
+

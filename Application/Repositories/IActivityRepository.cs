@@ -1,10 +1,6 @@
-﻿using System.Threading.Tasks;
-using Domain.Entities;
+﻿namespace Application.Repositories;
 
-namespace Application.Repositories
+public interface IActivityRepository
 {
-    public interface IActivityRepository
-    {
-        Task CreateActivityAsync(PendingActivity activity);
-    }
+    Task CreateActivityAsync(PendingActivity activity);
 }

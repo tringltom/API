@@ -1,12 +1,12 @@
-﻿namespace Domain.Entities
+﻿namespace Domain.Entities;
+
+public enum ActivityTypeId : int
 {
-    public enum ActivityTypeId : int
-    {
-        GoodDeed = 1,
-        Joke = 2,
-        Quote = 3,
-        Puzzle = 4,
-        Happening = 5,
-        Challenge = 6,
-    }
+    GoodDeed = 1,
+    Joke = 2,
+    Quote = 3,
+    Puzzle = 4,
+    Happening = 5,
+    Challenge = 6,
 }
+

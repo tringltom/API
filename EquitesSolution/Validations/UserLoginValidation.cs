@@ -1,14 +1,13 @@
-﻿using FluentValidation;
-using Models.User;
+﻿using Models.User;
 
-namespace API.Validations
+namespace API.Validations;
+
+public class UserLoginValidation : AbstractValidator<UserLogin>
 {
-    public class UserLoginValidation : AbstractValidator<UserLogin>
+    public UserLoginValidation()
     {
-        public UserLoginValidation()
-        {
-            RuleFor(x => x.Email).NotEmpty().EmailAddress().Configure(rule => rule.MessageBuilder = _ => "Neispravna email adresa");
-            RuleFor(x => x.Password).NotEmpty().WithMessage("Šifra ne sme biti prazna");
-        }
+        RuleFor(x => x.Email).NotEmpty().EmailAddress().Configure(rule => rule.MessageBuilder = _ => "Neispravna email adresa");
+        RuleFor(x => x.Password).NotEmpty().WithMessage("Šifra ne sme biti prazna");
     }
 }
+

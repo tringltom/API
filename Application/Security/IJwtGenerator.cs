@@ -1,10 +1,7 @@
-﻿using Domain.Entities;
+﻿namespace Application.Security;
 
-namespace Application.Security
+public interface IJwtGenerator
 {
-    public interface IJwtGenerator
-    {
-        string CreateToken(User user);
-        RefreshToken GetRefreshToken();
-    }
+    string CreateToken(User user);
+    RefreshToken GetRefreshToken();
 }

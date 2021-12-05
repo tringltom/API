@@ -1,8 +1,8 @@
 ﻿
-namespace Models.User
+namespace Models.User;
+
+public class UserEmail
 {
-    public class UserEmail
-    {
-        public string Email { get; set; }
-    }
+    public string Email { get; set; }
 }
+

@@ -1,7 +1,7 @@
-﻿namespace Application.ServiceHelpers
+﻿namespace Application.ServiceHelpers;
+
+public interface IUserServiceHelper
 {
-    public interface IUserServiceHelper
-    {
-        string DecodeToken(string token);
-    }
+    string DecodeToken(string token);
 }
+

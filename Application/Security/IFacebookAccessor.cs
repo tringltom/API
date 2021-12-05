@@ -1,10 +1,8 @@
-﻿using System.Threading.Tasks;
-using Application.SecurityModels;
+﻿using Application.SecurityModels;
 
-namespace Application.Security
+namespace Application.Security;
+
+public interface IFacebookAccessor
 {
-    public interface IFacebookAccessor
-    {
-        Task<FacebookUserInfo> FacebookLogin(string accessToken);
-    }
+    Task<FacebookUserInfo> FacebookLogin(string accessToken);
 }

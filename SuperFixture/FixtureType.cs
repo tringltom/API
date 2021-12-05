@@ -1,10 +1,10 @@
-﻿namespace FixtureShared
+﻿namespace FixtureShared;
+
+public enum FixtureType
 {
-    public enum FixtureType
-    {
-        WithAutoMoq,
-        WithOmitRecursion,
-        WithAutoMoqAndOmitRecursion,
-        Base
-    }
+    WithAutoMoq,
+    WithOmitRecursion,
+    WithAutoMoqAndOmitRecursion,
+    Base
 }
+

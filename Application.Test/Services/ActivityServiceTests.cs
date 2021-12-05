@@ -1,73 +1,61 @@
-﻿using System;
-using System.Threading.Tasks;
-using Application.Media;
-using Application.Services;
-using AutoFixture;
-using AutoFixture.NUnit3;
+﻿using Application.Media;
 using AutoMapper;
-using Domain.Entities;
-using FixtureShared;
-using FluentAssertions;
 using Models.Activity;
-using Moq;
-using NUnit.Framework;
 
-namespace Application.Tests.Services
+namespace Application.Tests.Services;
+public class ActivityServiceTests
 {
-    public class ActivityServiceTests
+    private IFixture _fixture;
+
+    [SetUp]
+    public void SetUp()
     {
-        private IFixture _fixture;
+        _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
+    }
 
-        [SetUp]
-        public void SetUp()
-        {
-            _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
-        }
+    [Test]
+    [Fixture(FixtureType.WithAutoMoq)]
+    public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
+    {
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
-        {
+        // Arrange
+        var activityCreate = _fixture
+            .Build<ActivityCreate>()
+            .Without(p => p.Images)
+            .Create();
 
-            // Arrange
-            var activityCreate = _fixture
-                .Build<ActivityCreate>()
-                .Without(p => p.Images)
-                .Create();
+        // Act
+        Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
 
-            // Act
-            Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
+        // Assert
+        methodInTest.Should().NotThrow<Exception>();
+    }
 
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-        }
+    [Test]
+    [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+    public void CreateActivityWithImageAsync_Successful(
+        [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
+        [Frozen] Mock<IMapper> mapperMock,
+        ActivityCreate activityCreate,
+        PhotoUploadResult photoUploadResult,
+        PendingActivity activity,
+        ActivityService sut)
+    {
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void CreateActivityWithImageAsync_Successful(
-            [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-            [Frozen] Mock<IMapper> mapperMock,
-            ActivityCreate activityCreate,
-            PhotoUploadResult photoUploadResult,
-            PendingActivity activity,
-            ActivityService sut)
-        {
+        // Arrange
+        mapperMock
+            .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
+            .Returns(activity);
 
-            // Arrange
-            mapperMock
-                .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
-                .Returns(activity);
+        photoAccessorMock
+            .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
+            .ReturnsAsync(photoUploadResult);
 
-            photoAccessorMock
-                .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
-                .ReturnsAsync(photoUploadResult);
+        // Act
+        Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
 
-            // Act
-            Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
-        }
+        // Assert
+        methodInTest.Should().NotThrow<Exception>();
+        photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
     }
 }

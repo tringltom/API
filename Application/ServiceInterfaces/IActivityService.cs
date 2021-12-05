@@ -1,10 +1,7 @@
-﻿using System.Threading.Tasks;
-using Models.Activity;
+﻿namespace Application.ServiceInterfaces;
 
-namespace Application.ServiceInterfaces
+public interface IActivityService
 {
-    public interface IActivityService
-    {
-        Task CreateActivityAsync(ActivityCreate user);
-    }
+    Task CreateActivityAsync(ActivityCreate user);
 }
+

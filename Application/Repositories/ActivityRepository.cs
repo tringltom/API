@@ -1,21 +1,18 @@
-﻿using System.Threading.Tasks;
-using Domain.Entities;
-using Persistence;
+﻿using Persistence;
 
-namespace Application.Repositories
+namespace Application.Repositories;
+
+public class ActivityRepository : IActivityRepository
 {
-    public class ActivityRepository : IActivityRepository
+    private readonly DataContext _context;
+    public ActivityRepository(DataContext context)
     {
-        private readonly DataContext _context;
-        public ActivityRepository(DataContext context)
-        {
-            _context = context;
-        }
+        _context = context;
+    }
 
-        public async Task CreateActivityAsync(PendingActivity activity)
-        {
-            await _context.PendingActivities.AddAsync(activity);
-            _context.SaveChanges();
-        }
+    public async Task CreateActivityAsync(PendingActivity activity)
+    {
+        await _context.PendingActivities.AddAsync(activity);
+        _context.SaveChanges();
     }
 }
