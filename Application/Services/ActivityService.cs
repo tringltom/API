@@ -15,21 +15,23 @@ namespace Application.Services
         private readonly IPhotoAccessor _photoAccessor;
         private readonly IActivityRepository _activityRepository;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
 
-        public ActivityService(IPhotoAccessor photoAccessor, IActivityRepository activityRepository, IMapper mapper)
+        public ActivityService(IPhotoAccessor photoAccessor, IActivityRepository activityRepository, IMapper mapper, IEmailService emailService)
         {
             _photoAccessor = photoAccessor;
             _activityRepository = activityRepository;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
-        public async Task CreateActivityAsync(ActivityCreate activityCreate)
+        public async Task CreatePendingActivityAsync(ActivityCreate activityCreate)
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);
 
             if (activityCreate.Images == null)
             {
-                await _activityRepository.CreateActivityAsync(activity);
+                await _activityRepository.CreatePendingActivityAsync(activity);
                 return;
             }
 
@@ -49,22 +51,24 @@ namespace Application.Services
 
             return new PendingActivityEnvelope
             {
-                Activities = pendingActivities,
+                Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityGet>(pa)).ToList(),
                 ActivityCount = await _activityRepository.GetPendingActivitiesCountAsync(),
             };
         }
 
-        public async Task<bool> ReslovePendingActivityAsync(int pendingActivityID, bool approve)
+        public async Task<bool> ReslovePendingActivityAsync(int pendingActivityID, PendingActivityApproval approval)
         {
             var pendingActivity = await _activityRepository.GetPendingActivityByIDAsync(pendingActivityID)
                 ?? throw new NotFound("Aktivnost nije pronadjena");
 
             var activity = _mapper.Map<Activity>(pendingActivity);
 
-            if (approve)
+            if (approval.Approve)
                 await _activityRepository.CreatActivityAsync(activity);
             else
                 activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
+
+            await _emailService.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
 
             return await _activityRepository.DeletePendingActivity(pendingActivity);
         }
