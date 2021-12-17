@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.ServiceInterfaces;
 using Application.Settings;
+using Domain.Entities;
 using MailKit.Net.Smtp;
 using Microsoft.Extensions.Options;
 using MimeKit;
@@ -25,14 +26,14 @@ namespace Application.Services
             _serverPort = settings.Value.Port;
         }
 
-        private MimeMessage ComposeMessage(string email)
+        private MimeMessage ComposeMessage(string recipientEmail)
         {
             var message = new MimeMessage();
 
             var from = new MailboxAddress(_sender);
             message.From.Add(from);
 
-            var to = new MailboxAddress(email);
+            var to = new MailboxAddress(recipientEmail);
             message.To.Add(to);
 
             return message;
@@ -48,56 +49,52 @@ namespace Application.Services
             client.Dispose();
         }
 
-        public async Task SendConfirmationEmailAsync(string verifyUrl, string email)
+        private async Task SendEmail(string recipientemail, string subject, BodyBuilder emailBody)
         {
             try
             {
-                var message = ComposeMessage(email);
-
-                message.Subject = "Ekviti - Potvrda email adrese";
-
-                var bodyBuilder = new BodyBuilder
-                {
-                    HtmlBody = $"<p>Molimo Vas, potvrdite email adresu klikom na sledeći link:</p><p><a href='{verifyUrl}'>Potvrda</a></p>",
-                    TextBody = $"Molimo Vas, potvrdite email adresu klikom na sledeći link: {verifyUrl}"
-                };
-
-                message.Body = bodyBuilder.ToMessageBody();
-
+                var message = ComposeMessage(recipientemail);
+                message.Subject = subject;
+                message.Body = emailBody.ToMessageBody();
                 await FinalizeMessageAsync(message);
-
             }
             catch (Exception e)
             {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila" }, e);
+                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila pod naslovom :{subject}" }, e);
             }
+        }
 
+        public async Task SendConfirmationEmailAsync(string verifyUrl, string email)
+        {
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Molimo Vas, potvrdite email adresu klikom na sledeći link:</p><p><a href='{verifyUrl}'>Potvrda</a></p>",
+                TextBody = $"Molimo Vas, potvrdite email adresu klikom na sledeći link: {verifyUrl}"
+            };
+
+            await SendEmail(email, "Ekviti - Potvrda email adrese", bodyBuilder);
         }
 
         public async Task SendPasswordRecoveryEmailAsync(string verifyUrl, string email)
         {
-            try
+            var bodyBuilder = new BodyBuilder
             {
-                var message = ComposeMessage(email);
+                HtmlBody = $"<p>Molimo Vas, kliknite na sledeći link kako biste promenili šifru:</p><p><a href='{verifyUrl}'>Nova Šifra</a></p>",
+                TextBody = $"Molimo Vas, kliknite na sledeći link kako biste promenili šifru: {verifyUrl}"
+            };
 
-                message.Subject = "Ekviti - Potvrda oporavka šifre";
-
-                var bodyBuilder = new BodyBuilder
-                {
-                    HtmlBody = $"<p>Molimo Vas, kliknite na sledeći link kako biste promenili šifru:</p><p><a href='{verifyUrl}'>Nova Šifra</a></p>",
-                    TextBody = $"Molimo Vas, kliknite na sledeći link kako biste promenili šifru: {verifyUrl}"
-                };
-
-                message.Body = bodyBuilder.ToMessageBody();
-
-                await FinalizeMessageAsync(message);
-
-            }
-            catch (Exception e)
-            {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila za oporavak šifre" }, e);
-            }
+            await SendEmail(email, "Ekviti - Potvrda oporavka šifre", bodyBuilder);
         }
 
+        public async Task SendActivityApprovalEmailAsync(PendingActivity activity, bool approved)
+        {
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Vaša aktivnost pod nazivom {activity.Title} je {(approved ? "prihvaćena" : "odbijena")}!</p>",
+                TextBody = $"Vaša aktivnost pod nazivom {activity.Title} je {(approved ? "prihvaćena" : "odbijena")}!"
+            };
+
+            await SendEmail(activity.User.Email, $"Ekviti - Obaveštenje u vezi aktivnosti: {activity.Title}", bodyBuilder);
+        }
     }
 }

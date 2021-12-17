@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.Services;
+using AutoFixture;
+using Domain.Entities;
 using FixtureShared;
 using FluentAssertions;
 using NUnit.Framework;
@@ -10,11 +12,9 @@ namespace Application.Tests.Services
 {
     public class EmailServiceTests
     {
-
         [SetUp]
         public void SetUp()
         {
-
         }
 
         // TODO - extract FinalizeMessageAsync/ComposeMessage from EmailService and create success tests
@@ -70,6 +70,20 @@ namespace Application.Tests.Services
             // Arrange
             // Act
             Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void SendActivityApprovalEmailAsync_IncorrectEmail(PendingActivity activity, EmailService sut)
+        {
+            // Arrange
+            activity.User.Email = "";
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.SendActivityApprovalEmailAsync(activity, true);
 
             // Assert
             methodInTest.Should().Throw<RestException>();

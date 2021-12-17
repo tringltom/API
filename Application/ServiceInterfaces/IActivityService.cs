@@ -5,6 +5,8 @@ namespace Application.ServiceInterfaces
 {
     public interface IActivityService
     {
-        Task CreateActivityAsync(ActivityCreate user);
+        Task CreatePendingActivityAsync(ActivityCreate user);
+        Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset);
+        Task<bool> ReslovePendingActivityAsync(int pendingActivityID, PendingActivityApproval approval);
     }
 }
