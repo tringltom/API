@@ -85,6 +85,12 @@ namespace Application.Services
 
             user.RefreshTokens.Add(refreshToken);
 
+            if (user.CurrentLevel == 0)
+            {
+                user.CurrentLevel = 1;
+                user.CurrentXp = 0;
+            }
+
             if (!await _userRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
@@ -171,7 +177,9 @@ namespace Application.Services
                 Id = userInfo.Id,
                 Email = userInfo.Email,
                 UserName = "fb_" + userInfo.Id,
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                CurrentLevel = 1,
+                CurrentXp = 0
             };
 
             user.RefreshTokens.Add(refreshToken);
