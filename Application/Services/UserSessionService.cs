@@ -58,7 +58,7 @@ namespace Application.Services
 
             var token = _jwtGenerator.CreateToken(user);
 
-            return new UserCurrentlyLoggedIn() { Username = user.UserName, Token = token };
+            return new UserCurrentlyLoggedIn() { Username = user.UserName, Token = token, CurrentLevel = user.CurrentLevel.ToString(), CurrentXp = user.CurrentXp.ToString() };
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -96,7 +96,7 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.CurrentLevel, user.CurrentXp);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
