@@ -4,12 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Migrations\20211218183900_AddedXpLevel.cs" />
-    <Compile Remove="Migrations\20211218183900_AddedXpLevel.Designer.cs" />
-    <Compile Remove="Migrations\20211220183946_AddedXpLevelRework.cs" />
-    <Compile Remove="Migrations\20211220183946_AddedXpLevelRework.Designer.cs" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.16" />
