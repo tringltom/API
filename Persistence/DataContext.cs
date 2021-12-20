@@ -54,7 +54,7 @@ namespace Persistence
 
             builder
             .Entity<User>()
-            .Property(b => b.CurrentLevelId)
+            .Property(b => b.XpLevelId)
             .HasDefaultValue(1);
 
             builder.Entity<XpLevel>().HasData(

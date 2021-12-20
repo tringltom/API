@@ -58,7 +58,7 @@ namespace Application.Services
 
             var token = _jwtGenerator.CreateToken(user);
 
-            return new UserCurrentlyLoggedIn() { Username = user.UserName, Token = token, CurrentLevel = user.CurrentLevelId, CurrentXp = user.CurrentXp };
+            return new UserCurrentlyLoggedIn() { Username = user.UserName, Token = token, CurrentLevel = user.XpLevelId, CurrentXp = user.CurrentXp };
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -85,13 +85,12 @@ namespace Application.Services
 
             user.RefreshTokens.Add(refreshToken);
 
-
             if (!await _userRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.CurrentLevelId, user.CurrentXp);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
@@ -173,6 +172,7 @@ namespace Application.Services
                 Email = userInfo.Email,
                 UserName = "fb_" + userInfo.Id,
                 EmailConfirmed = true,
+                XpLevelId = 1,
                 CurrentXp = 0
             };
 

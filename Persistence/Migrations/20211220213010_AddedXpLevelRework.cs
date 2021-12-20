@@ -7,12 +7,6 @@ namespace Persistence.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<int>(
-                name: "CurrentLevelId",
-                table: "AspNetUsers",
-                nullable: false,
-                defaultValue: 1);
-
-            migrationBuilder.AddColumn<int>(
                 name: "CurrentXp",
                 table: "AspNetUsers",
                 nullable: false,
@@ -21,7 +15,8 @@ namespace Persistence.Migrations
             migrationBuilder.AddColumn<int>(
                 name: "XpLevelId",
                 table: "AspNetUsers",
-                nullable: true);
+                nullable: false,
+                defaultValue: 1);
 
             migrationBuilder.CreateTable(
                 name: "XpLevels",
@@ -74,7 +69,7 @@ namespace Persistence.Migrations
                 column: "XpLevelId",
                 principalTable: "XpLevels",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
+                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -88,10 +83,6 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropIndex(
                 name: "IX_AspNetUsers_XpLevelId",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "CurrentLevelId",
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(

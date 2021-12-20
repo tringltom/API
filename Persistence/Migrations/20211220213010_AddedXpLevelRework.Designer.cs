@@ -10,7 +10,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20211220183946_AddedXpLevelRework")]
+    [Migration("20211220213010_AddedXpLevelRework")]
     partial class AddedXpLevelRework
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,11 +256,6 @@ namespace Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CurrentLevelId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasDefaultValue(1);
-
                     b.Property<int>("CurrentXp")
                         .HasColumnType("int");
 
@@ -304,8 +299,10 @@ namespace Persistence.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
-                    b.Property<int?>("XpLevelId")
-                        .HasColumnType("int");
+                    b.Property<int>("XpLevelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.HasKey("Id");
 
@@ -623,8 +620,10 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.HasOne("Domain.Entities.XpLevel", "XpLevel")
-                        .WithMany("Activities")
-                        .HasForeignKey("XpLevelId");
+                        .WithMany("Users")
+                        .HasForeignKey("XpLevelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

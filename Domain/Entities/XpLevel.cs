@@ -8,6 +8,6 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
         public int Xp { get; set; }
-        public virtual List<User> Activities { get; set; }
+        public virtual List<User> Users { get; set; }
     }
 }
