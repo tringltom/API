@@ -10,8 +10,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20211218183900_AddedXpLevel")]
-    partial class AddedXpLevel
+    [Migration("20211220183946_AddedXpLevelRework")]
+    partial class AddedXpLevelRework
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -256,8 +256,10 @@ namespace Persistence.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("CurrentLevel")
-                        .HasColumnType("int");
+                    b.Property<int>("CurrentLevelId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("CurrentXp")
                         .HasColumnType("int");
@@ -302,6 +304,9 @@ namespace Persistence.Migrations
                         .HasColumnType("nvarchar(256)")
                         .HasMaxLength(256);
 
+                    b.Property<int?>("XpLevelId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedEmail")
@@ -311,6 +316,8 @@ namespace Persistence.Migrations
                         .IsUnique()
                         .HasName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("XpLevelId");
 
                     b.ToTable("AspNetUsers");
                 });
@@ -322,135 +329,112 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int>("Level")
-                        .HasColumnType("int");
-
                     b.Property<int>("Xp")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.ToTable("XpLevel");
+                    b.ToTable("XpLevels");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Level = 1,
                             Xp = 0
                         },
                         new
                         {
                             Id = 2,
-                            Level = 2,
                             Xp = 1000
                         },
                         new
                         {
                             Id = 3,
-                            Level = 3,
                             Xp = 3000
                         },
                         new
                         {
                             Id = 4,
-                            Level = 4,
                             Xp = 6000
                         },
                         new
                         {
                             Id = 5,
-                            Level = 5,
                             Xp = 10000
                         },
                         new
                         {
                             Id = 6,
-                            Level = 6,
                             Xp = 15000
                         },
                         new
                         {
                             Id = 7,
-                            Level = 7,
                             Xp = 21000
                         },
                         new
                         {
                             Id = 8,
-                            Level = 8,
                             Xp = 28000
                         },
                         new
                         {
                             Id = 9,
-                            Level = 9,
                             Xp = 36000
                         },
                         new
                         {
                             Id = 10,
-                            Level = 10,
                             Xp = 45000
                         },
                         new
                         {
                             Id = 11,
-                            Level = 11,
                             Xp = 55000
                         },
                         new
                         {
                             Id = 12,
-                            Level = 12,
                             Xp = 66000
                         },
                         new
                         {
                             Id = 13,
-                            Level = 13,
                             Xp = 78000
                         },
                         new
                         {
                             Id = 14,
-                            Level = 14,
                             Xp = 91000
                         },
                         new
                         {
                             Id = 15,
-                            Level = 15,
                             Xp = 105000
                         },
                         new
                         {
                             Id = 16,
-                            Level = 16,
                             Xp = 120000
                         },
                         new
                         {
                             Id = 17,
-                            Level = 17,
                             Xp = 136000
                         },
                         new
                         {
                             Id = 18,
-                            Level = 18,
                             Xp = 153000
                         },
                         new
                         {
                             Id = 19,
-                            Level = 19,
                             Xp = 171000
                         },
                         new
                         {
                             Id = 20,
-                            Level = 20,
                             Xp = 190000
                         });
                 });
@@ -634,6 +618,13 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Domain.Entities.User", b =>
+                {
+                    b.HasOne("Domain.Entities.XpLevel", "XpLevel")
+                        .WithMany("Activities")
+                        .HasForeignKey("XpLevelId");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

@@ -16,14 +16,14 @@ namespace Models.User
             Token = token;
             Username = userName;
             RefreshToken = refreshToken;
-            CurrentLevel = userCurrentLevel.ToString();
-            CurrentXp = userCurrentXp.ToString();
+            CurrentLevel = userCurrentLevel;
+            CurrentXp = userCurrentXp;
         }
 
         public string Token { get; set; }
         public string Username { get; set; }
-        public string CurrentXp { get; set; }
-        public string CurrentLevel { get; set; }
+        public int CurrentXp { get; set; }
+        public int CurrentLevel { get; set; }
 
         [JsonIgnore]
         public string RefreshToken { get; set; }

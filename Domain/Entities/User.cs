@@ -9,7 +9,8 @@ namespace Domain.Entities
         public virtual ICollection<Activity> Activities { get; set; }
         public virtual ICollection<PendingActivity> PendingActivities { get; set; }
         public int CurrentXp { get; set; }
-        public int CurrentLevel { get; set; }
+        public int CurrentLevelId { get; set; }
+        public virtual XpLevel XpLevel { get; set; }
 
     }
 }
