@@ -11,6 +11,7 @@ namespace Models.User
             Username = userName;
             RefreshToken = refreshToken;
         }
+
         public UserBaseResponse(string token, string userName, string refreshToken, int userCurrentLevel, int userCurrentXp)
         {
             Token = token;

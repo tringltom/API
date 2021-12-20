@@ -31,7 +31,7 @@ namespace API.Controllers
 
             var origin = Request.Headers["origin"];
 
-            await _userRegistrationService.RegisterAsync(userToRegister, origin);
+            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
