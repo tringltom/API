@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
-
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.16" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.3.1" />
