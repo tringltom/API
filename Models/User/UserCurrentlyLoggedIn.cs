@@ -5,5 +5,7 @@ namespace Models.User
     {
         public string Token { get; set; }
         public string Username { get; set; }
+        public int CurrentXp { get; set; }
+        public int CurrentLevel { get; set; }
     }
 }

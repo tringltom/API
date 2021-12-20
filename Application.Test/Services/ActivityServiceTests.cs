@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Media;
+using Application.Repositories;
+using Application.ServiceInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
@@ -36,7 +39,7 @@ namespace Application.Tests.Services
                 .Create();
 
             // Act
-            Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
+            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
@@ -63,11 +66,119 @@ namespace Application.Tests.Services
                 .ReturnsAsync(photoUploadResult);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.CreateActivityAsync(activityCreate);
+            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetPendingActivitiesAsync_Successful(
+            [Frozen] Mock<IMapper> mapperMock,
+            [Frozen] Mock<IActivityRepository> activityRepoMock,
+            List<PendingActivity> pendingActivities,
+            List<PendingActivityGet> pendingActivitiesGet,
+            int limit, int offset,
+            ActivityService sut)
+        {
+
+            // Arrange
+            var pendingActivityEnvelope = _fixture.Create<PendingActivityEnvelope>();
+            pendingActivityEnvelope.Activities = pendingActivitiesGet;
+            pendingActivityEnvelope.ActivityCount = pendingActivitiesGet.Count;
+
+            mapperMock
+                .Setup(x => x.Map<List<PendingActivityGet>>(It.IsAny<PendingActivity>()))
+                .Returns(pendingActivitiesGet);
+
+            activityRepoMock
+                .Setup(x => x.GetPendingActivitiesAsync(limit, offset))
+                .ReturnsAsync(pendingActivities);
+
+            activityRepoMock
+                .Setup(x => x.GetPendingActivitiesCountAsync())
+                .ReturnsAsync(pendingActivities.Count);
+
+            // Act
+            Func<Task<PendingActivityEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesAsync(limit, offset);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            activityRepoMock.Verify(x => x.GetPendingActivitiesAsync(limit, offset), Times.Once);
+            activityRepoMock.Verify(x => x.GetPendingActivitiesCountAsync(), Times.Once);
+
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void ApprovePendingActivityAsync_Successful(
+            [Frozen] Mock<IMapper> mapperMock,
+            [Frozen] Mock<IActivityRepository> activityRepoMock,
+            [Frozen] Mock<IEmailService> emailServiceMock,
+            int pendingActivityId,
+            PendingActivity pendingActivity,
+            Activity activity,
+            ActivityService sut)
+        {
+
+            // Arrange
+            var approval = _fixture.Create<PendingActivityApproval>();
+            approval.Approve = true;
+
+            mapperMock
+                .Setup(x => x.Map<Activity>(pendingActivity))
+                .Returns(activity);
+
+            activityRepoMock
+                .Setup(x => x.GetPendingActivityByIDAsync(pendingActivityId))
+                .ReturnsAsync(pendingActivity);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            activityRepoMock.Verify(x => x.GetPendingActivityByIDAsync(pendingActivityId), Times.Once);
+            activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Once);
+            emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void DisapprovePendingActivityAsync_Successful(
+          [Frozen] Mock<IMapper> mapperMock,
+            [Frozen] Mock<IActivityRepository> activityRepoMock,
+            [Frozen] Mock<IEmailService> emailServiceMock,
+            int pendingActivityId,
+            PendingActivity pendingActivity,
+            Activity activity,
+            ActivityService sut)
+        {
+
+            // Arrange
+            var approval = _fixture.Create<PendingActivityApproval>();
+            approval.Approve = false;
+
+            mapperMock
+                .Setup(x => x.Map<Activity>(pendingActivity))
+                .Returns(activity);
+
+            activityRepoMock
+                .Setup(x => x.GetPendingActivityByIDAsync(pendingActivityId))
+                .ReturnsAsync(pendingActivity);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            activityRepoMock.Verify(x => x.GetPendingActivityByIDAsync(pendingActivityId), Times.Once);
+            activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Never);
+            emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
         }
     }
 }
