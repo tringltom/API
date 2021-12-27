@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Reflection;
 using System.Text;
-using API.Mappings;
 using API.Middleware;
 using API.Validations;
 using Application.Managers;
+using Application.Mappings;
 using Application.Media;
 using Application.Repositories;
 using Application.Security;
@@ -65,10 +65,12 @@ namespace API
             //Add Transient Repositories
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IActivityRepository, ActivityRepository>();
+            services.AddTransient<IFavoritesRepository, FavortitesRepository>();
 
             //Add Scoped Managers
             services.AddScoped<IUserManager, UserManager>();
 
+            services.AddScoped<IFavoritesService, FavoritesService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();

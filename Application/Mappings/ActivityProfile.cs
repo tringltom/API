@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Application.Activities;
 using AutoMapper;
 using Domain.Entities;
 using Models.Activity;
 
-namespace API.Mappings
+namespace Application.Mappings
 {
     public class ActivityProfile : Profile
     {
@@ -16,6 +15,10 @@ namespace API.Mappings
                 .BeforeMap((s, d) => d.PendingActivityMedias = new List<PendingActivityMedia>())
                 .ForMember(d => d.ActivityTypeId, o => o.MapFrom(s => s.Type))
                 .ForMember(d => d.User, o => o.MapFrom<UserResolver>());
+
+            CreateMap<FavoriteActivityCreate, UserFavoriteActivity>();
+
+            CreateMap<FavoriteActivityRemove, UserFavoriteActivity>();
         }
     }
 }

@@ -30,19 +30,37 @@ namespace Persistence
             base.OnModelCreating(builder);
 
             builder
-           .Entity<Activity>()
-           .Property(e => e.ActivityTypeId)
-           .HasConversion<int>();
+               .Entity<Activity>()
+               .Property(e => e.ActivityTypeId)
+               .HasConversion<int>();
 
             builder
-           .Entity<PendingActivity>()
-           .Property(e => e.ActivityTypeId)
-           .HasConversion<int>();
+               .Entity<PendingActivity>()
+               .Property(e => e.ActivityTypeId)
+               .HasConversion<int>();
 
             builder
                 .Entity<ActivityType>()
                 .Property(e => e.Id)
                 .HasConversion<int>();
+
+            builder
+                .Entity<UserFavoriteActivity>()
+                .HasIndex(uf => new { uf.UserId, uf.ActivityId })
+                .IsUnique();
+
+            builder
+                .Entity<UserReview>()
+                .HasIndex(ur => new { ur.UserId, ur.ActivityId })
+                .IsUnique();
+
+            builder
+                .Entity<ActivityReviewXp>()
+                .HasIndex(arx => new { arx.ReviewTypeId, arx.ActivityTypeId })
+                .IsUnique();
+
+            builder.Entity<ReviewType>()
+                .HasIndex(rt => rt.Name).IsUnique();
 
             builder
                 .Entity<ActivityType>().HasData(

@@ -3,9 +3,9 @@ using AutoMapper;
 using Domain.Entities;
 using Models.Activity;
 
-namespace Application.Activities
+namespace Application.Mappings
 {
-    public class UserResolver : IValueResolver<ActivityCreate, PendingActivity, User>
+    public class UserResolver : IValueResolver<ActivityCreate, PendingActivity, User>, IValueResolver<FavoriteActivityCreate, UserFavoriteActivity, User>
     {
         private readonly IUserRepository _userRepository;
 
@@ -16,7 +16,12 @@ namespace Application.Activities
 
         public User Resolve(ActivityCreate source, PendingActivity destination, User destMember, ResolutionContext context)
         {
-            return _userRepository.GetUserByID().Result;
+            return _userRepository.GetUserByTokenAsync().Result;
+        }
+
+        public User Resolve(FavoriteActivityCreate source, UserFavoriteActivity destination, User destMember, ResolutionContext context)
+        {
+            return _userRepository.GetUserByIdAsync(source.UserId).Result;
         }
     }
 }

@@ -5,6 +5,23 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20211218193937_Added review tables.cs" />
+    <Compile Remove="Migrations\20211218193937_Added review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211220201339_Created unique indexes.cs" />
+    <Compile Remove="Migrations\20211220201339_Created unique indexes.Designer.cs" />
+    <Compile Remove="Migrations\20211220201438_created review tables.cs" />
+    <Compile Remove="Migrations\20211220201438_created review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211220202141_created review tables.cs" />
+    <Compile Remove="Migrations\20211220202141_created review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211220203421_created review tables.cs" />
+    <Compile Remove="Migrations\20211220203421_created review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211220203919_created review tables.cs" />
+    <Compile Remove="Migrations\20211220203919_created review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211220204024_created review tables.cs" />
+    <Compile Remove="Migrations\20211220204024_created review tables.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.16" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.3.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="3.3.1" />

@@ -113,15 +113,25 @@ namespace Application.Repositories
             return username;
         }
 
-        public async Task<User> GetUserByID()
+        public async Task<User> GetUserByTokenAsync()
         {
             var userID = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
             return await _context.Users.SingleOrDefaultAsync(x => x.Id == int.Parse(userID));
         }
 
+        public async Task<User> GetUserByIdAsync(int userId)
+        {
+            return await _context.Users.SingleOrDefaultAsync(x => x.Id == userId);
+        }
+
         public async Task<RefreshToken> GetOldRefreshToken(string refreshToken)
         {
             return await _context.RefreshTokens.SingleOrDefaultAsync(r => r.Token == refreshToken);
+        }
+
+        public async Task<User> GetUserByUserNameAsync(string userName)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
         }
     }
 }

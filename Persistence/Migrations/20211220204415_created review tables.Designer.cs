@@ -10,8 +10,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20211218193937_Added review tables")]
-    partial class Addedreviewtables
+    [Migration("20211220204415_created review tables")]
+    partial class createdreviewtables
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -116,7 +116,8 @@ namespace Persistence.Migrations
 
                     b.HasIndex("ActivityTypeId");
 
-                    b.HasIndex("ReviewTypeId");
+                    b.HasIndex("ReviewTypeId", "ActivityTypeId")
+                        .IsUnique();
 
                     b.ToTable("ActivityReviewXp");
 
@@ -547,17 +548,18 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ActivityId")
+                    b.Property<int>("ActivityId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ActivityId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ActivityId")
+                        .IsUnique();
 
                     b.ToTable("UserFavoriteActivities");
                 });
@@ -569,13 +571,13 @@ namespace Persistence.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ActivityId")
+                    b.Property<int>("ActivityId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ReviewTypeId")
+                    b.Property<int>("ReviewTypeId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -584,7 +586,8 @@ namespace Persistence.Migrations
 
                     b.HasIndex("ReviewTypeId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserId", "ActivityId")
+                        .IsUnique();
 
                     b.ToTable("UserReviews");
                 });
@@ -789,26 +792,36 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Domain.Entities.Activity", "Activity")
                         .WithMany()
-                        .HasForeignKey("ActivityId");
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.UserReview", b =>
                 {
                     b.HasOne("Domain.Entities.Activity", "Activity")
                         .WithMany()
-                        .HasForeignKey("ActivityId");
+                        .HasForeignKey("ActivityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.ReviewType", "ReviewType")
                         .WithMany()
-                        .HasForeignKey("ReviewTypeId");
+                        .HasForeignKey("ReviewTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>

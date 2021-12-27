@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.Repositories
@@ -14,8 +15,13 @@ namespace Application.Repositories
 
         public async Task CreateActivityAsync(PendingActivity activity)
         {
-            await _context.PendingActivities.AddAsync(activity);
-            _context.SaveChanges();
+            _context.PendingActivities.Add(activity);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Activity> GetActivityByIdAsync(int id)
+        {
+            return await _context.Activities.SingleOrDefaultAsync(x => x.Id == id);
         }
     }
 }

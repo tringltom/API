@@ -2,7 +2,7 @@
 
 namespace Persistence.Migrations
 {
-    public partial class Addedreviewtables : Migration
+    public partial class createdreviewtables : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -24,8 +24,8 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(nullable: true),
-                    ActivityId = table.Column<int>(nullable: true)
+                    UserId = table.Column<int>(nullable: false),
+                    ActivityId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -35,13 +35,13 @@ namespace Persistence.Migrations
                         column: x => x.ActivityId,
                         principalTable: "Activities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserFavoriteActivities_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -77,9 +77,9 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(nullable: true),
-                    ActivityId = table.Column<int>(nullable: true),
-                    ReviewTypeId = table.Column<int>(nullable: true)
+                    UserId = table.Column<int>(nullable: false),
+                    ActivityId = table.Column<int>(nullable: false),
+                    ReviewTypeId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,19 +89,19 @@ namespace Persistence.Migrations
                         column: x => x.ActivityId,
                         principalTable: "Activities",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserReviews_ReviewTypes_ReviewTypeId",
                         column: x => x.ReviewTypeId,
                         principalTable: "ReviewTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserReviews_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
@@ -152,9 +152,10 @@ namespace Persistence.Migrations
                 column: "ActivityTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ActivityReviewXp_ReviewTypeId",
+                name: "IX_ActivityReviewXp_ReviewTypeId_ActivityTypeId",
                 table: "ActivityReviewXp",
-                column: "ReviewTypeId");
+                columns: new[] { "ReviewTypeId", "ActivityTypeId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserFavoriteActivities_ActivityId",
@@ -162,9 +163,10 @@ namespace Persistence.Migrations
                 column: "ActivityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserFavoriteActivities_UserId",
+                name: "IX_UserFavoriteActivities_UserId_ActivityId",
                 table: "UserFavoriteActivities",
-                column: "UserId");
+                columns: new[] { "UserId", "ActivityId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserReviews_ActivityId",
@@ -177,9 +179,10 @@ namespace Persistence.Migrations
                 column: "ReviewTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserReviews_UserId",
+                name: "IX_UserReviews_UserId_ActivityId",
                 table: "UserReviews",
-                column: "UserId");
+                columns: new[] { "UserId", "ActivityId" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
