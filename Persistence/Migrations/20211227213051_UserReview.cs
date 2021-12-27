@@ -2,7 +2,7 @@
 
 namespace Persistence.Migrations
 {
-    public partial class createdreviewtables : Migration
+    public partial class UserReview : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -155,6 +155,12 @@ namespace Persistence.Migrations
                 name: "IX_ActivityReviewXp_ReviewTypeId_ActivityTypeId",
                 table: "ActivityReviewXp",
                 columns: new[] { "ReviewTypeId", "ActivityTypeId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ReviewTypes_Name",
+                table: "ReviewTypes",
+                column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(

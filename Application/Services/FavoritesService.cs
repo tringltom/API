@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using AutoMapper;
 using Domain.Entities;
 using Models.Activity;

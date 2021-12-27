@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Security;
 using Application.ServiceInterfaces;
 using Domain.Entities;

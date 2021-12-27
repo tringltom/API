@@ -10,8 +10,8 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20211220204415_created review tables")]
-    partial class createdreviewtables
+    [Migration("20211227213051_UserReview")]
+    partial class UserReview
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -448,6 +448,9 @@ namespace Persistence.Migrations
                         .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("ReviewTypes");
 

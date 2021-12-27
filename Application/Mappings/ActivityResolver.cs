@@ -1,4 +1,4 @@
-﻿using Application.Repositories;
+﻿using Application.RepositoryInterfaces;
 using AutoMapper;
 using Domain.Entities;
 using Models.Activity;

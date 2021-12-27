@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Application.Media;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using Domain.Entities;

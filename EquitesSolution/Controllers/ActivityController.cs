@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Application.ServiceInterfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Activity;
 
@@ -10,11 +11,13 @@ namespace API.Controllers
     {
         private readonly IActivityService _activityService;
         private readonly IFavoritesService _favoriteService;
+        private readonly IActivityReviewService _activityReviewService;
 
-        public ActivityController(IActivityService activityService, IFavoritesService favoritesService)
+        public ActivityController(IActivityService activityService, IFavoritesService favoritesService, IActivityReviewService activityReviewService)
         {
             _activityService = activityService;
             _favoriteService = favoritesService;
+            _activityReviewService = activityReviewService;
         }
 
         [HttpPost("create")]
@@ -39,6 +42,15 @@ namespace API.Controllers
             await _favoriteService.RemoveFavoriteAsync(favoriteActivityRemove);
 
             return Ok("Uspešno ste uklonili omiljenu aktivnost");
+        }
+
+        [HttpPost("reviewActivity")]
+        [AllowAnonymous]
+        public async Task<ActionResult> ReviewActivity([FromForm] ActivityReview activityReview)
+        {
+            await _activityReviewService.ReviewActivityAsync(activityReview);
+
+            return Ok("Uspešno ste ocenili aktivnost");
         }
     }
 }

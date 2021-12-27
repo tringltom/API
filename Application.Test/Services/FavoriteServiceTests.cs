@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using AutoMapper;

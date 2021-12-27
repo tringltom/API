@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Application.Repositories
+namespace Application.RepositoryInterfaces
 {
     public interface IUserRepository
     {

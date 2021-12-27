@@ -19,6 +19,32 @@
     <Compile Remove="Migrations\20211220203919_created review tables.Designer.cs" />
     <Compile Remove="Migrations\20211220204024_created review tables.cs" />
     <Compile Remove="Migrations\20211220204024_created review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211220204415_created review tables.cs" />
+    <Compile Remove="Migrations\20211220204415_created review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211227204527_Added favorite-review tables.cs" />
+    <Compile Remove="Migrations\20211227204527_Added favorite-review tables.Designer.cs" />
+    <Compile Remove="Migrations\20211227205342_UserReview.cs" />
+    <Compile Remove="Migrations\20211227205342_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227205533_UserReview1.cs" />
+    <Compile Remove="Migrations\20211227205533_UserReview1.Designer.cs" />
+    <Compile Remove="Migrations\20211227205756_UserReview1.cs" />
+    <Compile Remove="Migrations\20211227205756_UserReview1.Designer.cs" />
+    <Compile Remove="Migrations\20211227210332_UserReview.cs" />
+    <Compile Remove="Migrations\20211227210332_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227210623_UserReview.cs" />
+    <Compile Remove="Migrations\20211227210623_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227211638_UserReview.cs" />
+    <Compile Remove="Migrations\20211227211638_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227211908_UserReview.cs" />
+    <Compile Remove="Migrations\20211227211908_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227212510_UserReview.cs" />
+    <Compile Remove="Migrations\20211227212510_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227212606_UserReview.cs" />
+    <Compile Remove="Migrations\20211227212606_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227212744_UserReview.cs" />
+    <Compile Remove="Migrations\20211227212744_UserReview.Designer.cs" />
+    <Compile Remove="Migrations\20211227212835_UserReview.cs" />
+    <Compile Remove="Migrations\20211227212835_UserReview.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

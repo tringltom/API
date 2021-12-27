@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Domain.Entities;
 
-namespace Application.Repositories
+namespace Application.RepositoryInterfaces
 {
     public interface IActivityRepository
     {

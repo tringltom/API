@@ -7,6 +7,7 @@ using Application.Managers;
 using Application.Mappings;
 using Application.Media;
 using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Security;
 using Application.ServiceHelpers;
 using Application.ServiceInterfaces;
@@ -66,10 +67,12 @@ namespace API
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IActivityRepository, ActivityRepository>();
             services.AddTransient<IFavoritesRepository, FavortitesRepository>();
+            services.AddTransient<IUserReviewRepository, UserReviewRepository>();
 
             //Add Scoped Managers
             services.AddScoped<IUserManager, UserManager>();
 
+            services.AddScoped<IActivityReviewService, ActivityReviewService>();
             services.AddScoped<IFavoritesService, FavoritesService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
@@ -79,6 +82,7 @@ namespace API
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
+
 
             services.AddDefaultIdentity<User>(options =>
                 {

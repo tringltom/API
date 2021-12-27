@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace Domain.Entities
+﻿namespace Domain.Entities
 {
     public class UserReview
     {
@@ -13,7 +11,7 @@ namespace Domain.Entities
         public int ActivityId { get; set; }
         public virtual Activity Activity { get; set; }
 
-        [Required]
+        public ReviewTypeId ReviewTypeId { get; set; }
         public virtual ReviewType ReviewType { get; set; }
     }
 }

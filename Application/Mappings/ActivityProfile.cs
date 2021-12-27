@@ -19,6 +19,8 @@ namespace Application.Mappings
             CreateMap<FavoriteActivityCreate, UserFavoriteActivity>();
 
             CreateMap<FavoriteActivityRemove, UserFavoriteActivity>();
+
+            CreateMap<ActivityReview, UserReview>();
         }
     }
 }
