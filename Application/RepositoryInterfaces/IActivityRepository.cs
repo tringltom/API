@@ -1,12 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Domain.Entities;
 
 namespace Application.RepositoryInterfaces
 {
     public interface IActivityRepository
     {
-        Task CreateActivityAsync(PendingActivity activity);
+        Task CreatePendingActivityAsync(PendingActivity activity);
+        Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);
+        Task<int> GetPendingActivitiesCountAsync();
+        Task<PendingActivity> GetPendingActivityByIDAsync(int id);
+        Task CreatActivityAsync(Activity activity);
+        Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
 
-        Task<Activity> GetActivityByIdAsync(int id);
     }
 }

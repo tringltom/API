@@ -19,22 +19,59 @@ namespace API.Tests.Controllers
         public void SetUp() { }
 
         [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        [Fixture(FixtureType.WithAutoMoq)]
         public void CreateActivity_Successfull(
             [Frozen] Mock<IActivityService> activityServiceMock,
             ActivityCreate activityCreate,
             [Greedy] ActivityController sut)
         {
             // Arrange
-            activityServiceMock.Setup(x => x.CreateActivityAsync(activityCreate))
+            activityServiceMock.Setup(x => x.CreatePendingActivityAsync(activityCreate))
                .Returns(Task.CompletedTask);
 
             // Act
-            var res = sut.CreateActivity(activityCreate);
+            var res = sut.CreatePendingActivity(activityCreate);
 
             // Assert
             res.Result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public void GetPendingActivities_Successfull(
+            [Frozen] Mock<IActivityService> activityServiceMock,
+            PendingActivityEnvelope pendingActivityEnvelope,
+            [Greedy] ActivityController sut)
+        {
+            // Arrange
+            activityServiceMock.Setup(x => x.GetPendingActivitiesAsync(5, 2))
+               .ReturnsAsync(pendingActivityEnvelope);
+
+            // Act
+            var res = sut.GetPendingActivities(5, 2);
+
+            // Assert
+
+            res.Should().BeOfType<Task<ActionResult<PendingActivityEnvelope>>>();
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public void ResolvePendingActivitiy_Successfull(
+            [Frozen] Mock<IActivityService> activityServiceMock,
+            PendingActivityApproval activityApproval,
+            [Greedy] ActivityController sut)
+        {
+            // Arrange
+            activityServiceMock.Setup(x => x.ReslovePendingActivityAsync(1, activityApproval))
+               .ReturnsAsync(true);
+
+            // Act
+            var res = sut.ResolvePendingActivity(1, activityApproval);
+
+            // Assert
+            res.Should().BeOfType<Task<ActionResult<bool>>>();
         }
 
         [Test]

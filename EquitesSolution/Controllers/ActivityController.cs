@@ -21,9 +21,9 @@ namespace API.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<ActionResult> CreateActivity([FromForm] ActivityCreate activityCreate)
+        public async Task<ActionResult> CreatePendingActivity([FromForm] ActivityCreate activityCreate)
         {
-            await _activityService.CreateActivityAsync(activityCreate);
+            await _activityService.CreatePendingActivityAsync(activityCreate);
 
             return Ok("Uspešno kreiranje, molimo Vas da sačekate odobrenje");
         }
@@ -51,6 +51,20 @@ namespace API.Controllers
             await _activityReviewService.ReviewActivityAsync(activityReview);
 
             return Ok("Uspešno ste ocenili aktivnost");
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpGet]
+        public async Task<ActionResult<PendingActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
+        {
+            return await _activityService.GetPendingActivitiesAsync(limit, offset);
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPost("resolve/{id}")]
+        public async Task<ActionResult<bool>> ResolvePendingActivity(int id, PendingActivityApproval approval)
+        {
+            return await _activityService.ReslovePendingActivityAsync(id, approval);
         }
     }
 }
