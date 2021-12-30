@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace Domain.Entities
@@ -11,6 +12,6 @@ namespace Domain.Entities
         public int CurrentXp { get; set; }
         public int XpLevelId { get; set; }
         public virtual XpLevel XpLevel { get; set; }
-
+        public DateTimeOffset? LastRollDate { get; set; }
     }
 }
