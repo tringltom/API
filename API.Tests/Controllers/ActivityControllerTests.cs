@@ -74,42 +74,6 @@ namespace API.Tests.Controllers
             res.Should().BeOfType<Task<ActionResult<bool>>>();
         }
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void CreateFavoriteActivity_Successfull(
-            [Frozen] Mock<IFavoritesService> favoriteServiceMock,
-            FavoriteActivityCreate activity,
-            [Greedy] ActivityController sut)
-        {
-            // Arrange
-            favoriteServiceMock.Setup(x => x.CreateFavoriteAsync(activity))
-               .Returns(Task.CompletedTask);
 
-            // Act
-            var res = sut.CreateFavoriteActivity(activity);
-
-            // Assert
-            res.Result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RemoveFavoriteActivity_Successfull(
-            [Frozen] Mock<IFavoritesService> favoriteActivityService,
-            FavoriteActivityRemove activity,
-            [Greedy] ActivityController sut)
-        {
-            // Arrange
-            favoriteActivityService.Setup(x => x.RemoveFavoriteAsync(activity))
-               .Returns(Task.CompletedTask);
-
-            // Act
-            var res = sut.RemoveFavoriteActivity(activity);
-
-            // Assert
-            res.Result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
-        }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Media;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using Application.Services;
 using AutoFixture;

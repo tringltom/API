@@ -181,7 +181,7 @@ namespace Persistence
                         {
                             Id = 20,
                             Xp = 190000,
-                        });
+                        }
                 );
 
             builder

@@ -24,8 +24,8 @@ namespace Application.Repositories
 
         public async Task CreatePendingActivityAsync(PendingActivity activity)
         {
-            await _context.PendingActivities.Add(activity);
-            _context.SaveChangesAsync();
+            _context.PendingActivities.Add(activity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> DeletePendingActivity(PendingActivity pendingActivity)
