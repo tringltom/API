@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
+using Application.Errors;
 using Application.Media;
 using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
@@ -179,6 +181,46 @@ namespace Application.Tests.Services
             activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Never);
             emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetActivitityUserIdByActivityId_Successful(
+            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
+            int activityId,
+            Activity activity,
+            ActivityService sut)
+        {
+
+            // Arrange
+            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
+                .ReturnsAsync(activity);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.GetActivitityUserIdByActivityId(activityId);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
+        }
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetActivitityUserIdByActivityId_ActivityNotFound(
+            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
+            int activityId,
+            ActivityService sut)
+        {
+
+            // Arrange
+            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
+                .ThrowsAsync(new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" }));
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.GetActivitityUserIdByActivityId(activityId);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
         }
     }
 }

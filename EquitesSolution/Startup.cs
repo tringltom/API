@@ -68,9 +68,10 @@ namespace API
             services.AddTransient<IActivityRepository, ActivityRepository>();
             services.AddTransient<IFavoritesRepository, FavortitesRepository>();
             services.AddTransient<IUserReviewRepository, UserReviewRepository>();
+            services.AddTransient<IActivityReviewXpRepository, ActivityReviewXpRepository>();
 
             //Add Scoped Managers
-            services.AddScoped<IUserManager, UserManager>();
+            services.AddScoped<IReviewManager, ReviewManager>();
 
             services.AddScoped<IActivityReviewService, ActivityReviewService>();
             services.AddScoped<IFavoritesService, FavoritesService>();
@@ -79,6 +80,8 @@ namespace API
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IUserLevelingService, UserLevelingService>();
+
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();

@@ -21,34 +21,34 @@ namespace Application.Services
             _userReviewRepository = userReviewRepository;
         }
 
-        public async Task ReviewActivityAsync(ActivityReview activityReview)
+        public async Task<UserReview> GetUserReviewByActivityAndUserIds(int activityId, int userId)
         {
-            var activity = _mapper.Map<UserReview>(activityReview);
+            return await _userReviewRepository.GetUserReviewByActivityAndUserIdAsync(activityId, userId);
+        }
 
-            var existingReview = await _userReviewRepository.GetUserReviewByActivityAndUserIdAsync(activity.ActivityId, activity.UserId);
-
-            if (existingReview != null)
-            {
-                //recalculate exp
-                try
-                {
-                    await _userReviewRepository.UpdateUserActivityReviewAsync(activity);
-                }
-                catch (Exception)
-                {
-                    throw new RestException(HttpStatusCode.Conflict, new { Greska = "Greška pri izmeni ocene." });
-                }
-                return;
-            }
-
-            // add exp
+        public async Task UpdateReviewActivityAsync(ActivityReview activityReview)
+        {
+            var review = _mapper.Map<UserReview>(activityReview);
             try
             {
-                await _userReviewRepository.ReviewUserActivityAsync(activity);
+                await _userReviewRepository.UpdateUserActivityReviewAsync(review);
             }
             catch (Exception)
             {
-                throw new RestException(HttpStatusCode.Conflict, new { Greska = "Greška pri unosu ocene." });
+                throw new RestException(HttpStatusCode.InternalServerError, new { Activity = "Neuspešna izmena ocene aktivnosti." });
+            }
+        }
+
+        public async Task AddReviewActivityAsync(ActivityReview activityReview)
+        {
+            var review = _mapper.Map<UserReview>(activityReview);
+            try
+            {
+                await _userReviewRepository.ReviewUserActivityAsync(review);
+            }
+            catch (Exception)
+            {
+                throw new RestException(HttpStatusCode.InternalServerError, new { Activity = "Neuspešna ocena aktivnosti." });
             }
         }
     }

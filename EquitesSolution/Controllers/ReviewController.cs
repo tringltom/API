@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Application.ServiceInterfaces;
+using Application.Managers;
 using Microsoft.AspNetCore.Mvc;
 using Models.Activity;
 
@@ -8,17 +8,17 @@ namespace API.Controllers
     [Route("reviews")]
     public class ReviewController : BaseController
     {
-        private readonly IActivityReviewService _activityReviewService;
+        private readonly IReviewManager _reviewManager;
 
-        public ReviewController(IActivityReviewService activityReviewService)
+        public ReviewController(IReviewManager reviewManager)
         {
-            _activityReviewService = activityReviewService;
+            _reviewManager = reviewManager;
         }
 
         [HttpPost("reviewActivity")]
         public async Task<ActionResult> ReviewActivity([FromForm] ActivityReview activityReview)
         {
-            await _activityReviewService.ReviewActivityAsync(activityReview);
+            await _reviewManager.ReviewActivityAsync(activityReview);
 
             return Ok("Uspešno ste ocenili aktivnost");
         }

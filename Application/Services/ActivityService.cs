@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.Media;
@@ -43,6 +44,12 @@ namespace Application.Services
             }
 
             await _activityRepository.CreatePendingActivityAsync(activity);
+        }
+
+        public async Task<Activity> GetActivitityUserIdByActivityId(int activityId)
+        {
+            return await _activityRepository.GetActivityByIdAsync(activityId)
+                ?? throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" });
         }
 
         public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)

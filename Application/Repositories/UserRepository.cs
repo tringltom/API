@@ -122,7 +122,7 @@ namespace Application.Repositories
 
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            return await _context.Users.SingleOrDefaultAsync(x => x.Id == userId);
+            return await _userIdentityManager.FindByIdAsync(userId.ToString());
         }
 
         public async Task<RefreshToken> GetOldRefreshToken(string refreshToken)
