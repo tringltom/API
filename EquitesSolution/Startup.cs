@@ -82,6 +82,7 @@ namespace API
             services.AddScoped<IActivityService, ActivityService>();
             services.AddScoped<IUserLevelingService, UserLevelingService>();
 
+            services.AddScoped<IDiceService, DiceService>();
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();

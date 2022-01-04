@@ -58,7 +58,7 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<ActionResult<UserCurrentlyLoggedIn>> GetCurrentlyLoggedInUser()
+        public async Task<ActionResult<UserBaseResponse>> GetCurrentlyLoggedInUser()
         {
             bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
             var refreshToken = Request.Cookies["refreshToken"];

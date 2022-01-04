@@ -43,7 +43,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
-            UserCurrentlyLoggedIn result = null;
+            UserBaseResponse result = null;
 
             //Act
             var refreshToken = _fixture.Create<string>();
@@ -71,7 +71,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(It.IsAny<User>()))
                 .Returns(token);
 
-            UserCurrentlyLoggedIn result = null;
+            UserBaseResponse result = null;
 
             //Act
             var refreshToken = _fixture.Create<string>();
@@ -99,7 +99,7 @@ namespace Application.Tests.Services
             jwtGeneratorMock.Setup(x => x.CreateToken(currentUser))
                 .Returns(token);
 
-            UserCurrentlyLoggedIn result = null;
+            UserBaseResponse result = null;
 
             //Act
             var refreshToken = _fixture.Create<string>();

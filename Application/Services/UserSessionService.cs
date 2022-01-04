@@ -26,7 +26,7 @@ namespace Application.Services
             _facebookAccessor = facebookAccessor;
         }
 
-        public async Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
+        public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
         {
             var username = _userRepository.GetCurrentUsername();
 
@@ -49,7 +49,7 @@ namespace Application.Services
                 }
                 else
                 {
-                    return new UserCurrentlyLoggedIn();
+                    return null;
                 }
             }
 
@@ -58,7 +58,7 @@ namespace Application.Services
 
             var token = _jwtGenerator.CreateToken(user);
 
-            return new UserCurrentlyLoggedIn() { Id = user.Id, Username = user.UserName, Token = token, CurrentLevel = user.XpLevelId, CurrentXp = user.CurrentXp };
+            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate);
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -90,7 +90,7 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
