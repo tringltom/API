@@ -2,7 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using Models;
 
@@ -19,7 +19,7 @@ namespace Application.Services
 
         public async Task<DiceResult> GetDiceRollResult()
         {
-            var user = await _userRepository.GetUserByID();
+            var user = await _userRepository.GetUserByTokenAsync();
 
             if (user.LastRollDate != null && (DateTimeOffset.Now - user.LastRollDate) < TimeSpan.FromDays(1))
                 return new DiceResult { Result = 0, Message = "Bacanje kockice je moguće jednom dnevno" };

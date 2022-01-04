@@ -1,5 +1,5 @@
 ﻿using System;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
@@ -34,7 +34,7 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddDays(-2))
               .Create();
 
-            userRepoMock.Setup(x => x.GetUserByID())
+            userRepoMock.Setup(x => x.GetUserByTokenAsync())
                 .ReturnsAsync(eligableUser);
 
             userRepoMock.Setup(x => x.UpdateUserAsync(eligableUser))
@@ -60,7 +60,7 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddMinutes(-20))
               .Create();
 
-            userRepoMock.Setup(x => x.GetUserByID())
+            userRepoMock.Setup(x => x.GetUserByTokenAsync())
                 .ReturnsAsync(nonEligableUser);
 
             // Act
