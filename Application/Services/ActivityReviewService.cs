@@ -60,7 +60,6 @@ namespace Application.Services
             var userReviews = await _userReviewRepository.GetAllUserReviewsAsQeuriable().Where(x => x.UserId == userId).ToListAsync();
 
             return _mapper.Map<List<ActivityReviewedByUser>>(userReviews);
-            // List<UserReview>,
         }
     }
 }
