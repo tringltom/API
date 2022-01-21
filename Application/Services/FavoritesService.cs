@@ -54,9 +54,11 @@ namespace Application.ServiceInterfaces
             }
         }
 
-        public async Task<IList<UserFavoriteActivity>> GetAllFavoritesForUserAsync(int userId)
+        public async Task<IList<FavoriteActivityReturn>> GetAllFavoritesForUserAsync(int userId)
         {
-            return await _favoritesRepository.GetFavoriteActivitiesByUserIdAsync(userId);
+            var favoriteActivities = await _favoritesRepository.GetFavoriteActivitiesByUserIdAsync(userId);
+
+            return _mapper.Map<List<FavoriteActivityReturn>>(favoriteActivities);
         }
 
         public async Task RemoveFavoriteAsync(FavoriteActivityRemove favoriteActivity)

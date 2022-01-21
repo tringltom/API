@@ -25,7 +25,7 @@ namespace API.Controllers
 
         // TODO - Add checking if user is Admin
         [HttpGet]
-        public async Task<ActionResult<PendingActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
+        public async Task<ActionResult<ActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
         {
             return await _activityService.GetPendingActivitiesAsync(limit, offset);
         }
@@ -36,5 +36,12 @@ namespace API.Controllers
         {
             return await _activityService.ReslovePendingActivityAsync(id, approval);
         }
+
+        [HttpGet("approvedActivitiesExcludeUser/{id}")]
+        public async Task<ActionResult<ActivityEnvelope>> GetApprovedActivitiesExcludeUser(int id, int? limit, int? offset)
+        {
+            return await _activityService.GetApprovedActivitiesExcludingUserAsync(id, limit, offset);
+        }
+
     }
 }

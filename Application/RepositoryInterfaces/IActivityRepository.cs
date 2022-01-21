@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
 
@@ -14,6 +15,8 @@ namespace Application.RepositoryInterfaces
         Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
         Task<int> GetTypeOfActivityAsync(int activityId);
         Task<Activity> GetActivityByIdAsync(int activityId);
+        IQueryable<Activity> GetApprovedActivitiesAsQueriable();
+        Task<int> GetApprovedActivitiesCountAsync();
 
     }
 }

@@ -81,18 +81,18 @@ namespace Application.Tests.Services
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityRepository> activityRepoMock,
             List<PendingActivity> pendingActivities,
-            List<PendingActivityGet> pendingActivitiesGet,
+            List<ActivityGet> pendingActivitiesGet,
             int limit, int offset,
             ActivityService sut)
         {
 
             // Arrange
-            var pendingActivityEnvelope = _fixture.Create<PendingActivityEnvelope>();
+            var pendingActivityEnvelope = _fixture.Create<ActivityEnvelope>();
             pendingActivityEnvelope.Activities = pendingActivitiesGet;
             pendingActivityEnvelope.ActivityCount = pendingActivitiesGet.Count;
 
             mapperMock
-                .Setup(x => x.Map<List<PendingActivityGet>>(It.IsAny<PendingActivity>()))
+                .Setup(x => x.Map<List<ActivityGet>>(It.IsAny<PendingActivity>()))
                 .Returns(pendingActivitiesGet);
 
             activityRepoMock
@@ -104,7 +104,7 @@ namespace Application.Tests.Services
                 .ReturnsAsync(pendingActivities.Count);
 
             // Act
-            Func<Task<PendingActivityEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesAsync(limit, offset);
+            Func<Task<ActivityEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesAsync(limit, offset);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();

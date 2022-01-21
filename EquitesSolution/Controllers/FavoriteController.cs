@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Models.Activity;
@@ -17,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost("createFavorite")]
-        public async Task<ActionResult> CreateFavoriteActivity([FromForm] FavoriteActivityCreate favoriteActivityCreate)
+        public async Task<ActionResult> CreateFavoriteActivity([FromBody] FavoriteActivityCreate favoriteActivityCreate)
         {
             await _favoriteService.CreateFavoriteAsync(favoriteActivityCreate);
 
@@ -25,11 +26,17 @@ namespace API.Controllers
         }
 
         [HttpPost("removeFavorite")]
-        public async Task<ActionResult> RemoveFavoriteActivity([FromForm] FavoriteActivityRemove favoriteActivityRemove)
+        public async Task<ActionResult> RemoveFavoriteActivity([FromBody] FavoriteActivityRemove favoriteActivityRemove)
         {
             await _favoriteService.RemoveFavoriteAsync(favoriteActivityRemove);
 
             return Ok("Uspešno ste uklonili omiljenu aktivnost");
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IList<FavoriteActivityReturn>> GetFavoriteActivitiesForUser(int id)
+        {
+            return await _favoriteService.GetAllFavoritesForUserAsync(id);
         }
     }
 }

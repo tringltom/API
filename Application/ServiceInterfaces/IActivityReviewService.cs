@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Domain.Entities;
 using Models.Activity;
 
@@ -9,5 +10,6 @@ namespace Application.ServiceInterfaces
         Task<UserReview> GetUserReviewByActivityAndUserIds(int activityId, int userId);
         Task UpdateReviewActivityAsync(ActivityReview activityReview);
         Task AddReviewActivityAsync(ActivityReview activityReview);
+        Task<IList<ActivityReviewedByUser>> GetAllReviewsByUserId(int userId);
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
@@ -6,6 +8,7 @@ using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Models.Activity;
 
 namespace Application.Services
@@ -50,6 +53,14 @@ namespace Application.Services
             {
                 throw new RestException(HttpStatusCode.InternalServerError, new { Activity = "Neuspešna ocena aktivnosti." });
             }
+        }
+
+        public async Task<IList<ActivityReviewedByUser>> GetAllReviewsByUserId(int userId)
+        {
+            var userReviews = await _userReviewRepository.GetAllUserReviewsAsQeuriable().Where(x => x.UserId == userId).ToListAsync();
+
+            return _mapper.Map<List<ActivityReviewedByUser>>(userReviews);
+            // List<UserReview>,
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
 using Application.ServiceInterfaces;
@@ -50,6 +51,25 @@ namespace API.Tests.Controllers
             // Assert
             res.Result.Should().BeOfType<OkObjectResult>();
             ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetFavoriteActivitiesForUser_Successfull(
+            [Frozen] Mock<IFavoritesService> favoriteActivityService,
+            List<FavoriteActivityReturn> favoriteActivities,
+            int id,
+            [Greedy] FavoriteController sut)
+        {
+            // Arrange
+            favoriteActivityService.Setup(x => x.GetAllFavoritesForUserAsync(id))
+               .ReturnsAsync(favoriteActivities);
+
+            // Act
+            var res = sut.GetFavoriteActivitiesForUser(id);
+
+            // Assert
+            res.Result.Should().Equal(favoriteActivities);
         }
     }
 }

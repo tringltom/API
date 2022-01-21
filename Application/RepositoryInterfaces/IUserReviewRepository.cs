@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using Domain.Entities;
 
 namespace Application.RepositoryInterfaces
@@ -8,5 +9,6 @@ namespace Application.RepositoryInterfaces
         Task<UserReview> GetUserReviewByActivityAndUserIdAsync(int activityId, int userId);
         Task ReviewUserActivityAsync(UserReview userReview);
         Task UpdateUserActivityReviewAsync(UserReview userReview);
+        IQueryable<UserReview> GetAllUserReviewsAsQeuriable();
     }
 }

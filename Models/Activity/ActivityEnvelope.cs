@@ -2,9 +2,9 @@
 
 namespace Models.Activity
 {
-    public class PendingActivityEnvelope
+    public class ActivityEnvelope
     {
-        public List<PendingActivityGet> Activities { get; set; }
+        public List<ActivityGet> Activities { get; set; }
         public int ActivityCount { get; set; }
     }
 }

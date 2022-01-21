@@ -7,6 +7,7 @@ using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Models.Activity;
 
 namespace Application.Services
@@ -52,13 +53,13 @@ namespace Application.Services
                 ?? throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" });
         }
 
-        public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)
+        public async Task<ActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)
         {
             var pendingActivities = await _activityRepository.GetPendingActivitiesAsync(limit, offset);
 
-            return new PendingActivityEnvelope
+            return new ActivityEnvelope
             {
-                Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityGet>(pa)).ToList(),
+                Activities = pendingActivities.Select(pa => _mapper.Map<ActivityGet>(pa)).ToList(),
                 ActivityCount = await _activityRepository.GetPendingActivitiesCountAsync(),
             };
         }
@@ -78,6 +79,21 @@ namespace Application.Services
             await _emailService.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
 
             return await _activityRepository.DeletePendingActivity(pendingActivity);
+        }
+
+        public async Task<ActivityEnvelope> GetApprovedActivitiesExcludingUserAsync(int userId, int? limit, int? offset)
+        {
+            var approvedActivities = await _activityRepository.GetApprovedActivitiesAsQueriable()
+                .Skip(offset ?? 0)
+                .Take(limit ?? 3)
+                .Where(x => x.User.Id != userId)
+                .ToListAsync();
+
+            return new ActivityEnvelope
+            {
+                Activities = approvedActivities.Select(pa => _mapper.Map<ActivityGet>(pa)).ToList(),
+                ActivityCount = await _activityRepository.GetApprovedActivitiesCountAsync(),
+            };
         }
 
     }

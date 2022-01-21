@@ -4,7 +4,7 @@ using Domain.Entities;
 
 namespace Models.Activity
 {
-    public class PendingActivityGet
+    public class ActivityGet
     {
         public int Id { get; set; }
         public string UserName { get; set; }

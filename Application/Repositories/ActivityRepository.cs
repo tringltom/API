@@ -22,6 +22,11 @@ namespace Application.Repositories
             _context.SaveChanges();
         }
 
+        public IQueryable<Activity> GetApprovedActivitiesAsQueriable()
+        {
+            return _context.Activities.AsQueryable();
+        }
+
         public async Task CreatePendingActivityAsync(PendingActivity activity)
         {
             _context.PendingActivities.Add(activity);
@@ -46,6 +51,11 @@ namespace Application.Repositories
         public async Task<int> GetPendingActivitiesCountAsync()
         {
             return await _context.PendingActivities.CountAsync();
+        }
+
+        public async Task<int> GetApprovedActivitiesCountAsync()
+        {
+            return await _context.Activities.CountAsync();
         }
 
         public async Task<PendingActivity> GetPendingActivityByIDAsync(int id) => await _context.PendingActivities.FindAsync(id);

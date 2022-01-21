@@ -16,7 +16,7 @@ namespace Application.Repositories
             _context = context;
         }
 
-        private IQueryable<UserReview> GetAllUserReviewsAsQeuriable()
+        public IQueryable<UserReview> GetAllUserReviewsAsQeuriable()
         {
             return _context.UserReviews.AsQueryable();
         }

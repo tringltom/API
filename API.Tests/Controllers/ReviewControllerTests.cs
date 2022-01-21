@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
 using Application.Managers;
+using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using FixtureShared;
 using FluentAssertions;
@@ -33,6 +35,22 @@ namespace API.Tests.Controllers
             res.Result.Should().BeOfType<OkObjectResult>();
             reviewManagerMock.Verify(x => x.ReviewActivityAsync(activityReview), Times.Once);
             ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public void GetReviewsForUser_Successfull([Frozen] Mock<IActivityReviewService> activityReviewServiceMock, int userId, List<ActivityReviewedByUser> acitvitiesReviewed, [Greedy] ReviewController sut)
+        {
+            // Arrange
+            activityReviewServiceMock.Setup(x => x.GetAllReviewsByUserId(userId))
+                .ReturnsAsync(acitvitiesReviewed);
+
+            // Act
+            var res = sut.GetReviewsForUser(userId);
+
+            // Assert
+            res.Result.Should().Equal(acitvitiesReviewed);
+            activityReviewServiceMock.Verify(x => x.GetAllReviewsByUserId(userId), Times.Once);
         }
     }
 }
