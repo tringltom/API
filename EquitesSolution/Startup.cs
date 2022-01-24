@@ -4,7 +4,6 @@ using System.Text;
 using API.Mappings;
 using API.Middleware;
 using API.Validations;
-using Application.Managers;
 using Application.Media;
 using Application.Repositories;
 using Application.Security;
@@ -67,7 +66,6 @@ namespace API
             services.AddTransient<IActivityRepository, ActivityRepository>();
 
             //Add Scoped Managers
-            services.AddScoped<IUserManager, UserManager>();
 
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();

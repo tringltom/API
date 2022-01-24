@@ -27,10 +27,10 @@ namespace Application.Repositories
             _context.SaveChanges();
         }
 
-        public async Task<bool> DeletePendingActivity(PendingActivity pendingActivity)
+        public async Task CreateActivityCreationCounter(ActivityCreationCounter activityCreationCounter)
         {
-            _context.PendingActivities.Remove(pendingActivity);
-            return await _context.SaveChangesAsync() > 0;
+            await _context.ActivityCreationCounters.AddAsync(activityCreationCounter);
+            _context.SaveChanges();
         }
 
         public async Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset)
@@ -42,12 +42,20 @@ namespace Application.Repositories
                 .ToListAsync();
         }
 
-        public async Task<int> GetPendingActivitiesCountAsync()
-        {
-            return await _context.PendingActivities.CountAsync();
-        }
+        public async Task<int> GetPendingActivitiesCountAsync() => await _context.PendingActivities.CountAsync();
 
         public async Task<PendingActivity> GetPendingActivityByIDAsync(int id) => await _context.PendingActivities.FindAsync(id);
 
+        public async Task<bool> DeletePendingActivity(PendingActivity pendingActivity)
+        {
+            _context.PendingActivities.Remove(pendingActivity);
+            return await _context.SaveChangesAsync() > 0;
+        }
+
+        public async Task<bool> DeleteActivityCountersAsync(List<ActivityCreationCounter> activityCounters)
+        {
+            _context.ActivityCreationCounters.RemoveRange(activityCounters);
+            return await _context.SaveChangesAsync() > 0;
+        }
     }
 }

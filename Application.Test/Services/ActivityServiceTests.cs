@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Application.Errors;
 using Application.Media;
 using Application.Repositories;
 using Application.ServiceInterfaces;
@@ -71,6 +72,57 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void CreatePendingActivity_ExceededCount(
+           [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
+           [Frozen] Mock<IMapper> mapperMock,
+           [Frozen] Mock<IActivityRepository> activityRepoMock,
+           ActivityService sut,
+           User user)
+        {
+
+            // Arrange
+            var userWithNoMoreGoodDeedCount = _fixture
+               .Build<User>()
+               .With(ac => ac.ActivityCreationCounters,
+                    new List<ActivityCreationCounter>()
+                    {
+                        new ActivityCreationCounter
+                        {
+                            ActivityTypeId = ActivityTypeId.GoodDeed,
+                            DateCreated = DateTimeOffset.Now,
+                            User = user
+                        },
+                        new ActivityCreationCounter
+                        {
+                            ActivityTypeId = ActivityTypeId.GoodDeed,
+                            DateCreated = DateTimeOffset.Now,
+                            User = user
+                        },
+                    })
+               .Create();
+
+            var pendingActivity = _fixture
+            .Build<PendingActivity>()
+            .With(u => u.User, userWithNoMoreGoodDeedCount)
+            .Create();
+
+            mapperMock
+             .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
+             .Returns(pendingActivity);
+
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(It.IsAny<ActivityCreate>());
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            photoAccessorMock.Verify(x => x.AddPhotoAsync(It.IsAny<ActivityCreate>().Images[0]), Times.Never);
+            activityRepoMock.Verify(x => x.CreatePendingActivityAsync(pendingActivity), Times.Never);
+            activityRepoMock.Verify(x => x.CreateActivityCreationCounter(It.IsAny<ActivityCreationCounter>()), Times.Never);
         }
 
         [Test]

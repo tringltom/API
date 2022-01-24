@@ -21,6 +21,7 @@ namespace Persistence
         public virtual DbSet<ActivityMedia> ActivityMedia { get; set; }
         public virtual DbSet<PendingActivityMedia> PendingActivityMedia { get; set; }
         public virtual DbSet<XpLevel> XpLevels { get; set; }
+        public virtual DbSet<ActivityCreationCounter> ActivityCreationCounters { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -6,12 +6,13 @@ namespace Application.Repositories
 {
     public interface IActivityRepository
     {
-        Task CreatePendingActivityAsync(PendingActivity activity);
-        Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);
-        Task<int> GetPendingActivitiesCountAsync();
-        Task<PendingActivity> GetPendingActivityByIDAsync(int id);
         Task CreatActivityAsync(Activity activity);
+        Task CreatePendingActivityAsync(PendingActivity activity);
+        Task CreateActivityCreationCounter(ActivityCreationCounter activityCreationCounter);
+        Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);
+        Task<PendingActivity> GetPendingActivityByIDAsync(int id);
+        Task<int> GetPendingActivitiesCountAsync();
         Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
-
+        Task<bool> DeleteActivityCountersAsync(List<ActivityCreationCounter> activityCounters);
     }
 }
