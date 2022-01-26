@@ -18,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost("createFavorite")]
-        public async Task<ActionResult> CreateFavoriteActivity([FromBody] FavoriteActivityCreate favoriteActivityCreate)
+        public async Task<ActionResult> CreateFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityCreate)
         {
             await _favoriteService.CreateFavoriteAsync(favoriteActivityCreate);
 
@@ -26,7 +26,7 @@ namespace API.Controllers
         }
 
         [HttpPost("removeFavorite")]
-        public async Task<ActionResult> RemoveFavoriteActivity([FromBody] FavoriteActivityRemove favoriteActivityRemove)
+        public async Task<ActionResult> RemoveFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityRemove)
         {
             await _favoriteService.RemoveFavoriteAsync(favoriteActivityRemove);
 

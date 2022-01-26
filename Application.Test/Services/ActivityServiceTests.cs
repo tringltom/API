@@ -185,7 +185,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetActivitityUserIdByActivityId_Successful(
+        public void GetActivityUserIdByActivityId_Successful(
             [Frozen] Mock<IActivityRepository> activityRepositoryMock,
             int activityId,
             Activity activity,
@@ -205,7 +205,7 @@ namespace Application.Tests.Services
         }
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetActivitityUserIdByActivityId_ActivityNotFound(
+        public void GetActivityUserIdByActivityId_ActivityNotFound(
             [Frozen] Mock<IActivityRepository> activityRepositoryMock,
             int activityId,
             ActivityService sut)

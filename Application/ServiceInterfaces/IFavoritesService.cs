@@ -6,8 +6,8 @@ namespace Application.ServiceInterfaces
 {
     public interface IFavoritesService
     {
-        Task CreateFavoriteAsync(FavoriteActivityCreate activity);
+        Task CreateFavoriteAsync(FavoriteActivityBase activity);
         Task<IList<FavoriteActivityReturn>> GetAllFavoritesForUserAsync(int userId);
-        Task RemoveFavoriteAsync(FavoriteActivityRemove favoriteActivity);
+        Task RemoveFavoriteAsync(FavoriteActivityBase favoriteActivity);
     }
 }

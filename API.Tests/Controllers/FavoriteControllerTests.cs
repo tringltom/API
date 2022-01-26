@@ -19,7 +19,7 @@ namespace API.Tests.Controllers
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateFavoriteActivity_Successfull(
             [Frozen] Mock<IFavoritesService> favoriteServiceMock,
-            FavoriteActivityCreate activity,
+            FavoriteActivityBase activity,
             [Greedy] FavoriteController sut)
         {
             // Arrange
@@ -38,7 +38,7 @@ namespace API.Tests.Controllers
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RemoveFavoriteActivity_Successfull(
             [Frozen] Mock<IFavoritesService> favoriteActivityService,
-            FavoriteActivityRemove activity,
+            FavoriteActivityBase activity,
             [Greedy] FavoriteController sut)
         {
             // Arrange

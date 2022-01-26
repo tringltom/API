@@ -1,6 +1,5 @@
 ﻿namespace Domain.Entities
 {
-
     public enum ReviewTypeId
     {
         None = 1,

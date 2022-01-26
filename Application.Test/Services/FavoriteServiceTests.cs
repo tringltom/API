@@ -26,7 +26,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateFavoriteAsync_Successfull([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
             [Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserRepository> userRepoMock, User user,
-            UserFavoriteActivity favoriteActivity, FavoriteActivityCreate activity,
+            UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
             FavoritesService sut)
         {
 
@@ -63,7 +63,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateFavoriteAsync_AddFailed([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
             [Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserRepository> userRepoMock, User user,
-            UserFavoriteActivity favoriteActivity, FavoriteActivityCreate activity,
+            UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
             FavoritesService sut)
         {
 
@@ -100,7 +100,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateFavoriteAsync_ActivityAlreadyExists([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
             [Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserRepository> userRepoMock, User user,
-            UserFavoriteActivity favoriteActivity, FavoriteActivityCreate activity,
+            UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
             FavoritesService sut)
         {
 
@@ -137,7 +137,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateFavoriteAsync_IncorrectUserIds([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
            [Frozen] Mock<IMapper> mapperMock, [Frozen] Mock<IUserRepository> userRepoMock, User user,
-           UserFavoriteActivity favoriteActivity, FavoriteActivityCreate activity,
+           UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
            FavoritesService sut)
         {
 
@@ -174,7 +174,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RemoveFavoriteAsync_Successfull([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
           [Frozen] Mock<IUserRepository> userRepoMock, User user,
-          FavoriteActivityRemove favoriteActivity,
+          FavoriteActivityBase favoriteActivity,
           FavoritesService sut)
         {
 
@@ -203,7 +203,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RemoveFavoriteAsync_ActivityNotFound([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
           [Frozen] Mock<IUserRepository> userRepoMock, User user,
-          FavoriteActivityRemove favoriteActivity,
+          FavoriteActivityBase favoriteActivity,
           FavoritesService sut)
         {
 
@@ -232,7 +232,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void RemoveFavoriteAsync_IncorrectUserId([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
           [Frozen] Mock<IUserRepository> userRepoMock, User user,
-          FavoriteActivityRemove favoriteActivity,
+          FavoriteActivityBase favoriteActivity,
           FavoritesService sut)
         {
 

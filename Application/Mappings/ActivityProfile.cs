@@ -39,9 +39,7 @@ namespace Application.Mappings
             CreateMap<PendingActivityMedia, Photo>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
 
-            CreateMap<FavoriteActivityCreate, UserFavoriteActivity>();
-
-            CreateMap<FavoriteActivityRemove, UserFavoriteActivity>();
+            CreateMap<FavoriteActivityBase, UserFavoriteActivity>();
 
             CreateMap<ActivityReview, UserReview>();
 

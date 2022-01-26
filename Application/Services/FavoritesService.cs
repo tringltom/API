@@ -23,7 +23,7 @@ namespace Application.ServiceInterfaces
             _userRepository = userRepository;
         }
 
-        public async Task CreateFavoriteAsync(FavoriteActivityCreate activity)
+        public async Task CreateFavoriteAsync(FavoriteActivityBase activity)
         {
 
             var currentUserName = _userRepository.GetCurrentUsername();
@@ -61,7 +61,7 @@ namespace Application.ServiceInterfaces
             return _mapper.Map<List<FavoriteActivityReturn>>(favoriteActivities);
         }
 
-        public async Task RemoveFavoriteAsync(FavoriteActivityRemove favoriteActivity)
+        public async Task RemoveFavoriteAsync(FavoriteActivityBase favoriteActivity)
         {
             var currentUser = await _userRepository.GetUserByUserNameAsync(_userRepository.GetCurrentUsername());
 

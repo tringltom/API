@@ -5,7 +5,7 @@ using Models.Activity;
 
 namespace Application.Mappings
 {
-    public class UserResolver : IValueResolver<ActivityCreate, PendingActivity, User>, IValueResolver<FavoriteActivityCreate, UserFavoriteActivity, User>
+    public class UserResolver : IValueResolver<ActivityCreate, PendingActivity, User>, IValueResolver<FavoriteActivityBase, UserFavoriteActivity, User>
     {
         private readonly IUserRepository _userRepository;
 
@@ -19,7 +19,7 @@ namespace Application.Mappings
             return _userRepository.GetUserUsingTokenAsync().Result;
         }
 
-        public User Resolve(FavoriteActivityCreate source, UserFavoriteActivity destination, User destMember, ResolutionContext context)
+        public User Resolve(FavoriteActivityBase source, UserFavoriteActivity destination, User destMember, ResolutionContext context)
         {
             return _userRepository.GetUserByIdAsync(source.UserId).Result;
         }
