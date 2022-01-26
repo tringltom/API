@@ -49,10 +49,10 @@ namespace Application.Tests.Managers
             mapperMock.Setup(x => x.Map<UserReview>(activityReview))
                 .Returns(review);
 
-            activityServiceMock.Setup(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId))
+            activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
-            activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId))
+            activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId))
                 .ReturnsAsync((UserReview)null);
 
             activityReviewServiceMock.Setup(x => x.AddReviewActivityAsync(activityReview))
@@ -68,8 +68,8 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Once);
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
-            activityServiceMock.Verify(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId), Times.Once);
-            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId), Times.Once);
+            activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
+            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId), Times.Once);
             activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Once);
 
             activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
@@ -109,10 +109,10 @@ namespace Application.Tests.Managers
             mapperMock.Setup(x => x.Map<UserReview>(activityReview))
                 .Returns(review);
 
-            activityServiceMock.Setup(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId))
+            activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
-            activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId))
+            activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId))
                 .ReturnsAsync(userReview);
 
             activityReviewServiceMock.Setup(x => x.UpdateReviewActivityAsync(activityReview))
@@ -128,8 +128,8 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Exactly(2));
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
             mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
-            activityServiceMock.Verify(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId), Times.Once);
-            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId), Times.Once);
+            activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
+            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId), Times.Once);
             activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Once);
 
             activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
@@ -164,10 +164,10 @@ namespace Application.Tests.Managers
             mapperMock.Setup(x => x.Map<UserReview>(activityReview))
                 .Returns(review);
 
-            activityServiceMock.Setup(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId))
+            activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
-            activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId))
+            activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId))
                 .ReturnsAsync(userReview);
 
             // Act
@@ -179,8 +179,8 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(activityReview.UserId), Times.Once);
             userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Exactly(2));
             mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
-            activityServiceMock.Verify(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId), Times.Once);
-            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId), Times.Once);
+            activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
+            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId), Times.Once);
 
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
@@ -217,8 +217,8 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Never);
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Never);
-            activityServiceMock.Verify(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId), Times.Never);
-            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId), Times.Never);
+            activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Never);
+            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId), Times.Never);
             activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
             activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
         }
@@ -244,7 +244,7 @@ namespace Application.Tests.Managers
             mapperMock.Setup(x => x.Map<UserReview>(activityReview))
                 .Returns(review);
 
-            activityServiceMock.Setup(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId))
+            activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
             // Act
@@ -254,11 +254,11 @@ namespace Application.Tests.Managers
             methodInTest.Should().Throw<RestException>();
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(activityReview.UserId), Times.Once);
             mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
-            activityServiceMock.Verify(x => x.GetActivitityUserIdByActivityId(activityReview.ActivityId), Times.Once);
+            activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
 
             userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Never);
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId), Times.Never);
+            activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId), Times.Never);
             activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
             activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
         }

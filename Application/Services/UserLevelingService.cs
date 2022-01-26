@@ -32,11 +32,11 @@ namespace Application.Services
             {
                 var activityType = await _activityRepository.GetTypeOfActivityAsync(userReview.ActivityId);
 
-                return await _activityReviewXpRepository.GetXpRewardByActivityAndReviewTypeIdsAsync(activityType, (int)userReview.ReviewTypeId);
+                return await _activityReviewXpRepository.GetXpRewardByActivityAndReviewTypeIdsAsync(activityType, userReview.ReviewTypeId);
             }
             catch (Exception)
             {
-                throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška pri pronalaženju dobijenih iskustvenih poena za odabranu aktivnost." });
+                throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška pri pronalaženju dobijenih iskustvenih poena." });
             }
         }
 

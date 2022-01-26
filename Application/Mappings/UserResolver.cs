@@ -16,7 +16,7 @@ namespace Application.Mappings
 
         public User Resolve(ActivityCreate source, PendingActivity destination, User destMember, ResolutionContext context)
         {
-            return _userRepository.GetUserByTokenAsync().Result;
+            return _userRepository.GetUserUsingTokenAsync().Result;
         }
 
         public User Resolve(FavoriteActivityCreate source, UserFavoriteActivity destination, User destMember, ResolutionContext context)

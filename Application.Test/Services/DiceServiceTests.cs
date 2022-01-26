@@ -34,7 +34,7 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddDays(-2))
               .Create();
 
-            userRepoMock.Setup(x => x.GetUserByTokenAsync())
+            userRepoMock.Setup(x => x.GetUserUsingTokenAsync())
                 .ReturnsAsync(eligableUser);
 
             userRepoMock.Setup(x => x.UpdateUserAsync(eligableUser))
@@ -60,7 +60,7 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddMinutes(-20))
               .Create();
 
-            userRepoMock.Setup(x => x.GetUserByTokenAsync())
+            userRepoMock.Setup(x => x.GetUserUsingTokenAsync())
                 .ReturnsAsync(nonEligableUser);
 
             // Act

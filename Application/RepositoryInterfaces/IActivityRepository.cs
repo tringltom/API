@@ -13,7 +13,7 @@ namespace Application.RepositoryInterfaces
         Task<PendingActivity> GetPendingActivityByIDAsync(int id);
         Task CreatActivityAsync(Activity activity);
         Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
-        Task<int> GetTypeOfActivityAsync(int activityId);
+        Task<ActivityTypeId> GetTypeOfActivityAsync(int activityId);
         Task<Activity> GetActivityByIdAsync(int activityId);
         IQueryable<Activity> GetApprovedActivitiesAsQueriable();
         Task<int> GetApprovedActivitiesCountAsync();

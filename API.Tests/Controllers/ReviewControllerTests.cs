@@ -22,7 +22,9 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void ReviewActivity_Successfull([Frozen] Mock<IReviewManager> reviewManagerMock, ActivityReview activityReview, [Greedy] ReviewController sut)
+        public void ReviewActivity_Successfull([Frozen] Mock<IReviewManager> reviewManagerMock,
+            ActivityReview activityReview,
+            [Greedy] ReviewController sut)
         {
             // Arrange
             reviewManagerMock.Setup(x => x.ReviewActivityAsync(activityReview))
@@ -39,7 +41,9 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void GetReviewsForUser_Successfull([Frozen] Mock<IActivityReviewService> activityReviewServiceMock, int userId, List<ActivityReviewedByUser> acitvitiesReviewed, [Greedy] ReviewController sut)
+        public void GetReviewsForUser_Successfull([Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
+            int userId, List<ActivityReviewedByUser> acitvitiesReviewed,
+            [Greedy] ReviewController sut)
         {
             // Arrange
             activityReviewServiceMock.Setup(x => x.GetAllReviewsByUserId(userId))

@@ -24,7 +24,7 @@ namespace Application.Services
             _userReviewRepository = userReviewRepository;
         }
 
-        public async Task<UserReview> GetUserReviewByActivityAndUserIds(int activityId, int userId)
+        public async Task<UserReview> GetUserReviewByActivityAndUserId(int activityId, int userId)
         {
             return await _userReviewRepository.GetUserReviewByActivityAndUserIdAsync(activityId, userId);
         }

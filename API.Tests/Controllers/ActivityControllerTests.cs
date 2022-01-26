@@ -41,7 +41,7 @@ namespace API.Tests.Controllers
         [Fixture(FixtureType.WithAutoMoq)]
         public void GetPendingActivities_Successfull(
             [Frozen] Mock<IActivityService> activityServiceMock,
-            ActivityEnvelope pendingActivityEnvelope,
+            PendingActivityEnvelope pendingActivityEnvelope,
             [Greedy] ActivityController sut)
         {
             // Arrange
@@ -53,7 +53,7 @@ namespace API.Tests.Controllers
 
             // Assert
 
-            res.Should().BeOfType<Task<ActionResult<ActivityEnvelope>>>();
+            res.Should().BeOfType<Task<ActionResult<PendingActivityEnvelope>>>();
         }
 
         [Test]
@@ -78,21 +78,21 @@ namespace API.Tests.Controllers
         [Fixture(FixtureType.WithAutoMoq)]
         public void GetApprovedActivitiesExcludeUser_Successfull(
             [Frozen] Mock<IActivityService> activityServiceMock,
-            ActivityEnvelope activityEnvelope,
+            ApprovedActivityEnvelope activityEnvelope,
             int id,
             int offset,
             int limit,
             [Greedy] ActivityController sut)
         {
             // Arrange
-            activityServiceMock.Setup(x => x.GetApprovedActivitiesExcludingUserAsync(id, limit, offset))
+            activityServiceMock.Setup(x => x.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset))
                .ReturnsAsync(activityEnvelope);
 
             // Act
             var res = sut.GetApprovedActivitiesExcludeUser(id, limit, offset);
 
             // Assert
-            res.Should().BeOfType<Task<ActionResult<ActivityEnvelope>>>();
+            res.Should().BeOfType<Task<ActionResult<ApprovedActivityEnvelope>>>();
         }
 
 

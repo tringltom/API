@@ -21,14 +21,9 @@ namespace Application.Repositories
             return _context.ActivityReviewXp.AsQueryable();
         }
 
-        private DbSet<ActivityReviewXp> ActivityReviewXp()
+        public async Task<int> GetXpRewardByActivityAndReviewTypeIdsAsync(ActivityTypeId activityTypeId, ReviewTypeId reviewTypeId)
         {
-            return _context.ActivityReviewXp;
-        }
-
-        public async Task<int> GetXpRewardByActivityAndReviewTypeIdsAsync(int activityTypeId, int reviewTypeId)
-        {
-            return (await ActivityReviewXpAsQueriable().FirstOrDefaultAsync(x => (int)x.ActivityTypeId == activityTypeId && (int)x.ReviewTypeId == reviewTypeId)).Xp;
+            return (await ActivityReviewXpAsQueriable().FirstOrDefaultAsync(x => x.ActivityTypeId == activityTypeId && x.ReviewTypeId == reviewTypeId)).Xp;
         }
     }
 }

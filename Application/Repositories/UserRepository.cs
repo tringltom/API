@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -114,10 +115,10 @@ namespace Application.Repositories
             return username;
         }
 
-        public async Task<User> GetUserByTokenAsync()
+        public async Task<User> GetUserUsingTokenAsync()
         {
-            var userID = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
-            return await _context.Users.SingleOrDefaultAsync(x => x.Id == int.Parse(userID));
+            var userId = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
+            return await GetUserByIdAsync(Convert.ToInt32(userId));
         }
 
         public async Task<User> GetUserByIdAsync(int userId)
@@ -132,7 +133,7 @@ namespace Application.Repositories
 
         public async Task<User> GetUserByUserNameAsync(string userName)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+            return await _context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
         }
     }
 }

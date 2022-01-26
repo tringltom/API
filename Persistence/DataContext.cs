@@ -55,8 +55,6 @@ namespace Persistence
                 .HasIndex(ur => new { ur.UserId, ur.ActivityId })
                 .IsUnique();
 
-
-
             builder
                 .Entity<ActivityReviewXp>()
                 .HasIndex(arx => new { arx.ReviewTypeId, arx.ActivityTypeId })

@@ -18,8 +18,8 @@ namespace Application.Repositories
 
         public async Task CreatActivityAsync(Activity activity)
         {
-            await _context.Activities.AddAsync(activity);
-            _context.SaveChanges();
+            _context.Activities.Add(activity);
+            await _context.SaveChangesAsync();
         }
 
         public IQueryable<Activity> GetApprovedActivitiesAsQueriable()
@@ -60,9 +60,9 @@ namespace Application.Repositories
 
         public async Task<PendingActivity> GetPendingActivityByIDAsync(int id) => await _context.PendingActivities.FindAsync(id);
 
-        public async Task<int> GetTypeOfActivityAsync(int activityId)
+        public async Task<ActivityTypeId> GetTypeOfActivityAsync(int activityId)
         {
-            return (int)(await _context.Activities.FirstOrDefaultAsync(x => x.Id == activityId)).ActivityTypeId;
+            return (await _context.Activities.FirstOrDefaultAsync(x => x.Id == activityId)).ActivityTypeId;
         }
 
         public async Task<Activity> GetActivityByIdAsync(int activityId)

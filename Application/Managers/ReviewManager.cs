@@ -34,7 +34,7 @@ namespace Application.Managers
 
             var activity = _mapper.Map<UserReview>(activityReview);
 
-            var activityCreatorId = (await _activityService.GetActivitityUserIdByActivityId(activityReview.ActivityId)).User.Id;
+            var activityCreatorId = (await _activityService.GetActivityUserIdByActivityId(activityReview.ActivityId)).User.Id;
 
             if (activityReview.UserId == activityCreatorId)
             {
@@ -43,7 +43,7 @@ namespace Application.Managers
 
             var xpRewardToYield = await _userLevelingService.GetXpRewardYieldByReviewAsync(activity);
 
-            var existingReview = await _activityReviewService.GetUserReviewByActivityAndUserIds(activityReview.ActivityId, activityReview.UserId);
+            var existingReview = await _activityReviewService.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId);
 
             if (existingReview == null)
             {

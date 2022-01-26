@@ -7,9 +7,9 @@ namespace Application.ServiceInterfaces
     public interface IActivityService
     {
         Task CreatePendingActivityAsync(ActivityCreate user);
-        Task<ActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset);
+        Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset);
         Task<bool> ReslovePendingActivityAsync(int pendingActivityID, PendingActivityApproval approval);
-        Task<Activity> GetActivitityUserIdByActivityId(int activityId);
-        Task<ActivityEnvelope> GetApprovedActivitiesExcludingUserAsync(int userId, int? limit, int? offset);
+        Task<Activity> GetActivityUserIdByActivityId(int activityId);
+        Task<ApprovedActivityEnvelope> GetApprovedActivitiesFromOtherUsersAsync(int userId, int? limit, int? offset);
     }
 }

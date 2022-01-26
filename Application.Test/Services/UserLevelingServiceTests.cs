@@ -80,9 +80,9 @@ namespace Application.Tests.Services
             var result = new int();
 
             activityRepositoryMock.Setup(x => x.GetTypeOfActivityAsync(userReview.ActivityId))
-                .ReturnsAsync((int)activityTypeId);
+                .ReturnsAsync(activityTypeId);
 
-            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync((int)activityTypeId, (int)userReview.ReviewTypeId))
+            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId))
                 .ReturnsAsync(xpReward);
 
             // Act
@@ -92,7 +92,7 @@ namespace Application.Tests.Services
             methodInTest.Should().NotThrow<RestException>();
             result.Should().Equals(xpReward);
             activityRepositoryMock.Verify(x => x.GetTypeOfActivityAsync(userReview.ActivityId), Times.Once);
-            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync((int)activityTypeId, (int)userReview.ReviewTypeId), Times.Once);
+            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId), Times.Once);
         }
 
         [Test]
@@ -109,7 +109,7 @@ namespace Application.Tests.Services
             activityRepositoryMock.Setup(x => x.GetTypeOfActivityAsync(userReview.ActivityId))
                 .ThrowsAsync(new Exception());
 
-            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync((int)activityTypeId, (int)userReview.ReviewTypeId))
+            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId))
                 .ReturnsAsync(xpReward);
 
             // Act
@@ -118,7 +118,7 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().Throw<RestException>();
             activityRepositoryMock.Verify(x => x.GetTypeOfActivityAsync(userReview.ActivityId), Times.Once);
-            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync((int)activityTypeId, (int)userReview.ReviewTypeId), Times.Never);
+            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId), Times.Never);
         }
 
         [Test]

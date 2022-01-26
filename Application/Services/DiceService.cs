@@ -19,7 +19,7 @@ namespace Application.Services
 
         public async Task<DiceResult> GetDiceRollResult()
         {
-            var user = await _userRepository.GetUserByTokenAsync();
+            var user = await _userRepository.GetUserUsingTokenAsync();
 
             if (user.LastRollDate != null && (DateTimeOffset.Now - user.LastRollDate) < TimeSpan.FromDays(1))
                 return new DiceResult { Result = 0, Message = "Bacanje kockice je moguće jednom dnevno" };

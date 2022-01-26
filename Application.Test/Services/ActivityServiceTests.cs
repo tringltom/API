@@ -81,18 +81,18 @@ namespace Application.Tests.Services
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityRepository> activityRepoMock,
             List<PendingActivity> pendingActivities,
-            List<ActivityGet> pendingActivitiesGet,
+            List<PendingActivityReturn> pendingActivitiesGet,
             int limit, int offset,
             ActivityService sut)
         {
 
             // Arrange
-            var pendingActivityEnvelope = _fixture.Create<ActivityEnvelope>();
+            var pendingActivityEnvelope = _fixture.Create<PendingActivityEnvelope>();
             pendingActivityEnvelope.Activities = pendingActivitiesGet;
             pendingActivityEnvelope.ActivityCount = pendingActivitiesGet.Count;
 
             mapperMock
-                .Setup(x => x.Map<List<ActivityGet>>(It.IsAny<PendingActivity>()))
+                .Setup(x => x.Map<List<PendingActivityReturn>>(It.IsAny<PendingActivity>()))
                 .Returns(pendingActivitiesGet);
 
             activityRepoMock
@@ -104,7 +104,7 @@ namespace Application.Tests.Services
                 .ReturnsAsync(pendingActivities.Count);
 
             // Act
-            Func<Task<ActivityEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesAsync(limit, offset);
+            Func<Task<PendingActivityEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesAsync(limit, offset);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
@@ -197,7 +197,7 @@ namespace Application.Tests.Services
                 .ReturnsAsync(activity);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.GetActivitityUserIdByActivityId(activityId);
+            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
@@ -216,7 +216,7 @@ namespace Application.Tests.Services
                 .ThrowsAsync(new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" }));
 
             // Act
-            Func<Task> methodInTest = async () => await sut.GetActivitityUserIdByActivityId(activityId);
+            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
 
             // Assert
             methodInTest.Should().Throw<RestException>();

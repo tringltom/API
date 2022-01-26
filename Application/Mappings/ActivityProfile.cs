@@ -22,12 +22,12 @@ namespace Application.Mappings
                 .ForMember(d => d.ActivityMedias, o => o.MapFrom(s => s.PendingActivityMedias))
                 .ForMember(d => d.Id, o => o.MapFrom(src => 0));
 
-            CreateMap<PendingActivity, ActivityGet>()
+            CreateMap<PendingActivity, PendingActivityReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
                 .ForMember(d => d.Photos, o => o.MapFrom(s => s.PendingActivityMedias));
 
-            CreateMap<Activity, ActivityGet>()
+            CreateMap<Activity, ApprovedActivityReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
                 .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias));
