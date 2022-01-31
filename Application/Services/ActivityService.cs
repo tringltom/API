@@ -77,7 +77,7 @@ namespace Application.Services
             var activity = _mapper.Map<Activity>(pendingActivity);
 
             if (approval.Approve)
-                await _activityRepository.CreatActivityAsync(activity);
+                await _activityRepository.CreateActivityAsync(activity);
             else
                 activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
 

@@ -6,7 +6,7 @@ namespace Application.Repositories
 {
     public interface IActivityRepository
     {
-        Task CreatActivityAsync(Activity activity);
+        Task CreateActivityAsync(Activity activity);
         Task CreatePendingActivityAsync(PendingActivity activity);
         Task CreateActivityCreationCounter(ActivityCreationCounter activityCreationCounter);
         Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);

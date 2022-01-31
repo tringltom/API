@@ -15,7 +15,7 @@ namespace Application.Repositories
             _context = context;
         }
 
-        public async Task CreatActivityAsync(Activity activity)
+        public async Task CreateActivityAsync(Activity activity)
         {
             await _context.Activities.AddAsync(activity);
             _context.SaveChanges();
