@@ -1,4 +1,5 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -122,6 +123,22 @@ namespace Application.Repositories
         public async Task<RefreshToken> GetOldRefreshToken(string refreshToken)
         {
             return await _context.RefreshTokens.SingleOrDefaultAsync(r => r.Token == refreshToken);
+        }
+
+        public async Task<List<User>> GetTopXpUsers(int? limit, int? offset)
+        {
+            return await _context.Users
+             .AsQueryable()
+             .OrderByDescending(u => u.CurrentXp)
+             .Skip(offset ?? 0)
+             .Take(limit ?? 3)
+             .Include(a => a.Activities)
+             .ToListAsync();
+        }
+
+        public async Task<int> GetUserCountAsync()
+        {
+            return await _context.Users.CountAsync();
         }
     }
 }
