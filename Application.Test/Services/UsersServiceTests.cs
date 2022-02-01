@@ -28,7 +28,12 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsers_Successfull(int? limit, int? offset, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IMapper> mapperMock, List<UserArenaGet> userArenaGet, List<User> users, int usersCount, UsersService sut)
+        public void GetTopXpUsers_Successfull(int? limit,
+            int? offset,
+            [Frozen] Mock<IUserRepository> userRepoMock,
+            [Frozen] Mock<IMapper> mapperMock,
+            List<UserArenaGet> userArenaGet, List<User> users,
+            int usersCount, UsersService sut)
         {
             // Arrange
             userRepoMock.Setup(x => x.GetTopXpUsersAsync(limit, offset))
