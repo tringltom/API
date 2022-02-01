@@ -30,7 +30,7 @@ namespace API.Controllers
 
         [HttpGet("getReviewsForUser")]
         [AllowAnonymous]
-        public async Task<IList<ActivityReviewedByUser>> GetReviewsForUser([FromQuery] int userId)
+        public async Task<IList<UserReviewedActivity>> GetReviewsForUser([FromQuery] int userId)
         {
             return await _activityReviewService.GetAllReviewsByUserId(userId);
         }

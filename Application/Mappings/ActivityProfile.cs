@@ -43,7 +43,7 @@ namespace Application.Mappings
 
             CreateMap<ActivityReview, UserReview>();
 
-            CreateMap<UserReview, ActivityReviewedByUser>();
+            CreateMap<UserReview, UserReviewedActivity>();
 
             CreateMap<UserFavoriteActivity, FavoriteActivityReturn>();
         }

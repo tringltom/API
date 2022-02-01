@@ -10,6 +10,6 @@ namespace Application.ServiceInterfaces
         Task<UserReview> GetUserReviewByActivityAndUserId(int activityId, int userId);
         Task UpdateReviewActivityAsync(ActivityReview activityReview);
         Task AddReviewActivityAsync(ActivityReview activityReview);
-        Task<IList<ActivityReviewedByUser>> GetAllReviewsByUserId(int userId);
+        Task<IList<UserReviewedActivity>> GetAllReviewsByUserId(int userId);
     }
 }

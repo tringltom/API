@@ -134,7 +134,7 @@ namespace Application.Tests.Services
                 .Returns(activity);
 
             activityRepoMock
-                .Setup(x => x.GetPendingActivityByIDAsync(pendingActivityId))
+                .Setup(x => x.GetPendingActivityByIdAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
             // Act
@@ -142,7 +142,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivityByIDAsync(pendingActivityId), Times.Once);
+            activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
             activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Once);
             emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
@@ -169,7 +169,7 @@ namespace Application.Tests.Services
                 .Returns(activity);
 
             activityRepoMock
-                .Setup(x => x.GetPendingActivityByIDAsync(pendingActivityId))
+                .Setup(x => x.GetPendingActivityByIdAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
             // Act
@@ -177,7 +177,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivityByIDAsync(pendingActivityId), Times.Once);
+            activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
             activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Never);
             emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);

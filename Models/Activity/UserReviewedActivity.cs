@@ -2,7 +2,7 @@
 
 namespace Models.Activity
 {
-    public class ActivityReviewedByUser
+    public class UserReviewedActivity
     {
         public int ActivityId { get; set; }
         public ReviewTypeId ReviewTypeId { get; set; }

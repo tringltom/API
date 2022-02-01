@@ -42,7 +42,7 @@ namespace API.Tests.Controllers
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
         public void GetReviewsForUser_Successfull([Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
-            int userId, List<ActivityReviewedByUser> acitvitiesReviewed,
+            int userId, List<UserReviewedActivity> acitvitiesReviewed,
             [Greedy] ReviewController sut)
         {
             // Arrange

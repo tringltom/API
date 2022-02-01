@@ -10,10 +10,9 @@ namespace Application.RepositoryInterfaces
         Task CreatePendingActivityAsync(PendingActivity activity);
         Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);
         Task<int> GetPendingActivitiesCountAsync();
-        Task<PendingActivity> GetPendingActivityByIDAsync(int id);
+        Task<PendingActivity> GetPendingActivityByIdAsync(int id);
         Task CreatActivityAsync(Activity activity);
         Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
-        Task<ActivityTypeId> GetTypeOfActivityAsync(int activityId);
         Task<Activity> GetActivityByIdAsync(int activityId);
         IQueryable<Activity> GetApprovedActivitiesAsQueriable();
         Task<int> GetApprovedActivitiesCountAsync();

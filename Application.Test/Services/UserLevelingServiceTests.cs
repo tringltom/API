@@ -71,18 +71,13 @@ namespace Application.Tests.Services
         public void GetXpRewardYieldByReviewAsync_Successful(
             UserReview userReview,
             [Frozen] Mock<IActivityReviewXpRepository> activityReviewXpRepositoryMock,
-            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
             int xpReward,
-            ActivityTypeId activityTypeId,
             UserLevelingService sut)
         {
             // Arrange
             var result = new int();
 
-            activityRepositoryMock.Setup(x => x.GetTypeOfActivityAsync(userReview.ActivityId))
-                .ReturnsAsync(activityTypeId);
-
-            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId))
+            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId))
                 .ReturnsAsync(xpReward);
 
             // Act
@@ -91,34 +86,7 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<RestException>();
             result.Should().Equals(xpReward);
-            activityRepositoryMock.Verify(x => x.GetTypeOfActivityAsync(userReview.ActivityId), Times.Once);
-            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId), Times.Once);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetXpRewardYieldByReviewAsync_Failed(
-            UserReview userReview,
-            [Frozen] Mock<IActivityReviewXpRepository> activityReviewXpRepositoryMock,
-            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
-            int xpReward,
-            ActivityTypeId activityTypeId,
-            UserLevelingService sut)
-        {
-            // Arrange
-            activityRepositoryMock.Setup(x => x.GetTypeOfActivityAsync(userReview.ActivityId))
-                .ThrowsAsync(new Exception());
-
-            activityReviewXpRepositoryMock.Setup(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId))
-                .ReturnsAsync(xpReward);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.GetXpRewardYieldByReviewAsync(userReview);
-
-            // Assert
-            methodInTest.Should().Throw<RestException>();
-            activityRepositoryMock.Verify(x => x.GetTypeOfActivityAsync(userReview.ActivityId), Times.Once);
-            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, userReview.ReviewTypeId), Times.Never);
+            activityReviewXpRepositoryMock.Verify(x => x.GetXpRewardByActivityAndReviewTypeIdsAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId), Times.Once);
         }
 
         [Test]

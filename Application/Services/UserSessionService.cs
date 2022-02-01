@@ -90,7 +90,7 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, user.Id);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)

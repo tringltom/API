@@ -55,11 +55,11 @@ namespace Application.Services
             }
         }
 
-        public async Task<IList<ActivityReviewedByUser>> GetAllReviewsByUserId(int userId)
+        public async Task<IList<UserReviewedActivity>> GetAllReviewsByUserId(int userId)
         {
             var userReviews = await _userReviewRepository.GetAllUserReviewsAsQeuriable().Where(x => x.UserId == userId).ToListAsync();
 
-            return _mapper.Map<List<ActivityReviewedByUser>>(userReviews);
+            return _mapper.Map<List<UserReviewedActivity>>(userReviews);
         }
     }
 }

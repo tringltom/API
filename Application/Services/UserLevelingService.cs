@@ -10,13 +10,11 @@ namespace Application.Services
 {
     public class UserLevelingService : IUserLevelingService
     {
-        private readonly IActivityRepository _activityRepository;
         private readonly IActivityReviewXpRepository _activityReviewXpRepository;
         private readonly IUserRepository _userRepository;
 
-        public UserLevelingService(IActivityRepository activityRepository, IActivityReviewXpRepository activityReviewXpRepository, IUserRepository userRepository)
+        public UserLevelingService(IActivityReviewXpRepository activityReviewXpRepository, IUserRepository userRepository)
         {
-            _activityRepository = activityRepository;
             _activityReviewXpRepository = activityReviewXpRepository;
             _userRepository = userRepository;
         }
@@ -30,9 +28,7 @@ namespace Application.Services
         {
             try
             {
-                var activityType = await _activityRepository.GetTypeOfActivityAsync(userReview.ActivityId);
-
-                return await _activityReviewXpRepository.GetXpRewardByActivityAndReviewTypeIdsAsync(activityType, userReview.ReviewTypeId);
+                return await _activityReviewXpRepository.GetXpRewardByActivityAndReviewTypeIdsAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId);
             }
             catch (Exception)
             {

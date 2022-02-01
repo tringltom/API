@@ -66,7 +66,7 @@ namespace Application.Services
 
         public async Task<bool> ReslovePendingActivityAsync(int pendingActivityID, PendingActivityApproval approval)
         {
-            var pendingActivity = await _activityRepository.GetPendingActivityByIDAsync(pendingActivityID)
+            var pendingActivity = await _activityRepository.GetPendingActivityByIdAsync(pendingActivityID)
                 ?? throw new NotFound("Aktivnost nije pronadjena");
 
             var activity = _mapper.Map<Activity>(pendingActivity);
