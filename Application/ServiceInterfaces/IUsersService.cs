@@ -6,7 +6,7 @@ using Models.User;
 
 namespace Application.ServiceInterfaces
 {
-    public interface IArenaService
+    public interface IUsersService
     {
         Task<UserArenaEnvelope> GetTopXpUsers(int? limit, int? offset);
     }

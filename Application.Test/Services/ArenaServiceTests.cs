@@ -16,7 +16,7 @@ using NUnit.Framework;
 
 namespace Application.Tests.Services
 {
-    public class ArenaServiceTests
+    public class UsersServiceTests
     {
         private IFixture _fixture;
 
@@ -28,10 +28,10 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsers_Successfull(int? limit, int? offset, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IMapper> mapperMock, List<UserArenaGet> userArenaGet, List<User> users, int usersCount, ArenaService sut)
+        public void GetTopXpUsers_Successfull(int? limit, int? offset, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IMapper> mapperMock, List<UserArenaGet> userArenaGet, List<User> users, int usersCount, UsersService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.GetTopXpUsers(limit, offset))
+            userRepoMock.Setup(x => x.GetTopXpUsersAsync(limit, offset))
                 .ReturnsAsync(users);
 
             userRepoMock.Setup(x => x.GetUserCountAsync())

@@ -13,9 +13,6 @@ namespace Application.Mappings
         public ArenaProfile()
         {
             CreateMap<User, UserArenaGet>()
-               .ForMember(d => d.Username, o => o.MapFrom(s => s.UserName))
-               .ForMember(d => d.Email, o => o.MapFrom(s => s.Email))
-               .ForMember(d => d.CurrentXp, o => o.MapFrom(s => s.CurrentXp))
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
                .ForMember(d => d.NumberOfGoodDeeds, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.GoodDeed).Count()))
                .ForMember(d => d.NumberOfJokes, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Joke).Count()))

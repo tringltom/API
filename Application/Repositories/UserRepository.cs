@@ -125,7 +125,7 @@ namespace Application.Repositories
             return await _context.RefreshTokens.SingleOrDefaultAsync(r => r.Token == refreshToken);
         }
 
-        public async Task<List<User>> GetTopXpUsers(int? limit, int? offset)
+        public async Task<List<User>> GetTopXpUsersAsync(int? limit, int? offset)
         {
             return await _context.Users
              .AsQueryable()

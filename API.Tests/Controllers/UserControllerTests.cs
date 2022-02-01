@@ -106,10 +106,10 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsers_Successfull(int? limit, int? offset, UserArenaEnvelope userArenaEnvelope, [Frozen] Mock<IArenaService> arenaServiceMock, [Greedy] UserController sut)
+        public void GetTopXpUsersAsync_Successfull(int? limit, int? offset, UserArenaEnvelope userArenaEnvelope, [Frozen] Mock<IUsersService> usersServiceMock, [Greedy] UserController sut)
         {
             // Arrange
-            arenaServiceMock.Setup(x => x.GetTopXpUsers(limit, offset))
+            usersServiceMock.Setup(x => x.GetTopXpUsers(limit, offset))
             .ReturnsAsync(userArenaEnvelope);
 
             // Act

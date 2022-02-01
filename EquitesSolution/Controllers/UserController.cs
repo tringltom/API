@@ -16,14 +16,14 @@ namespace API.Controllers
         private readonly IUserRegistrationService _userRegistrationService;
         private readonly IUserSessionService _userSessionService;
         private readonly IUserRecoveryService _userRecoveryService;
-        private readonly IArenaService _arenaService;
+        private readonly IUsersService _usersService;
 
-        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService, IArenaService arenaService)
+        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService, IUsersService arenaService)
         {
             _userRegistrationService = registrationService;
             _userSessionService = userSessionService;
             _userRecoveryService = userRecoveryService;
-            _arenaService = arenaService;
+            _usersService = arenaService;
         }
 
         [AllowAnonymous]
@@ -71,7 +71,7 @@ namespace API.Controllers
         [HttpGet("getTopXpUsers")]
         public async Task<ActionResult<UserArenaEnvelope>> GetTopXpUsers(int? limit, int? offset)
         {
-            return await _arenaService.GetTopXpUsers(limit, offset);
+            return await _usersService.GetTopXpUsers(limit, offset);
         }
 
         [AllowAnonymous]

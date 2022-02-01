@@ -26,7 +26,7 @@ namespace Application.Repositories
         string GetCurrentUsername();
         Task<User> GetUserByID();
         Task<RefreshToken> GetOldRefreshToken(string refreshToken);
-        Task<List<User>> GetTopXpUsers(int? limit, int? offset);
+        Task<List<User>> GetTopXpUsersAsync(int? limit, int? offset);
         Task<int> GetUserCountAsync();
     }
 }

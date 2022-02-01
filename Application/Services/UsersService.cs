@@ -10,12 +10,12 @@ using Models.User;
 
 namespace Application.Services
 {
-    public class ArenaService : IArenaService
+    public class UsersService : IUsersService
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
 
-        public ArenaService(IUserRepository userRepository, IMapper mapper)
+        public UsersService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
@@ -23,7 +23,7 @@ namespace Application.Services
 
         public async Task<UserArenaEnvelope> GetTopXpUsers(int? limit, int? offset)
         {
-            var topXpUsers = await _userRepository.GetTopXpUsers(limit, offset);
+            var topXpUsers = await _userRepository.GetTopXpUsersAsync(limit, offset);
 
             var userArenaEnvelope = new UserArenaEnvelope
             {
