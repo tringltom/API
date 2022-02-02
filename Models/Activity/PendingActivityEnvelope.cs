@@ -4,7 +4,7 @@ namespace Models.Activity
 {
     public class PendingActivityEnvelope
     {
-        public List<PendingActivityGet> Activities { get; set; }
+        public List<PendingActivityReturn> Activities { get; set; }
         public int ActivityCount { get; set; }
     }
 }

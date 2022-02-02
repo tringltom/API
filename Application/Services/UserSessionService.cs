@@ -4,7 +4,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Security;
 using Application.ServiceInterfaces;
 using Domain.Entities;
@@ -58,7 +58,7 @@ namespace Application.Services
 
             var token = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate);
+            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate, user.Id);
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -90,7 +90,7 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, user.Id);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)

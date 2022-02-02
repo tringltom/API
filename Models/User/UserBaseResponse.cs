@@ -13,7 +13,7 @@ namespace Models.User
             RefreshToken = refreshToken;
         }
 
-        public UserBaseResponse(string token, string userName, string refreshToken, int userCurrentLevel, int userCurrentXp, DateTimeOffset? lastRollDate)
+        public UserBaseResponse(string token, string userName, string refreshToken, int userCurrentLevel, int userCurrentXp, DateTimeOffset? lastRollDate, int id)
         {
             Token = token;
             Username = userName;
@@ -21,8 +21,10 @@ namespace Models.User
             CurrentLevel = userCurrentLevel;
             CurrentXp = userCurrentXp;
             IsDiceRollAllowed = lastRollDate == null || (DateTimeOffset.Now - lastRollDate) >= TimeSpan.FromDays(1);
+            Id = id;
         }
 
+        public int? Id { get; set; }
         public string Token { get; set; }
         public string Username { get; set; }
         public int CurrentXp { get; set; }

@@ -1,11 +1,13 @@
 ﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.Media;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Models.Activity;
 
 namespace Application.Services
@@ -45,20 +47,26 @@ namespace Application.Services
             await _activityRepository.CreatePendingActivityAsync(activity);
         }
 
+        public async Task<Activity> GetActivityUserIdByActivityId(int activityId)
+        {
+            return await _activityRepository.GetActivityByIdAsync(activityId)
+                ?? throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" });
+        }
+
         public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)
         {
             var pendingActivities = await _activityRepository.GetPendingActivitiesAsync(limit, offset);
 
             return new PendingActivityEnvelope
             {
-                Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityGet>(pa)).ToList(),
+                Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityReturn>(pa)).ToList(),
                 ActivityCount = await _activityRepository.GetPendingActivitiesCountAsync(),
             };
         }
 
         public async Task<bool> ReslovePendingActivityAsync(int pendingActivityID, PendingActivityApproval approval)
         {
-            var pendingActivity = await _activityRepository.GetPendingActivityByIDAsync(pendingActivityID)
+            var pendingActivity = await _activityRepository.GetPendingActivityByIdAsync(pendingActivityID)
                 ?? throw new NotFound("Aktivnost nije pronadjena");
 
             var activity = _mapper.Map<Activity>(pendingActivity);
@@ -71,6 +79,21 @@ namespace Application.Services
             await _emailService.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
 
             return await _activityRepository.DeletePendingActivity(pendingActivity);
+        }
+
+        public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesFromOtherUsersAsync(int userId, int? limit, int? offset)
+        {
+            var approvedActivities = await _activityRepository.GetApprovedActivitiesAsQueriable()
+                .Skip(offset ?? 0)
+                .Take(limit ?? 3)
+                .Where(x => x.User.Id != userId)
+                .ToListAsync();
+
+            return new ApprovedActivityEnvelope
+            {
+                Activities = approvedActivities.Select(pa => _mapper.Map<ApprovedActivityReturn>(pa)).ToList(),
+                ActivityCount = await _activityRepository.GetApprovedActivitiesCountAsync(),
+            };
         }
 
     }

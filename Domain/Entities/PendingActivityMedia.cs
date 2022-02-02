@@ -6,6 +6,5 @@
         public virtual PendingActivity ActivityPending { get; set; }
         public string PublicId { get; set; }
         public string Url { get; set; }
-
     }
 }

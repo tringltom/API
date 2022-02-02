@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Application.Repositories
+namespace Application.RepositoryInterfaces
 {
     public interface IUserRepository
     {
@@ -23,7 +23,9 @@ namespace Application.Repositories
         Task<bool> UpdateUserAsync(User user);
         Task SignOutUserAsync();
         string GetCurrentUsername();
-        Task<User> GetUserByID();
+        Task<User> GetUserByUserNameAsync(string userName);
+        Task<User> GetUserUsingTokenAsync();
+        Task<User> GetUserByIdAsync(int userId);
         Task<RefreshToken> GetOldRefreshToken(string refreshToken);
     }
 }

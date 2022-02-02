@@ -4,7 +4,7 @@ using Domain.Entities;
 
 namespace Models.Activity
 {
-    public class PendingActivityGet
+    public abstract class ActivityBase
     {
         public int Id { get; set; }
         public string UserName { get; set; }
@@ -18,7 +18,6 @@ namespace Models.Activity
         public int? XpReward { get; set; }
         public DateTimeOffset? StartDate { get; set; }
         public DateTimeOffset? EndDate { get; set; }
-        public DateTimeOffset DateCreated { get; set; }
         public ICollection<Photo> Photos { get; set; }
     }
 }
