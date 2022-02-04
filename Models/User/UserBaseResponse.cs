@@ -15,7 +15,7 @@ namespace Models.User
             RefreshToken = refreshToken;
         }
 
-        public UserBaseResponse(string token, string userName, string refreshToken, int userCurrentLevel, int userCurrentXp, DateTimeOffset? lastRollDate, List<ActivityCount> activityCounts)
+        public UserBaseResponse(string token, string userName, string refreshToken, int userCurrentLevel, int userCurrentXp, DateTimeOffset? lastRollDate, List<ActivityCount> activityCounts, int? id)
         {
             Token = token;
             Username = userName;

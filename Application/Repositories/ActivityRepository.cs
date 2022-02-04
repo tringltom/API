@@ -68,8 +68,6 @@ namespace Application.Repositories
             return await _context.Activities.CountAsync();
         }
 
-        public async Task<PendingActivity> GetPendingActivityByIdAsync(int id) => await _context.PendingActivities.FindAsync(id);
-
         public async Task<Activity> GetActivityByIdAsync(int activityId)
         {
             return await _context.Activities.FirstOrDefaultAsync(x => x.Id == activityId);

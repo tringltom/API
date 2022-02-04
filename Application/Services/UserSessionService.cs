@@ -64,7 +64,7 @@ namespace Application.Services
 
             var activityCounts = await GetAvailableActivitiesCount(user);
 
-            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts);
+            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -98,7 +98,7 @@ namespace Application.Services
 
             var activityCounts = await GetAvailableActivitiesCount(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts);
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
