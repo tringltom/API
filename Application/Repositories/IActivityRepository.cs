@@ -10,7 +10,7 @@ namespace Application.Repositories
         Task CreatePendingActivityAsync(PendingActivity activity);
         Task CreateActivityCreationCounter(ActivityCreationCounter activityCreationCounter);
         Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);
-        Task<PendingActivity> GetPendingActivityByIDAsync(int id);
+        Task<PendingActivity> GetPendingActivityByIdAsync(int id);
         Task<int> GetPendingActivitiesCountAsync();
         Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
         Task<bool> DeleteActivityCountersAsync(List<ActivityCreationCounter> activityCounters);

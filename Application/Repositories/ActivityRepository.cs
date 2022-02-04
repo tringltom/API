@@ -44,7 +44,7 @@ namespace Application.Repositories
 
         public async Task<int> GetPendingActivitiesCountAsync() => await _context.PendingActivities.CountAsync();
 
-        public async Task<PendingActivity> GetPendingActivityByIDAsync(int id) => await _context.PendingActivities.FindAsync(id);
+        public async Task<PendingActivity> GetPendingActivityByIdAsync(int id) => await _context.PendingActivities.FindAsync(id);
 
         public async Task<bool> DeletePendingActivity(PendingActivity pendingActivity)
         {
