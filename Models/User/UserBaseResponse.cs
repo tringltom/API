@@ -24,8 +24,10 @@ namespace Models.User
             CurrentXp = userCurrentXp;
             IsDiceRollAllowed = lastRollDate == null || (DateTimeOffset.Now - lastRollDate) >= TimeSpan.FromDays(1);
             ActivityCounts = activityCounts;
+            Id = id;
         }
 
+        public int? Id { get; set; }
         public string Token { get; set; }
         public string Username { get; set; }
         public int CurrentXp { get; set; }

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Reflection;
 using System.Text;
-using API.Mappings;
 using API.Middleware;
 using API.Validations;
+using Application.Managers;
+using Application.Mappings;
 using Application.Media;
 using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Security;
 using Application.ServiceHelpers;
 using Application.ServiceInterfaces;
@@ -64,18 +66,27 @@ namespace API
             //Add Transient Repositories
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<IActivityRepository, ActivityRepository>();
+            services.AddTransient<IFavoritesRepository, FavortitesRepository>();
+            services.AddTransient<IUserReviewRepository, UserReviewRepository>();
+            services.AddTransient<IActivityReviewXpRepository, ActivityReviewXpRepository>();
 
             //Add Scoped Managers
+            services.AddScoped<IReviewManager, ReviewManager>();
 
+            services.AddScoped<IActivityReviewService, ActivityReviewService>();
+            services.AddScoped<IFavoritesService, FavoritesService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IUserLevelingService, UserLevelingService>();
+
             services.AddScoped<IDiceService, DiceService>();
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
+
 
             services.AddDefaultIdentity<User>(options =>
                 {

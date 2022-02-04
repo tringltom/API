@@ -36,5 +36,12 @@ namespace API.Controllers
         {
             return await _activityService.ReslovePendingActivityAsync(id, approval);
         }
+
+        [HttpGet("approvedActivitiesExcludeUser/{id}")]
+        public async Task<ActionResult<ApprovedActivityEnvelope>> GetApprovedActivitiesExcludeUser(int id, int? limit, int? offset)
+        {
+            return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
+        }
+
     }
 }

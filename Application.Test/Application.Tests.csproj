@@ -30,8 +30,4 @@
     <ProjectReference Include="..\SuperFixture\FixtureShared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Managers\" />
-  </ItemGroup>
-
 </Project>

@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.Media;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using Application.Services;
 using AutoFixture;
@@ -131,7 +132,7 @@ namespace Application.Tests.Services
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityRepository> activityRepoMock,
             List<PendingActivity> pendingActivities,
-            List<PendingActivityGet> pendingActivitiesGet,
+            List<PendingActivityReturn> pendingActivitiesGet,
             int limit, int offset,
             ActivityService sut)
         {
@@ -142,7 +143,7 @@ namespace Application.Tests.Services
             pendingActivityEnvelope.ActivityCount = pendingActivitiesGet.Count;
 
             mapperMock
-                .Setup(x => x.Map<List<PendingActivityGet>>(It.IsAny<PendingActivity>()))
+                .Setup(x => x.Map<List<PendingActivityReturn>>(It.IsAny<PendingActivity>()))
                 .Returns(pendingActivitiesGet);
 
             activityRepoMock
@@ -231,6 +232,46 @@ namespace Application.Tests.Services
             activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Never);
             emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetActivityUserIdByActivityId_Successful(
+            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
+            int activityId,
+            Activity activity,
+            ActivityService sut)
+        {
+
+            // Arrange
+            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
+                .ReturnsAsync(activity);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
+        }
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetActivityUserIdByActivityId_ActivityNotFound(
+            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
+            int activityId,
+            ActivityService sut)
+        {
+
+            // Arrange
+            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
+                .ThrowsAsync(new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" }));
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
         }
     }
 }

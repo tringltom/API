@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Domain.Entities;
 
-namespace Application.Repositories
+namespace Application.RepositoryInterfaces
 {
     public interface IActivityRepository
     {
@@ -12,7 +13,13 @@ namespace Application.Repositories
         Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset);
         Task<PendingActivity> GetPendingActivityByIdAsync(int id);
         Task<int> GetPendingActivitiesCountAsync();
+        Task<PendingActivity> GetPendingActivityByIdAsync(int id);
+        Task CreatActivityAsync(Activity activity);
         Task<bool> DeletePendingActivity(PendingActivity pendingActivity);
         Task<bool> DeleteActivityCountersAsync(List<ActivityCreationCounter> activityCounters);
+        Task<Activity> GetActivityByIdAsync(int activityId);
+        IQueryable<Activity> GetApprovedActivitiesAsQueriable();
+        Task<int> GetApprovedActivitiesCountAsync();
+
     }
 }
