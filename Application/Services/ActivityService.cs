@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
@@ -8,6 +9,7 @@ using Application.ServiceInterfaces;
 using AutoMapper;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Models.Activity;
 
 namespace Application.Services
@@ -31,13 +33,14 @@ namespace Application.Services
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);
 
-            if (activityCreate.Images == null)
+            if (activity.User.ActivityCreationCounters
+                .Where(ac => ac.ActivityTypeId == activityCreate.Type && ac.DateCreated.AddDays(7) >= DateTimeOffset.Now)
+                .Count() >= 2)
             {
-                await _activityRepository.CreatePendingActivityAsync(activity);
-                return;
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = $"Nemate pravo da kreirate aktivnost" });
             }
 
-            foreach (var image in activityCreate?.Images)
+            foreach (var image in activityCreate?.Images ?? new IFormFile[0])
             {
                 var photoResult = image != null ? await _photoAccessor.AddPhotoAsync(image) : null;
                 if (photoResult != null)
@@ -45,6 +48,15 @@ namespace Application.Services
             }
 
             await _activityRepository.CreatePendingActivityAsync(activity);
+
+            var activityCreationCounter = new ActivityCreationCounter
+            {
+                User = activity.User,
+                ActivityTypeId = activity.ActivityTypeId,
+                DateCreated = DateTimeOffset.Now
+            };
+
+            await _activityRepository.CreateActivityCreationCounter(activityCreationCounter);
         }
 
         public async Task<Activity> GetActivityUserIdByActivityId(int activityId)
@@ -72,7 +84,7 @@ namespace Application.Services
             var activity = _mapper.Map<Activity>(pendingActivity);
 
             if (approval.Approve)
-                await _activityRepository.CreatActivityAsync(activity);
+                await _activityRepository.CreateActivityAsync(activity);
             else
                 activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
 
