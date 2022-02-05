@@ -9,7 +9,7 @@ namespace Application.ServiceInterfaces
         Task<UserBaseResponse> LoginAsync(UserLogin userLogin);
         Task<UserBaseResponse> RefreshTokenAsync(string refreshToken);
         Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
-        Task<UserCurrentlyLoggedIn> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken);
+        Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken);
         Task LogoutUserAsync(string refreshToken);
     }
 }

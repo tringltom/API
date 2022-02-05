@@ -89,7 +89,7 @@ namespace API.Tests.Controllers
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetCurrentlyLoggedInUser_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock, [Frozen] Mock<IMapper> mapperMock,
-            UserCurrentlyLoggedIn currentUser, string token, [Greedy] UserController sut)
+            UserBaseResponse currentUser, string token, [Greedy] UserController sut)
         {
             // Arrange
             userSessionServiceMock.Setup(x => x.GetCurrentlyLoggedInUserAsync(false, token))
@@ -100,7 +100,7 @@ namespace API.Tests.Controllers
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserCurrentlyLoggedIn>>>();
+            result.Should().BeOfType<Task<ActionResult<UserBaseResponse>>>();
 
         }
 

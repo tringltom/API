@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.RepositoryInterfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -15,22 +16,27 @@ namespace Application.Repositories
             _context = context;
         }
 
-        public async Task CreatActivityAsync(Activity activity)
+        public async Task CreateActivityAsync(Activity activity)
         {
-            await _context.Activities.AddAsync(activity);
-            _context.SaveChanges();
+            _context.Activities.Add(activity);
+            await _context.SaveChangesAsync();
+        }
+
+        public IQueryable<Activity> GetApprovedActivitiesAsQueriable()
+        {
+            return _context.Activities.AsQueryable();
         }
 
         public async Task CreatePendingActivityAsync(PendingActivity activity)
         {
-            await _context.PendingActivities.AddAsync(activity);
-            _context.SaveChanges();
+            _context.PendingActivities.Add(activity);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> DeletePendingActivity(PendingActivity pendingActivity)
+        public async Task CreateActivityCreationCounter(ActivityCreationCounter activityCreationCounter)
         {
-            _context.PendingActivities.Remove(pendingActivity);
-            return await _context.SaveChangesAsync() > 0;
+            await _context.ActivityCreationCounters.AddAsync(activityCreationCounter);
+            _context.SaveChanges();
         }
 
         public async Task<List<PendingActivity>> GetPendingActivitiesAsync(int? limit, int? offset)
@@ -42,12 +48,29 @@ namespace Application.Repositories
                 .ToListAsync();
         }
 
-        public async Task<int> GetPendingActivitiesCountAsync()
+        public async Task<int> GetPendingActivitiesCountAsync() => await _context.PendingActivities.CountAsync();
+
+        public async Task<PendingActivity> GetPendingActivityByIdAsync(int id) => await _context.PendingActivities.FindAsync(id);
+
+        public async Task<bool> DeletePendingActivity(PendingActivity pendingActivity)
         {
-            return await _context.PendingActivities.CountAsync();
+            _context.PendingActivities.Remove(pendingActivity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<PendingActivity> GetPendingActivityByIDAsync(int id) => await _context.PendingActivities.FindAsync(id);
+        public async Task<bool> DeleteActivityCountersAsync(List<ActivityCreationCounter> activityCounters)
+        {
+            _context.ActivityCreationCounters.RemoveRange(activityCounters);
+            return await _context.SaveChangesAsync() > 0;
+        }
+        public async Task<int> GetApprovedActivitiesCountAsync()
+        {
+            return await _context.Activities.CountAsync();
+        }
 
+        public async Task<Activity> GetActivityByIdAsync(int activityId)
+        {
+            return await _context.Activities.FirstOrDefaultAsync(x => x.Id == activityId);
+        }
     }
 }

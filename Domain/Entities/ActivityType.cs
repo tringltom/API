@@ -9,6 +9,5 @@ namespace Domain.Entities
 
         public virtual List<PendingActivity> PendingActivities { get; set; }
         public virtual List<Activity> Activities { get; set; }
-
     }
 }

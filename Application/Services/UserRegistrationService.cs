@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceHelpers;
 using Application.ServiceInterfaces;
 using Domain.Entities;

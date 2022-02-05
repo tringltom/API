@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Application.RepositoryInterfaces;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -114,10 +116,15 @@ namespace Application.Repositories
             return username;
         }
 
-        public async Task<User> GetUserByID()
+        public async Task<User> GetUserUsingTokenAsync()
         {
-            var userID = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
-            return await _context.Users.SingleOrDefaultAsync(x => x.Id == int.Parse(userID));
+            var userId = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
+            return await GetUserByIdAsync(Convert.ToInt32(userId));
+        }
+
+        public async Task<User> GetUserByIdAsync(int userId)
+        {
+            return await _userIdentityManager.FindByIdAsync(userId.ToString());
         }
 
         public async Task<RefreshToken> GetOldRefreshToken(string refreshToken)
@@ -138,6 +145,11 @@ namespace Application.Repositories
         public async Task<int> GetUserCountAsync()
         {
             return await _context.Users.CountAsync();
+        }
+
+        public async Task<User> GetUserByUserNameAsync(string userName)
+        {
+            return await _context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
         }
     }
 }

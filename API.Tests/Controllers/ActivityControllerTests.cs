@@ -73,5 +73,28 @@ namespace API.Tests.Controllers
             // Assert
             res.Should().BeOfType<Task<ActionResult<bool>>>();
         }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public void GetApprovedActivitiesExcludeUser_Successfull(
+            [Frozen] Mock<IActivityService> activityServiceMock,
+            ApprovedActivityEnvelope activityEnvelope,
+            int id,
+            int offset,
+            int limit,
+            [Greedy] ActivityController sut)
+        {
+            // Arrange
+            activityServiceMock.Setup(x => x.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset))
+               .ReturnsAsync(activityEnvelope);
+
+            // Act
+            var res = sut.GetApprovedActivitiesExcludeUser(id, limit, offset);
+
+            // Assert
+            res.Should().BeOfType<Task<ActionResult<ApprovedActivityEnvelope>>>();
+        }
+
+
     }
 }
