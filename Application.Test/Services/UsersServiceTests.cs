@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;

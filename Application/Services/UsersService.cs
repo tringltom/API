@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using Domain.Entities;
