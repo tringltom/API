@@ -41,7 +41,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.GetUserCountAsync())
                 .ReturnsAsync(usersCount);
 
-            mapperMock.Setup(x => x.Map<List<UserArenaGet>>(It.IsAny<User>())).Returns(userArenaGet);
+            mapperMock.Setup(x => x.Map<List<UserArenaGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
 
             var userArenaEnvelope = _fixture.Create<UserArenaEnvelope>();
             userArenaEnvelope.Users = userArenaGet;
@@ -53,6 +53,8 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             methodInTest.Should().NotBeNull();
+            userRepoMock.Verify(x => x.GetTopXpUsersAsync(limit, offset), Times.Once);
+            userRepoMock.Verify(x => x.GetUserCountAsync(), Times.Once);
         }
     }
 }

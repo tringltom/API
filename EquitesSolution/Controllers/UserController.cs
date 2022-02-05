@@ -18,12 +18,12 @@ namespace API.Controllers
         private readonly IUserRecoveryService _userRecoveryService;
         private readonly IUsersService _usersService;
 
-        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService, IUsersService arenaService)
+        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService, IUsersService usersService)
         {
             _userRegistrationService = registrationService;
             _userSessionService = userSessionService;
             _userRecoveryService = userRecoveryService;
-            _usersService = arenaService;
+            _usersService = usersService;
         }
 
         [AllowAnonymous]

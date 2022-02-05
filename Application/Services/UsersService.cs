@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Application.Repositories;
 using Application.ServiceInterfaces;
 using AutoMapper;
+using Domain.Entities;
 using Models.User;
 
 namespace Application.Services
@@ -27,7 +28,7 @@ namespace Application.Services
 
             var userArenaEnvelope = new UserArenaEnvelope
             {
-                Users = topXpUsers.Select(xpu => _mapper.Map<UserArenaGet>(xpu)).ToList(),
+                Users = (List<UserArenaGet>)_mapper.Map<IEnumerable<User>, IEnumerable<UserArenaGet>>(topXpUsers),
                 UserCount = await _userRepository.GetUserCountAsync(),
             };
 

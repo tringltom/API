@@ -132,7 +132,6 @@ namespace Application.Repositories
              .OrderByDescending(u => u.CurrentXp)
              .Skip(offset ?? 0)
              .Take(limit ?? 3)
-             .Include(a => a.Activities)
              .ToListAsync();
         }
 
