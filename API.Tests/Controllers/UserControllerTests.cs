@@ -106,6 +106,24 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserArenaEnvelope userArenaEnvelope, int? limit,
+            int? offset,
+            [Greedy] UserController sut)
+        {
+            // Arrange
+            usersServiceMock.Setup(x => x.GetTopXpUsers(limit, offset))
+            .ReturnsAsync(userArenaEnvelope);
+
+            // Act
+            var result = sut.GetTopXpUsers(limit, offset);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().BeOfType<Task<ActionResult<UserArenaEnvelope>>>();
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void Login_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock,
            UserLogin user, UserBaseResponse userResponse, Mock<IResponseCookies> cookiesMock,
            Mock<HttpResponse> response, UserLogin userLogin, Mock<HttpContext> context, [Greedy] UserController sut)

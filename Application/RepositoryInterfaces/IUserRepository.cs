@@ -1,4 +1,5 @@
 ﻿
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -27,5 +28,7 @@ namespace Application.RepositoryInterfaces
         Task<User> GetUserUsingTokenAsync();
         Task<User> GetUserByIdAsync(int userId);
         Task<RefreshToken> GetOldRefreshToken(string refreshToken);
+        Task<List<User>> GetTopXpUsersAsync(int? limit, int? offset);
+        Task<int> GetUserCountAsync();
     }
 }

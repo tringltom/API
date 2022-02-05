@@ -16,12 +16,14 @@ namespace API.Controllers
         private readonly IUserRegistrationService _userRegistrationService;
         private readonly IUserSessionService _userSessionService;
         private readonly IUserRecoveryService _userRecoveryService;
+        private readonly IUsersService _usersService;
 
-        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService)
+        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService, IUsersService usersService)
         {
             _userRegistrationService = registrationService;
             _userSessionService = userSessionService;
             _userRecoveryService = userRecoveryService;
+            _usersService = usersService;
         }
 
         [AllowAnonymous]
@@ -64,6 +66,12 @@ namespace API.Controllers
             var refreshToken = Request.Cookies["refreshToken"];
 
             return await _userSessionService.GetCurrentlyLoggedInUserAsync(stayLoggedIn, refreshToken);
+        }
+
+        [HttpGet("getTopXpUsers")]
+        public async Task<ActionResult<UserArenaEnvelope>> GetTopXpUsers(int? limit, int? offset)
+        {
+            return await _usersService.GetTopXpUsers(limit, offset);
         }
 
         [AllowAnonymous]
