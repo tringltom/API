@@ -23,30 +23,24 @@ namespace Application.ServiceInterfaces
             _userRepository = userRepository;
         }
 
-        public async Task CreateFavoriteAsync(FavoriteActivityBase activity)
+        public async Task ResolveFavoriteActivityAsync(FavoriteActivityBase activity)
         {
+            var userId = _userRepository.GetUserIdUsingToken();
 
-            var currentUserName = _userRepository.GetCurrentUsername();
-
-            var currentUser = await _userRepository.GetUserByUserNameAsync(currentUserName);
-
-            if (currentUser.Id != activity.UserId)
-            {
-                throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, ne možete napraviti omiljenu aktivnost za drugog korisnika." });
-            }
-
-            var userFavoriteActivity = _mapper.Map<UserFavoriteActivity>(activity);
-
-            var existingActivity = await _favoritesRepository.GetFavoriteActivityAsync(userFavoriteActivity);
-
-            if (existingActivity != null)
-            {
-                throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost je vec medju omiljenima." });
-            }
+            var userFavoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
 
             try
             {
-                await _favoritesRepository.AddFavoriteActivityAsync(userFavoriteActivity);
+                if (activity.Favorite)
+                {
+                    await _favoritesRepository.AddFavoriteActivityAsync(userFavoriteActivity);
+                }
+                else
+                {
+                    if (!await _favoritesRepository.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, activity.ActivityId))
+
+                        throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, kaktivnost je nepostojeća." });
+                }
             }
             catch (Exception)
             {
@@ -59,22 +53,6 @@ namespace Application.ServiceInterfaces
             var favoriteActivities = await _favoritesRepository.GetFavoriteActivitiesByUserIdAsync(userId);
 
             return _mapper.Map<List<FavoriteActivityReturn>>(favoriteActivities);
-        }
-
-        public async Task RemoveFavoriteAsync(FavoriteActivityBase favoriteActivity)
-        {
-            var currentUser = await _userRepository.GetUserByUserNameAsync(_userRepository.GetCurrentUsername());
-
-            if (currentUser.Id != favoriteActivity.UserId)
-            {
-                throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, ne možete ukloniti omiljenu aktivnost od drugog korisnika." });
-            }
-
-
-            if (!await _favoritesRepository.RemoveFavoriteActivityByActivityAndUserIdAsync(favoriteActivity.UserId, favoriteActivity.ActivityId))
-            {
-                throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije medju omiljenima." });
-            }
         }
     }
 }

@@ -26,6 +26,11 @@ namespace Application.Services
             _facebookAccessor = facebookAccessor;
         }
 
+        public int GetUserIdByToken()
+        {
+            return _userRepository.GetUserIdUsingToken();
+        }
+
         public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
         {
             var username = _userRepository.GetCurrentUsername();

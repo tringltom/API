@@ -16,18 +16,23 @@ namespace Application.Managers
         private readonly IUserLevelingService _userLevelingService;
         private readonly IMapper _mapper;
         private readonly IActivityService _activityService;
+        private readonly IUserSessionService _userSessionService;
 
-        public ReviewManager(IActivityReviewService activityReviewService, IUserLevelingService userLevelingService, IMapper mapper, IActivityService activityService)
+        public ReviewManager(IActivityReviewService activityReviewService, IUserLevelingService userLevelingService,
+            IMapper mapper, IActivityService activityService, IUserSessionService userSessionService)
         {
             _activityReviewService = activityReviewService;
             _userLevelingService = userLevelingService;
             _mapper = mapper;
             _activityService = activityService;
+            _userSessionService = userSessionService;
         }
 
         public async Task ReviewActivityAsync(ActivityReview activityReview)
         {
-            if (!await _userLevelingService.ReviewerExistsAsync(activityReview.UserId))
+            var reviewerId = _userSessionService.GetUserIdByToken();
+
+            if (!await _userLevelingService.ReviewerExistsAsync(reviewerId))
             {
                 throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, nepostojeći korisnik." });
             }
@@ -36,14 +41,14 @@ namespace Application.Managers
 
             var activityCreatorId = (await _activityService.GetActivityUserIdByActivityId(activityReview.ActivityId)).User.Id;
 
-            if (activityReview.UserId == activityCreatorId)
+            if (reviewerId == activityCreatorId)
             {
                 throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, ne možete oceniti svoju aktivnost." });
             }
 
             var xpRewardToYield = await _userLevelingService.GetXpRewardYieldByReviewAsync(activity);
 
-            var existingReview = await _activityReviewService.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId);
+            var existingReview = await _activityReviewService.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId);
 
             if (existingReview == null)
             {

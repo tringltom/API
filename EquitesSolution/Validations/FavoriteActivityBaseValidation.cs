@@ -7,7 +7,6 @@ namespace API.Validations
     {
         public FavoriteActivityBaseValidation()
         {
-            RuleFor(f => f.UserId).GreaterThan(0).WithMessage("Nevalidan korisnik");
             RuleFor(f => f.ActivityId).GreaterThan(0).WithMessage("Nevalidna aktivnost");
         }
     }

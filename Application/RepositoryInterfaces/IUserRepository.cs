@@ -23,6 +23,7 @@ namespace Application.RepositoryInterfaces
         Task<bool> UpdateUserAsync(User user);
         Task SignOutUserAsync();
         string GetCurrentUsername();
+        int GetUserIdUsingToken();
         Task<User> GetUserByUserNameAsync(string userName);
         Task<User> GetUserUsingTokenAsync();
         Task<User> GetUserByIdAsync(int userId);

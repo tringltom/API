@@ -17,20 +17,12 @@ namespace API.Controllers
             _favoriteService = favoriteService;
         }
 
-        [HttpPost("createFavorite")]
-        public async Task<ActionResult> CreateFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityCreate)
+        [HttpPost("resolveFavorite")]
+        public async Task<ActionResult> ResolveFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityCreate)
         {
-            await _favoriteService.CreateFavoriteAsync(favoriteActivityCreate);
+            await _favoriteService.ResolveFavoriteActivityAsync(favoriteActivityCreate);
 
             return Ok("Uspešno ste dodali omiljenu aktivnost");
-        }
-
-        [HttpPost("removeFavorite")]
-        public async Task<ActionResult> RemoveFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityRemove)
-        {
-            await _favoriteService.RemoveFavoriteAsync(favoriteActivityRemove);
-
-            return Ok("Uspešno ste uklonili omiljenu aktivnost");
         }
 
         [HttpGet("{id}")]

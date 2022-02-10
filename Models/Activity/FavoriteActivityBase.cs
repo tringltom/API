@@ -2,7 +2,7 @@
 {
     public class FavoriteActivityBase
     {
-        public int UserId { get; set; }
         public int ActivityId { get; set; }
+        public bool Favorite { get; set; }
     }
 }
