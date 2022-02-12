@@ -86,6 +86,7 @@ namespace API
             services.AddScoped<IJwtGenerator, JwtGenerator>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
+            services.AddScoped<IUsersService, UsersService>();
 
 
             services.AddDefaultIdentity<User>(options =>

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220120184734_ActivityCreationCounterTable")]
+    partial class ActivityCreationCounterTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -117,202 +119,6 @@ namespace Persistence.Migrations
                     b.HasIndex("ActivityId");
 
                     b.ToTable("ActivityMedia");
-                });
-
-            modelBuilder.Entity("Domain.Entities.ActivityReviewXp", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ActivityTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Xp")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActivityTypeId");
-
-                    b.HasIndex("ReviewTypeId", "ActivityTypeId")
-                        .IsUnique();
-
-                    b.ToTable("ActivityReviewXp");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ActivityTypeId = 1,
-                            ReviewTypeId = 1,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ActivityTypeId = 1,
-                            ReviewTypeId = 2,
-                            Xp = 20
-                        },
-                        new
-                        {
-                            Id = 3,
-                            ActivityTypeId = 1,
-                            ReviewTypeId = 3,
-                            Xp = 50
-                        },
-                        new
-                        {
-                            Id = 4,
-                            ActivityTypeId = 1,
-                            ReviewTypeId = 4,
-                            Xp = 200
-                        },
-                        new
-                        {
-                            Id = 5,
-                            ActivityTypeId = 2,
-                            ReviewTypeId = 1,
-                            Xp = -10
-                        },
-                        new
-                        {
-                            Id = 6,
-                            ActivityTypeId = 2,
-                            ReviewTypeId = 2,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 7,
-                            ActivityTypeId = 2,
-                            ReviewTypeId = 3,
-                            Xp = 10
-                        },
-                        new
-                        {
-                            Id = 8,
-                            ActivityTypeId = 2,
-                            ReviewTypeId = 4,
-                            Xp = 40
-                        },
-                        new
-                        {
-                            Id = 9,
-                            ActivityTypeId = 3,
-                            ReviewTypeId = 1,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 10,
-                            ActivityTypeId = 3,
-                            ReviewTypeId = 2,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 11,
-                            ActivityTypeId = 3,
-                            ReviewTypeId = 3,
-                            Xp = 20
-                        },
-                        new
-                        {
-                            Id = 12,
-                            ActivityTypeId = 3,
-                            ReviewTypeId = 4,
-                            Xp = 50
-                        },
-                        new
-                        {
-                            Id = 13,
-                            ActivityTypeId = 4,
-                            ReviewTypeId = 1,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 14,
-                            ActivityTypeId = 4,
-                            ReviewTypeId = 2,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 15,
-                            ActivityTypeId = 4,
-                            ReviewTypeId = 3,
-                            Xp = 20
-                        },
-                        new
-                        {
-                            Id = 16,
-                            ActivityTypeId = 4,
-                            ReviewTypeId = 4,
-                            Xp = 40
-                        },
-                        new
-                        {
-                            Id = 17,
-                            ActivityTypeId = 5,
-                            ReviewTypeId = 1,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 18,
-                            ActivityTypeId = 5,
-                            ReviewTypeId = 2,
-                            Xp = 10
-                        },
-                        new
-                        {
-                            Id = 19,
-                            ActivityTypeId = 5,
-                            ReviewTypeId = 3,
-                            Xp = 100
-                        },
-                        new
-                        {
-                            Id = 20,
-                            ActivityTypeId = 5,
-                            ReviewTypeId = 4,
-                            Xp = 200
-                        },
-                        new
-                        {
-                            Id = 21,
-                            ActivityTypeId = 6,
-                            ReviewTypeId = 1,
-                            Xp = 0
-                        },
-                        new
-                        {
-                            Id = 22,
-                            ActivityTypeId = 6,
-                            ReviewTypeId = 2,
-                            Xp = 10
-                        },
-                        new
-                        {
-                            Id = 23,
-                            ActivityTypeId = 6,
-                            ReviewTypeId = 3,
-                            Xp = 100
-                        },
-                        new
-                        {
-                            Id = 24,
-                            ActivityTypeId = 6,
-                            ReviewTypeId = 4,
-                            Xp = 250
-                        });
                 });
 
             modelBuilder.Entity("Domain.Entities.ActivityType", b =>
@@ -461,45 +267,6 @@ namespace Persistence.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ReviewType", b =>
-                {
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(10)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("ReviewTypes");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "None"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "Poor"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Name = "Good"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Name = "Awesome"
-                        });
-                });
-
             modelBuilder.Entity("Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -578,57 +345,6 @@ namespace Persistence.Migrations
                     b.HasIndex("XpLevelId");
 
                     b.ToTable("AspNetUsers");
-                });
-
-            modelBuilder.Entity("Domain.Entities.UserFavoriteActivity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActivityId");
-
-                    b.HasIndex("UserId", "ActivityId")
-                        .IsUnique();
-
-                    b.ToTable("UserFavoriteActivities");
-                });
-
-            modelBuilder.Entity("Domain.Entities.UserReview", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<int>("ActivityId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReviewTypeId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActivityId");
-
-                    b.HasIndex("ReviewTypeId");
-
-                    b.HasIndex("UserId", "ActivityId")
-                        .IsUnique();
-
-                    b.ToTable("UserReviews");
                 });
 
             modelBuilder.Entity("Domain.Entities.XpLevel", b =>
@@ -915,21 +631,6 @@ namespace Persistence.Migrations
                         .HasForeignKey("ActivityId");
                 });
 
-            modelBuilder.Entity("Domain.Entities.ActivityReviewXp", b =>
-                {
-                    b.HasOne("Domain.Entities.ActivityType", "ActivityType")
-                        .WithMany()
-                        .HasForeignKey("ActivityTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ReviewType", "ReviewType")
-                        .WithMany()
-                        .HasForeignKey("ReviewTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("Domain.Entities.PendingActivity", b =>
                 {
                     b.HasOne("Domain.Entities.ActivityType", "ActivityType")
@@ -955,42 +656,6 @@ namespace Persistence.Migrations
                     b.HasOne("Domain.Entities.User", "User")
                         .WithMany("RefreshTokens")
                         .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("Domain.Entities.UserFavoriteActivity", b =>
-                {
-                    b.HasOne("Domain.Entities.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Domain.Entities.UserReview", b =>
-                {
-                    b.HasOne("Domain.Entities.Activity", "Activity")
-                        .WithMany()
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.ReviewType", "ReviewType")
-                        .WithMany()
-                        .HasForeignKey("ReviewTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
