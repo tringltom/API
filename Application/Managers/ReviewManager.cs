@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.ServiceInterfaces;
 using AutoMapper;
-using Domain.Entities;
 using Models.Activity;
 
 namespace Application.Managers
@@ -16,52 +15,55 @@ namespace Application.Managers
         private readonly IUserLevelingService _userLevelingService;
         private readonly IMapper _mapper;
         private readonly IActivityService _activityService;
+        private readonly IUserSessionService _userSessionService;
 
-        public ReviewManager(IActivityReviewService activityReviewService, IUserLevelingService userLevelingService, IMapper mapper, IActivityService activityService)
+        public ReviewManager(IActivityReviewService activityReviewService, IUserLevelingService userLevelingService,
+            IMapper mapper, IActivityService activityService, IUserSessionService userSessionService)
         {
             _activityReviewService = activityReviewService;
             _userLevelingService = userLevelingService;
             _mapper = mapper;
             _activityService = activityService;
+            _userSessionService = userSessionService;
         }
 
         public async Task ReviewActivityAsync(ActivityReview activityReview)
         {
-            if (!await _userLevelingService.ReviewerExistsAsync(activityReview.UserId))
+            var reviewerId = _userSessionService.GetUserIdByToken();
+
+            if (!await _userLevelingService.ReviewerExistsAsync(reviewerId))
             {
                 throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, nepostojeći korisnik." });
             }
 
-            var activity = _mapper.Map<UserReview>(activityReview);
-
             var activityCreatorId = (await _activityService.GetActivityUserIdByActivityId(activityReview.ActivityId)).User.Id;
 
-            if (activityReview.UserId == activityCreatorId)
+            if (reviewerId == activityCreatorId)
             {
                 throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, ne možete oceniti svoju aktivnost." });
             }
 
-            var xpRewardToYield = await _userLevelingService.GetXpRewardYieldByReviewAsync(activity);
+            var xpRewardToYield = await _userLevelingService.GetXpRewardYieldByReviewAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId);
 
-            var existingReview = await _activityReviewService.GetUserReviewByActivityAndUserId(activityReview.ActivityId, activityReview.UserId);
+            var existingReview = await _activityReviewService.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId);
 
             if (existingReview == null)
             {
-                await _activityReviewService.AddReviewActivityAsync(activityReview);
+                await _activityReviewService.AddReviewActivityAsync(activityReview, reviewerId);
 
                 await _userLevelingService.UpdateUserXpAsync(xpRewardToYield, activityCreatorId);
 
                 return;
             }
 
-            var existingXpReward = await _userLevelingService.GetXpRewardYieldByReviewAsync(existingReview);
+            var existingXpReward = await _userLevelingService.GetXpRewardYieldByReviewAsync(existingReview.Activity.ActivityTypeId, existingReview.ReviewTypeId);
 
             if (existingXpReward == xpRewardToYield)
             {
                 return;
             }
 
-            await _activityReviewService.UpdateReviewActivityAsync(activityReview);
+            await _activityReviewService.UpdateReviewActivityAsync(activityReview, reviewerId);
 
             var difference = CalculateAmountToChange(xpRewardToYield, existingXpReward);
 

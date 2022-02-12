@@ -116,6 +116,11 @@ namespace Application.Repositories
             return username;
         }
 
+        public int GetUserIdUsingToken()
+        {
+            return Convert.ToInt32(_httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value);
+        }
+
         public async Task<User> GetUserUsingTokenAsync()
         {
             var userId = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;

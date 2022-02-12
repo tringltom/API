@@ -29,9 +29,10 @@ namespace Application.Services
             return await _userReviewRepository.GetUserReviewByActivityAndUserIdAsync(activityId, userId);
         }
 
-        public async Task UpdateReviewActivityAsync(ActivityReview activityReview)
+        public async Task UpdateReviewActivityAsync(ActivityReview activityReview, int reviwerId)
         {
             var review = _mapper.Map<UserReview>(activityReview);
+            review.UserId = reviwerId;
             try
             {
                 await _userReviewRepository.UpdateUserActivityReviewAsync(review);
@@ -42,9 +43,10 @@ namespace Application.Services
             }
         }
 
-        public async Task AddReviewActivityAsync(ActivityReview activityReview)
+        public async Task AddReviewActivityAsync(ActivityReview activityReview, int reviwerId)
         {
             var review = _mapper.Map<UserReview>(activityReview);
+            review.UserId = reviwerId;
             try
             {
                 await _userReviewRepository.ReviewUserActivityAsync(review);

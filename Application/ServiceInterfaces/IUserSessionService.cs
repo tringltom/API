@@ -10,6 +10,7 @@ namespace Application.ServiceInterfaces
         Task<UserBaseResponse> RefreshTokenAsync(string refreshToken);
         Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken);
         Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken);
+        int GetUserIdByToken();
         Task LogoutUserAsync(string refreshToken);
     }
 }

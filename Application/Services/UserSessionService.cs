@@ -30,6 +30,11 @@ namespace Application.Services
             _activityRepository = activityRepository;
         }
 
+        public int GetUserIdByToken()
+        {
+            return _userRepository.GetUserIdUsingToken();
+        }
+
         public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
         {
             var username = _userRepository.GetCurrentUsername();

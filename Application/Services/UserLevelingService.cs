@@ -24,11 +24,11 @@ namespace Application.Services
             return await _userRepository.GetUserByIdAsync(reviewerId) != null;
         }
 
-        public async Task<int> GetXpRewardYieldByReviewAsync(UserReview userReview)
+        public async Task<int> GetXpRewardYieldByReviewAsync(ActivityTypeId activityTypeId, ReviewTypeId reviewTypeId)
         {
             try
             {
-                return await _activityReviewXpRepository.GetXpRewardByActivityAndReviewTypeIdsAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId);
+                return await _activityReviewXpRepository.GetXpRewardByActivityAndReviewTypeIdsAsync(activityTypeId, reviewTypeId);
             }
             catch (Exception)
             {

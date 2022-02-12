@@ -36,10 +36,11 @@ namespace Application.Mappings
                 .ForMember(d => d.Activity, o => o.MapFrom(s => s.ActivityPending))
                 .ForMember(d => d.Id, o => o.MapFrom(src => 0));
 
+            CreateMap<ActivityMedia, Photo>()
+                  .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
+
             CreateMap<PendingActivityMedia, Photo>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
-
-            CreateMap<FavoriteActivityBase, UserFavoriteActivity>();
 
             CreateMap<ActivityReview, UserReview>();
 

@@ -23,11 +23,11 @@ namespace API.Tests.Controllers
             [Greedy] FavoriteController sut)
         {
             // Arrange
-            favoriteServiceMock.Setup(x => x.CreateFavoriteAsync(activity))
+            favoriteServiceMock.Setup(x => x.ResolveFavoriteActivityAsync(activity))
                .Returns(Task.CompletedTask);
 
             // Act
-            var res = sut.CreateFavoriteActivity(activity);
+            var res = sut.ResolveFavoriteActivity(activity);
 
             // Assert
             res.Result.Should().BeOfType<OkObjectResult>();
@@ -36,17 +36,17 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RemoveFavoriteActivity_Successfull(
+        public void ResolveFavoriteActivity_Successfull(
             [Frozen] Mock<IFavoritesService> favoriteActivityService,
             FavoriteActivityBase activity,
             [Greedy] FavoriteController sut)
         {
             // Arrange
-            favoriteActivityService.Setup(x => x.RemoveFavoriteAsync(activity))
+            favoriteActivityService.Setup(x => x.ResolveFavoriteActivityAsync(activity))
                .Returns(Task.CompletedTask);
 
             // Act
-            var res = sut.RemoveFavoriteActivity(activity);
+            var res = sut.ResolveFavoriteActivity(activity);
 
             // Assert
             res.Result.Should().BeOfType<OkObjectResult>();

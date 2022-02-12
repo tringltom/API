@@ -96,9 +96,9 @@ namespace Application.Services
         public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesFromOtherUsersAsync(int userId, int? limit, int? offset)
         {
             var approvedActivities = await _activityRepository.GetApprovedActivitiesAsQueriable()
+                .Where(x => x.User.Id != userId)
                 .Skip(offset ?? 0)
                 .Take(limit ?? 3)
-                .Where(x => x.User.Id != userId)
                 .ToListAsync();
 
             return new ApprovedActivityEnvelope
