@@ -30,8 +30,11 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void CreateActivityWithoutImageAsync_Successful(
+            [Frozen] Mock<IMapper> mapperMock,
+            PendingActivity activity,
+            ActivityService sut)
         {
 
             // Arrange
@@ -39,6 +42,10 @@ namespace Application.Tests.Services
                 .Build<ActivityCreate>()
                 .Without(p => p.Images)
                 .Create();
+
+            mapperMock
+                .Setup(x => x.Map<PendingActivity>(activityCreate))
+                .Returns(activity);
 
             // Act
             Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
@@ -81,6 +88,7 @@ namespace Application.Tests.Services
            [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
            [Frozen] Mock<IMapper> mapperMock,
            [Frozen] Mock<IActivityRepository> activityRepoMock,
+           ActivityCreate activityCreate,
            ActivityService sut,
            User user)
         {
@@ -112,16 +120,16 @@ namespace Application.Tests.Services
             .Create();
 
             mapperMock
-             .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
+             .Setup(x => x.Map<PendingActivity>(activityCreate))
              .Returns(pendingActivity);
 
 
             // Act
-            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(It.IsAny<ActivityCreate>());
+            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(It.IsAny<ActivityCreate>().Images[0]), Times.Never);
+            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Never);
             activityRepoMock.Verify(x => x.CreatePendingActivityAsync(pendingActivity), Times.Never);
             activityRepoMock.Verify(x => x.CreateActivityCreationCounter(It.IsAny<ActivityCreationCounter>()), Times.Never);
         }

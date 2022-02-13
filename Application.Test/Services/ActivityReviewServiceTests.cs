@@ -40,7 +40,7 @@ namespace Application.Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.UpdateReviewActivityAsync(activityReview);
+            Func<Task> methodInTest = async () => await sut.UpdateReviewActivityAsync(activityReview, It.IsAny<int>());
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
@@ -66,7 +66,7 @@ namespace Application.Tests.Services
                 .Throws(new RestException(HttpStatusCode.InternalServerError, new { Activity = "Neuspešna izmena ocene aktivnosti." }));
 
             // Act
-            Func<Task> methodInTest = async () => await sut.UpdateReviewActivityAsync(activityReview);
+            Func<Task> methodInTest = async () => await sut.UpdateReviewActivityAsync(activityReview, It.IsAny<int>());
 
             // Assert
             methodInTest.Should().Throw<RestException>();
@@ -92,7 +92,7 @@ namespace Application.Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.AddReviewActivityAsync(activityReview);
+            Func<Task> methodInTest = async () => await sut.AddReviewActivityAsync(activityReview, It.IsAny<int>());
 
             // Assert
             methodInTest.Should().NotThrow<RestException>();
@@ -118,7 +118,7 @@ namespace Application.Tests.Services
                 .Throws(new RestException(HttpStatusCode.InternalServerError, new { Activity = "Neuspešna izmena ocene aktivnosti." }));
 
             // Act
-            Func<Task> methodInTest = async () => await sut.AddReviewActivityAsync(activityReview);
+            Func<Task> methodInTest = async () => await sut.AddReviewActivityAsync(activityReview, It.IsAny<int>());
 
             // Assert
             methodInTest.Should().Throw<RestException>();

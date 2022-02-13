@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using Application.Repositories;
 using Application.RepositoryInterfaces;
 using Application.Services;
 using AutoFixture;
@@ -32,7 +30,7 @@ namespace Application.Tests.Services
         public void GetTopXpUsers_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IMapper> mapperMock, int? limit,
             int? offset,
             List<UserArenaGet> userArenaGet,
-            List<User> users,int usersCount,
+            List<User> users, int usersCount,
             UsersService sut)
         {
             // Arrange

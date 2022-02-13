@@ -5,7 +5,6 @@ using Application.Managers;
 using Application.ServiceInterfaces;
 using AutoFixture;
 using AutoFixture.NUnit3;
-using AutoMapper;
 using Domain.Entities;
 using FixtureShared;
 using FluentAssertions;
@@ -31,7 +30,6 @@ namespace Application.Tests.Managers
             int reviewerId,
             [Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
             [Frozen] Mock<IUserLevelingService> userLevelingServiceMock,
-            [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityService> activityServiceMock,
             [Frozen] Mock<IUserSessionService> userSessionServiceMock,
             ReviewManager sut)
@@ -45,14 +43,11 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Setup(x => x.ReviewerExistsAsync(reviewerId))
                 .ReturnsAsync(true);
 
-            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(review))
+            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
                 .ReturnsAsync(xpToYield);
 
             userLevelingServiceMock.Setup(x => x.UpdateUserXpAsync(xpToYield, activity.User.Id))
                 .Returns(Task.CompletedTask);
-
-            mapperMock.Setup(x => x.Map<UserReview>(activityReview))
-                .Returns(review);
 
             activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
@@ -60,7 +55,7 @@ namespace Application.Tests.Managers
             activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId))
                 .ReturnsAsync((UserReview)null);
 
-            activityReviewServiceMock.Setup(x => x.AddReviewActivityAsync(activityReview))
+            activityReviewServiceMock.Setup(x => x.AddReviewActivityAsync(activityReview, reviewerId))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -71,14 +66,13 @@ namespace Application.Tests.Managers
 
             userSessionServiceMock.Verify(x => x.GetUserIdByToken(), Times.Once);
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(reviewerId), Times.Once);
-            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Once);
+            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Once);
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
-            mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
             activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
             activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId), Times.Once);
-            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Once);
+            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview, reviewerId), Times.Once);
 
-            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
+            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview, reviewerId), Times.Never);
         }
 
         [Test]
@@ -93,7 +87,6 @@ namespace Application.Tests.Managers
             int reviewerId,
             [Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
             [Frozen] Mock<IUserLevelingService> userLevelingServiceMock,
-            [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityService> activityServiceMock,
             [Frozen] Mock<IUserSessionService> userSessionServiceMock,
             ReviewManager sut)
@@ -108,17 +101,14 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Setup(x => x.ReviewerExistsAsync(reviewerId))
                 .ReturnsAsync(true);
 
-            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(review))
+            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
                 .ReturnsAsync(xpToYield);
 
-            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(userReview))
+            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
                 .ReturnsAsync(xpYielded);
 
             userLevelingServiceMock.Setup(x => x.UpdateUserXpAsync(xpToYield - xpYielded, activity.User.Id))
                 .Returns(Task.CompletedTask);
-
-            mapperMock.Setup(x => x.Map<UserReview>(activityReview))
-                .Returns(review);
 
             activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
@@ -126,7 +116,7 @@ namespace Application.Tests.Managers
             activityReviewServiceMock.Setup(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId))
                 .ReturnsAsync(userReview);
 
-            activityReviewServiceMock.Setup(x => x.UpdateReviewActivityAsync(activityReview))
+            activityReviewServiceMock.Setup(x => x.UpdateReviewActivityAsync(activityReview, reviewerId))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -137,14 +127,13 @@ namespace Application.Tests.Managers
 
             userSessionServiceMock.Verify(x => x.GetUserIdByToken(), Times.Once);
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(reviewerId), Times.Once);
-            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Exactly(2));
+            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
-            mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
             activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
             activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId), Times.Once);
-            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Once);
+            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview, reviewerId), Times.Once);
 
-            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
+            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview, reviewerId), Times.Never);
         }
 
         [Test]
@@ -158,7 +147,6 @@ namespace Application.Tests.Managers
             int reviewerId,
             [Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
             [Frozen] Mock<IUserLevelingService> userLevelingServiceMock,
-            [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityService> activityServiceMock,
             [Frozen] Mock<IUserSessionService> userSessionServiceMock,
             ReviewManager sut)
@@ -172,14 +160,11 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Setup(x => x.ReviewerExistsAsync(reviewerId))
                 .ReturnsAsync(true);
 
-            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(review))
+            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
                 .ReturnsAsync(xp);
 
-            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(userReview))
+            userLevelingServiceMock.Setup(x => x.GetXpRewardYieldByReviewAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId))
                 .ReturnsAsync(xp);
-
-            mapperMock.Setup(x => x.Map<UserReview>(activityReview))
-                .Returns(review);
 
             activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
@@ -195,14 +180,13 @@ namespace Application.Tests.Managers
 
             userSessionServiceMock.Verify(x => x.GetUserIdByToken(), Times.Once);
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(reviewerId), Times.Once);
-            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Exactly(2));
-            mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
+            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
             activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
             activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId), Times.Once);
 
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
-            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
+            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview, reviewerId), Times.Never);
+            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview, reviewerId), Times.Never);
         }
 
         [Test]
@@ -215,7 +199,6 @@ namespace Application.Tests.Managers
             int reviewerId,
             [Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
             [Frozen] Mock<IUserLevelingService> userLevelingServiceMock,
-            [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityService> activityServiceMock,
             [Frozen] Mock<IUserSessionService> userSessionServiceMock,
             ReviewManager sut)
@@ -238,13 +221,12 @@ namespace Application.Tests.Managers
 
             userSessionServiceMock.Verify(x => x.GetUserIdByToken(), Times.Once);
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(reviewerId), Times.Once);
-            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Never);
+            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Never);
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
-            mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Never);
             activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Never);
             activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId), Times.Never);
-            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
-            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
+            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview, reviewerId), Times.Never);
+            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview, reviewerId), Times.Never);
         }
 
         [Test]
@@ -256,7 +238,6 @@ namespace Application.Tests.Managers
             int reviewerId,
             [Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
             [Frozen] Mock<IUserLevelingService> userLevelingServiceMock,
-            [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityService> activityServiceMock,
             [Frozen] Mock<IUserSessionService> userSessionServiceMock,
             ReviewManager sut)
@@ -270,9 +251,6 @@ namespace Application.Tests.Managers
             userLevelingServiceMock.Setup(x => x.ReviewerExistsAsync(reviewerId))
                 .ReturnsAsync(true);
 
-            mapperMock.Setup(x => x.Map<UserReview>(activityReview))
-                .Returns(review);
-
             activityServiceMock.Setup(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
@@ -284,13 +262,12 @@ namespace Application.Tests.Managers
 
             userSessionServiceMock.Verify(x => x.GetUserIdByToken(), Times.Once);
             userLevelingServiceMock.Verify(x => x.ReviewerExistsAsync(reviewerId), Times.Once);
-            mapperMock.Verify(x => x.Map<UserReview>(activityReview), Times.Once);
             activityServiceMock.Verify(x => x.GetActivityUserIdByActivityId(activityReview.ActivityId), Times.Once);
-            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<UserReview>()), Times.Never);
+            userLevelingServiceMock.Verify(x => x.GetXpRewardYieldByReviewAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Never);
             userLevelingServiceMock.Verify(x => x.UpdateUserXpAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Never);
             activityReviewServiceMock.Verify(x => x.GetUserReviewByActivityAndUserId(activityReview.ActivityId, reviewerId), Times.Never);
-            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview), Times.Never);
-            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview), Times.Never);
+            activityReviewServiceMock.Verify(x => x.UpdateReviewActivityAsync(activityReview, reviewerId), Times.Never);
+            activityReviewServiceMock.Verify(x => x.AddReviewActivityAsync(activityReview, reviewerId), Times.Never);
         }
     }
 }
