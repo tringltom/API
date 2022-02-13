@@ -25,7 +25,8 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_CreateSuccessfull([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
-            [Frozen] Mock<IUserRepository> userRepoMock, FavoriteActivityBase activity,
+            [Frozen] Mock<IUserRepository> userRepoMock,
+            FavoriteActivityBase activity,
             int userId, FavoritesService sut)
         {
 
@@ -50,7 +51,7 @@ namespace Application.Tests.Services
             //Assert
             methodInTest.Should().NotThrow<Exception>();
             userRepoMock.Verify(urm => urm.GetUserIdUsingToken(), Times.Once);
-            favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(favoriteActivity), Times.Once);
+            favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(It.IsAny<UserFavoriteActivity>()), Times.Once);
             favoriteRepoMock.Verify(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId), Times.Never);
         }
 
@@ -58,18 +59,20 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_AddFailed([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
             [Frozen] Mock<IUserRepository> userRepoMock,
-            UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
+            FavoriteActivityBase activity,
             int userId, FavoritesService sut)
         {
 
             //Arrange
+
+            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
 
             activity.Favorite = true;
 
             userRepoMock.Setup(urm => urm.GetUserIdUsingToken())
                 .Returns(userId);
 
-            favoriteRepoMock.Setup(frm => frm.AddFavoriteActivityAsync(favoriteActivity))
+            favoriteRepoMock.Setup(frm => frm.AddFavoriteActivityAsync(It.IsAny<UserFavoriteActivity>()))
                 .Throws(new DbUpdateException());
 
             favoriteRepoMock.Setup(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId))
@@ -81,7 +84,7 @@ namespace Application.Tests.Services
             //Assert
             methodInTest.Should().Throw<RestException>();
             userRepoMock.Verify(urm => urm.GetUserIdUsingToken(), Times.Once);
-            favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(favoriteActivity), Times.Once);
+            favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(It.IsAny<UserFavoriteActivity>()), Times.Once);
             favoriteRepoMock.Verify(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId), Times.Never);
         }
 
@@ -89,11 +92,13 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_RemoveSuccessfull([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
             [Frozen] Mock<IUserRepository> userRepoMock,
-            UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
+            FavoriteActivityBase activity,
             int userId, FavoritesService sut)
         {
 
             //Arrange
+
+            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
 
             activity.Favorite = false;
 
@@ -120,11 +125,13 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_RemoveFailed([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
            [Frozen] Mock<IUserRepository> userRepoMock,
-           UserFavoriteActivity favoriteActivity, FavoriteActivityBase activity,
+           FavoriteActivityBase activity,
            int userId, FavoritesService sut)
         {
 
             //Arrange
+
+            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
 
             activity.Favorite = false;
 

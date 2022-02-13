@@ -38,8 +38,7 @@ namespace Application.ServiceInterfaces
                 else
                 {
                     if (!await _favoritesRepository.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, activity.ActivityId))
-
-                        throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, kaktivnost je nepostojeća." });
+                        throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, aktivnost je nepostojeća." });
                 }
             }
             catch (Exception)

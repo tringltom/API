@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Application.Repositories;
 using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
@@ -29,7 +26,7 @@ namespace Application.Services
 
             var userArenaEnvelope = new UserArenaEnvelope
             {
-                Users = (List<UserArenaGet>)_mapper.Map<IEnumerable<User>, IEnumerable<UserArenaGet>>(topXpUsers),
+                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserArenaGet>>(topXpUsers).ToList(),
                 UserCount = await _userRepository.GetUserCountAsync(),
             };
 

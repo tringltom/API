@@ -81,7 +81,7 @@ namespace Application.Tests.Services
                 .ReturnsAsync(xpReward);
 
             // Act
-            Func<Task> methodInTest = async () => result = await sut.GetXpRewardYieldByReviewAsync(userReview);
+            Func<Task> methodInTest = async () => result = await sut.GetXpRewardYieldByReviewAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId);
 
             // Assert
             methodInTest.Should().NotThrow<RestException>();
