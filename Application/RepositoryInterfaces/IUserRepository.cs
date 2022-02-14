@@ -1,9 +1,10 @@
 ﻿
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
-namespace Application.Repositories
+namespace Application.RepositoryInterfaces
 {
     public interface IUserRepository
     {
@@ -23,7 +24,12 @@ namespace Application.Repositories
         Task<bool> UpdateUserAsync(User user);
         Task SignOutUserAsync();
         string GetCurrentUsername();
-        Task<User> GetUserByID();
+        int GetUserIdUsingToken();
+        Task<User> GetUserByUserNameAsync(string userName);
+        Task<User> GetUserUsingTokenAsync();
+        Task<User> GetUserByIdAsync(int userId);
         Task<RefreshToken> GetOldRefreshToken(string refreshToken);
+        Task<List<User>> GetTopXpUsersAsync(int? limit, int? offset);
+        Task<int> GetUserCountAsync();
     }
 }

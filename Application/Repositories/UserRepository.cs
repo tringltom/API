@@ -1,7 +1,10 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using System.Collections.Generic;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Application.RepositoryInterfaces;
 using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -113,15 +116,45 @@ namespace Application.Repositories
             return username;
         }
 
-        public async Task<User> GetUserByID()
+        public int GetUserIdUsingToken()
         {
-            var userID = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
-            return await _context.Users.SingleOrDefaultAsync(x => x.Id == int.Parse(userID));
+            return Convert.ToInt32(_httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value);
+        }
+
+        public async Task<User> GetUserUsingTokenAsync()
+        {
+            var userId = _httpContextAccessor.HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sid)?.Value;
+            return await GetUserByIdAsync(Convert.ToInt32(userId));
+        }
+
+        public async Task<User> GetUserByIdAsync(int userId)
+        {
+            return await _userIdentityManager.FindByIdAsync(userId.ToString());
         }
 
         public async Task<RefreshToken> GetOldRefreshToken(string refreshToken)
         {
             return await _context.RefreshTokens.SingleOrDefaultAsync(r => r.Token == refreshToken);
+        }
+
+        public async Task<List<User>> GetTopXpUsersAsync(int? limit, int? offset)
+        {
+            return await _context.Users
+             .AsQueryable()
+             .OrderByDescending(u => u.CurrentXp)
+             .Skip(offset ?? 0)
+             .Take(limit ?? 3)
+             .ToListAsync();
+        }
+
+        public async Task<int> GetUserCountAsync()
+        {
+            return await _context.Users.CountAsync();
+        }
+
+        public async Task<User> GetUserByUserNameAsync(string userName)
+        {
+            return await _context.Users.SingleOrDefaultAsync(u => u.UserName == userName);
         }
     }
 }

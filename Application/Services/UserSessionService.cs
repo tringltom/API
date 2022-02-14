@@ -1,13 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.Security;
 using Application.ServiceInterfaces;
 using Domain.Entities;
+using Models.Activity;
 using Models.User;
 
 
@@ -18,12 +20,19 @@ namespace Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IJwtGenerator _jwtGenerator;
         private readonly IFacebookAccessor _facebookAccessor;
+        private readonly IActivityRepository _activityRepository;
 
-        public UserSessionService(IUserRepository userRepository, IJwtGenerator jwtGenerator, IFacebookAccessor facebookAccessor)
+        public UserSessionService(IUserRepository userRepository, IJwtGenerator jwtGenerator, IFacebookAccessor facebookAccessor, IActivityRepository activityRepository)
         {
             _userRepository = userRepository;
             _jwtGenerator = jwtGenerator;
             _facebookAccessor = facebookAccessor;
+            _activityRepository = activityRepository;
+        }
+
+        public int GetUserIdByToken()
+        {
+            return _userRepository.GetUserIdUsingToken();
         }
 
         public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
@@ -58,7 +67,9 @@ namespace Application.Services
 
             var token = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate);
+            var activityCounts = await GetAvailableActivitiesCount(user);
+
+            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -90,7 +101,9 @@ namespace Application.Services
 
             var userToken = _jwtGenerator.CreateToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate);
+            var activityCounts = await GetAvailableActivitiesCount(user);
+
+            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
         }
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
@@ -182,6 +195,31 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
 
             return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
+        }
+
+        // This will be moved to activity service so UserActivityManager can consume it along with GetcurrentUser and Login
+        // Also tests will be added after refactoring
+        private async Task<List<ActivityCount>> GetAvailableActivitiesCount(User user)
+        {
+            var activityCounterForDelete = user.ActivityCreationCounters.Where(ac => ac.DateCreated.AddDays(7) < DateTimeOffset.Now).ToList();
+
+            await _activityRepository.DeleteActivityCountersAsync(activityCounterForDelete);
+
+            var usedActivitiesCount = user.ActivityCreationCounters
+                .GroupBy(acc => acc.ActivityTypeId)
+                .Select(ac => new { Type = ac.Key, UsedCount = ac.Count() }).ToList();
+
+            return Enum.GetValues(typeof(ActivityTypeId)).OfType<ActivityTypeId>()
+                .GroupJoin(usedActivitiesCount,
+                    atEnum => atEnum,
+                    ac => ac.Type,
+                    (type, counts) => new ActivityCount
+                    {
+                        Type = type,
+                        Available = 2 - counts.Select(used => used.UsedCount).FirstOrDefault(),
+                        Max = 2
+                    })
+                .ToList();
         }
     }
 }

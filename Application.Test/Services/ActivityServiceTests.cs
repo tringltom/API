@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
+using Application.Errors;
 using Application.Media;
-using Application.Repositories;
+using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using Application.Services;
 using AutoFixture;
@@ -28,8 +30,11 @@ namespace Application.Tests.Services
         }
 
         [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void CreateActivityWithoutImageAsync_Successful(ActivityService sut)
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void CreateActivityWithoutImageAsync_Successful(
+            [Frozen] Mock<IMapper> mapperMock,
+            PendingActivity activity,
+            ActivityService sut)
         {
 
             // Arrange
@@ -37,6 +42,10 @@ namespace Application.Tests.Services
                 .Build<ActivityCreate>()
                 .Without(p => p.Images)
                 .Create();
+
+            mapperMock
+                .Setup(x => x.Map<PendingActivity>(activityCreate))
+                .Returns(activity);
 
             // Act
             Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
@@ -75,11 +84,63 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void CreatePendingActivity_ExceededCount(
+           [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
+           [Frozen] Mock<IMapper> mapperMock,
+           [Frozen] Mock<IActivityRepository> activityRepoMock,
+           ActivityCreate activityCreate,
+           ActivityService sut,
+           User user)
+        {
+
+            // Arrange
+            var userWithNoMoreGoodDeedCount = _fixture
+               .Build<User>()
+               .With(ac => ac.ActivityCreationCounters,
+                    new List<ActivityCreationCounter>()
+                    {
+                        new ActivityCreationCounter
+                        {
+                            ActivityTypeId = ActivityTypeId.GoodDeed,
+                            DateCreated = DateTimeOffset.Now,
+                            User = user
+                        },
+                        new ActivityCreationCounter
+                        {
+                            ActivityTypeId = ActivityTypeId.GoodDeed,
+                            DateCreated = DateTimeOffset.Now,
+                            User = user
+                        },
+                    })
+               .Create();
+
+            var pendingActivity = _fixture
+            .Build<PendingActivity>()
+            .With(u => u.User, userWithNoMoreGoodDeedCount)
+            .Create();
+
+            mapperMock
+             .Setup(x => x.Map<PendingActivity>(activityCreate))
+             .Returns(pendingActivity);
+
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Never);
+            activityRepoMock.Verify(x => x.CreatePendingActivityAsync(pendingActivity), Times.Never);
+            activityRepoMock.Verify(x => x.CreateActivityCreationCounter(It.IsAny<ActivityCreationCounter>()), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetPendingActivitiesAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityRepository> activityRepoMock,
             List<PendingActivity> pendingActivities,
-            List<PendingActivityGet> pendingActivitiesGet,
+            List<PendingActivityReturn> pendingActivitiesGet,
             int limit, int offset,
             ActivityService sut)
         {
@@ -90,7 +151,7 @@ namespace Application.Tests.Services
             pendingActivityEnvelope.ActivityCount = pendingActivitiesGet.Count;
 
             mapperMock
-                .Setup(x => x.Map<List<PendingActivityGet>>(It.IsAny<PendingActivity>()))
+                .Setup(x => x.Map<List<PendingActivityReturn>>(It.IsAny<PendingActivity>()))
                 .Returns(pendingActivitiesGet);
 
             activityRepoMock
@@ -132,7 +193,7 @@ namespace Application.Tests.Services
                 .Returns(activity);
 
             activityRepoMock
-                .Setup(x => x.GetPendingActivityByIDAsync(pendingActivityId))
+                .Setup(x => x.GetPendingActivityByIdAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
             // Act
@@ -140,8 +201,8 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivityByIDAsync(pendingActivityId), Times.Once);
-            activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Once);
+            activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
+            activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Once);
             emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
         }
@@ -167,7 +228,7 @@ namespace Application.Tests.Services
                 .Returns(activity);
 
             activityRepoMock
-                .Setup(x => x.GetPendingActivityByIDAsync(pendingActivityId))
+                .Setup(x => x.GetPendingActivityByIdAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
             // Act
@@ -175,10 +236,50 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivityByIDAsync(pendingActivityId), Times.Once);
-            activityRepoMock.Verify(x => x.CreatActivityAsync(activity), Times.Never);
+            activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
+            activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Never);
             emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetActivityUserIdByActivityId_Successful(
+            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
+            int activityId,
+            Activity activity,
+            ActivityService sut)
+        {
+
+            // Arrange
+            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
+                .ReturnsAsync(activity);
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
+
+            // Assert
+            methodInTest.Should().NotThrow<Exception>();
+            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
+        }
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public void GetActivityUserIdByActivityId_ActivityNotFound(
+            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
+            int activityId,
+            ActivityService sut)
+        {
+
+            // Arrange
+            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
+                .ThrowsAsync(new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" }));
+
+            // Act
+            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
         }
     }
 }
