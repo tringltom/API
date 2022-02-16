@@ -33,7 +33,7 @@ namespace API.Controllers
 
             var origin = Request.Headers["origin"];
 
-            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
+            await _userRegistrationService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
@@ -69,7 +69,7 @@ namespace API.Controllers
         }
 
         [HttpGet("getTopXpUsers")]
-        public async Task<ActionResult<UserArenaEnvelope>> GetTopXpUsers(int? limit, int? offset)
+        public async Task<ActionResult<UserRangingEnvelope>> GetTopXpUsers(int? limit, int? offset)
         {
             return await _usersService.GetTopXpUsers(limit, offset);
         }

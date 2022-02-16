@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Services;
 using AutoFixture;
-using Domain.Entities;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
+using Infrastructure.Email;
 using NUnit.Framework;
 
 namespace Application.Tests.Services
@@ -23,7 +23,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoq, null, "email@email")]
         [Fixture(FixtureType.WithAutoMoq, "", "email@email")]
         [Fixture(FixtureType.WithAutoMoq, "   ", "email@email")]
-        public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
+        public void SendConfirmationEmailAsync_IncorrectUrl(string url, string email, EmailManager sut)
         {
             // Arrange
             // Act
@@ -37,7 +37,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", null)]
         [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "")]
         [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "   ")]
-        public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
+        public void SendConfirmationEmailAsync_IncorrectEmail(string url, string email, EmailManager sut)
         {
             // Arrange
             // Act
@@ -51,7 +51,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoq, (string)null, "email@email")]
         [Fixture(FixtureType.WithAutoMoq, "", "email@email")]
         [Fixture(FixtureType.WithAutoMoq, "   ", "email@email")]
-        public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailService sut)
+        public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailManager sut)
         {
             // Arrange
             // Act
@@ -65,7 +65,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", null)]
         [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "")]
         [Fixture(FixtureType.WithAutoMoq, "someGoodUrl", "   ")]
-        public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email, EmailService sut)
+        public void SendPasswordRecoveryEmailAsync_IncorrectEmail(string url, string email, EmailManager sut)
         {
             // Arrange
             // Act
@@ -77,7 +77,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void SendActivityApprovalEmailAsync_IncorrectEmail(PendingActivity activity, EmailService sut)
+        public void SendActivityApprovalEmailAsync_IncorrectEmail(PendingActivity activity, EmailManager sut)
         {
             // Arrange
             activity.User.Email = "";

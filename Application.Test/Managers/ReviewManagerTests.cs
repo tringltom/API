@@ -5,7 +5,7 @@ using Application.Managers;
 using Application.ServiceInterfaces;
 using AutoFixture;
 using AutoFixture.NUnit3;
-using Domain.Entities;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Models.Activity;

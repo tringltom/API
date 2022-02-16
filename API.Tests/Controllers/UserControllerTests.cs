@@ -106,7 +106,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserArenaEnvelope userArenaEnvelope, int? limit,
+        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserRangingEnvelope userArenaEnvelope, int? limit,
             int? offset,
             [Greedy] UserController sut)
         {
@@ -119,7 +119,7 @@ namespace API.Tests.Controllers
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserArenaEnvelope>>>();
+            result.Should().BeOfType<Task<ActionResult<UserRangingEnvelope>>>();
         }
 
         [Test]

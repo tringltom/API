@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
-using Domain.Entities;
+using DAL.RepositoryInterfaces;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Moq;
@@ -23,13 +24,13 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ReviewerExistsAsync_Successful(
             int reviewerId,
-            [Frozen] Mock<IUserRepository> userRepositoryMock,
+            [Frozen] Mock<IUserManager> userRepositoryMock,
             User user,
             UserLevelingService sut)
         {
 
             // Arrange
-            userRepositoryMock.Setup(x => x.GetUserByIdAsync(reviewerId))
+            userRepositoryMock.Setup(x => x.FindUserByIdAsync(reviewerId))
                 .ReturnsAsync(user);
 
             var result = new bool();
@@ -40,19 +41,19 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<RestException>();
             result.Should().BeTrue();
-            userRepositoryMock.Verify(x => x.GetUserByIdAsync(reviewerId), Times.Once);
+            userRepositoryMock.Verify(x => x.FindUserByIdAsync(reviewerId), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ReviewerExistsAsync_Fail(
             int reviewerId,
-            [Frozen] Mock<IUserRepository> userRepositoryMock,
+            [Frozen] Mock<IUserManager> userRepositoryMock,
             UserLevelingService sut)
         {
 
             // Arrange
-            userRepositoryMock.Setup(x => x.GetUserByIdAsync(reviewerId))
+            userRepositoryMock.Setup(x => x.FindUserByIdAsync(reviewerId))
                 .ReturnsAsync((User)null);
 
             var result = new bool();
@@ -63,7 +64,7 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<RestException>();
             result.Should().BeFalse();
-            userRepositoryMock.Verify(x => x.GetUserByIdAsync(reviewerId), Times.Once);
+            userRepositoryMock.Verify(x => x.FindUserByIdAsync(reviewerId), Times.Once);
         }
 
         [Test]
@@ -94,11 +95,11 @@ namespace Application.Tests.Services
         public void UpdateUserXpAsync_Successful(
            int amount,
            User user,
-           [Frozen] Mock<IUserRepository> userRepositoryMock,
+           [Frozen] Mock<IUserManager> userRepositoryMock,
            UserLevelingService sut)
         {
             // Arrange
-            userRepositoryMock.Setup(x => x.GetUserByIdAsync(user.Id))
+            userRepositoryMock.Setup(x => x.FindUserByIdAsync(user.Id))
                 .ReturnsAsync(user);
 
             userRepositoryMock.Setup(x => x.UpdateUserAsync(user))
@@ -109,7 +110,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<RestException>();
-            userRepositoryMock.Verify(x => x.GetUserByIdAsync(user.Id), Times.Once);
+            userRepositoryMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
             userRepositoryMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
         }
 
@@ -118,11 +119,11 @@ namespace Application.Tests.Services
         public void UpdateUserXpAsync_Failed(
            int amount,
            User user,
-           [Frozen] Mock<IUserRepository> userRepositoryMock,
+           [Frozen] Mock<IUserManager> userRepositoryMock,
            UserLevelingService sut)
         {
             // Arrange
-            userRepositoryMock.Setup(x => x.GetUserByIdAsync(user.Id))
+            userRepositoryMock.Setup(x => x.FindUserByIdAsync(user.Id))
                 .ThrowsAsync(new Exception());
 
             userRepositoryMock.Setup(x => x.UpdateUserAsync(user))
@@ -133,7 +134,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepositoryMock.Verify(x => x.GetUserByIdAsync(user.Id), Times.Once);
+            userRepositoryMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
             userRepositoryMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
         }
     }

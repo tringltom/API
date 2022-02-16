@@ -1,33 +1,33 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
-using Domain.Entities;
+using DAL;
+using Domain;
 using Models.User;
 
 namespace Application.Services
 {
     public class UsersService : IUsersService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public UsersService(IUserRepository userRepository, IMapper mapper)
+        public UsersService(IUnitOfWork uow, IMapper mapper)
         {
-            _userRepository = userRepository;
+            _uow = uow;
             _mapper = mapper;
         }
 
-        public async Task<UserArenaEnvelope> GetTopXpUsers(int? limit, int? offset)
+        public async Task<UserRangingEnvelope> GetTopXpUsers(int? limit, int? offset)
         {
-            var topXpUsers = await _userRepository.GetTopXpUsersAsync(limit, offset);
+            var topXpUsers = await _uow.Users.GetTopXpUsersAsync(limit, offset);
 
-            var userArenaEnvelope = new UserArenaEnvelope
+            var userArenaEnvelope = new UserRangingEnvelope
             {
-                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserArenaGet>>(topXpUsers).ToList(),
-                UserCount = await _userRepository.GetUserCountAsync(),
+                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserRangingGet>>(topXpUsers).ToList(),
+                UserCount = await _uow.Users.CountAsync(),
             };
 
             return userArenaEnvelope;

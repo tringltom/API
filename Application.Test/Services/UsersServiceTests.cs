@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Application.RepositoryInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
+using DAL.RepositoryInterfaces;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Models.User;
@@ -29,7 +29,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetTopXpUsers_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IMapper> mapperMock, int? limit,
             int? offset,
-            List<UserArenaGet> userArenaGet,
+            List<UserRangingGet> userArenaGet,
             List<User> users, int usersCount,
             UsersService sut)
         {
@@ -37,23 +37,23 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.GetTopXpUsersAsync(limit, offset))
                 .ReturnsAsync(users);
 
-            userRepoMock.Setup(x => x.GetUserCountAsync())
+            userRepoMock.Setup(x => x.CountAsync())
                 .ReturnsAsync(usersCount);
 
-            mapperMock.Setup(x => x.Map<List<UserArenaGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
+            mapperMock.Setup(x => x.Map<List<UserRangingGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
 
-            var userArenaEnvelope = _fixture.Create<UserArenaEnvelope>();
+            var userArenaEnvelope = _fixture.Create<UserRangingEnvelope>();
             userArenaEnvelope.Users = userArenaGet;
             userArenaEnvelope.UserCount = usersCount;
 
             // Act
-            Func<Task<UserArenaEnvelope>> methodInTest = async () => await sut.GetTopXpUsers(limit, offset);
+            Func<Task<UserRangingEnvelope>> methodInTest = async () => await sut.GetTopXpUsers(limit, offset);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             methodInTest.Should().NotBeNull();
             userRepoMock.Verify(x => x.GetTopXpUsersAsync(limit, offset), Times.Once);
-            userRepoMock.Verify(x => x.GetUserCountAsync(), Times.Once);
+            userRepoMock.Verify(x => x.CountAsync(), Times.Once);
         }
     }
 }

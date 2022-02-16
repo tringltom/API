@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
-using Domain.Entities;
+using Domain;
 using Models;
 using Models.Activity;
 

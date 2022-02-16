@@ -5,10 +5,12 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
-using Application.Security;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
 using Application.ServiceInterfaces;
-using Domain.Entities;
+using DAL;
+using DAL.RepositoryInterfaces;
+using Domain;
 using Models.Activity;
 using Models.User;
 
@@ -17,39 +19,48 @@ namespace Application.Services
 {
     public class UserSessionService : IUserSessionService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IJwtGenerator _jwtGenerator;
+        private readonly IUserManager _userManagerRepository;
+        private readonly ITokenManager _tokenManager;
         private readonly IFacebookAccessor _facebookAccessor;
         private readonly IActivityRepository _activityRepository;
+        private readonly IUserAccessor _userAccessor;
+        private readonly IUnitOfWork _uow;
 
-        public UserSessionService(IUserRepository userRepository, IJwtGenerator jwtGenerator, IFacebookAccessor facebookAccessor, IActivityRepository activityRepository)
+        public UserSessionService(IUserManager userManagerRepository,
+            ITokenManager tokenManger,
+            IFacebookAccessor facebookAccessor,
+            IActivityRepository activityRepository,
+            IUserAccessor userAccessor,
+            IUnitOfWork uow)
         {
-            _userRepository = userRepository;
-            _jwtGenerator = jwtGenerator;
+            _userManagerRepository = userManagerRepository;
+            _tokenManager = tokenManger;
             _facebookAccessor = facebookAccessor;
             _activityRepository = activityRepository;
+            _userAccessor = userAccessor;
+            _uow = uow;
         }
 
         public int GetUserIdByToken()
         {
-            return _userRepository.GetUserIdUsingToken();
+            return _userAccessor.GetUserIdFromAccessToken();
         }
 
         public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
         {
-            var username = _userRepository.GetCurrentUsername();
+            var username = _userAccessor.GetUsernameFromAccesssToken();
 
             User user;
 
             if (username != null)
             {
-                user = await _userRepository.FindUserByNameAsync(username);
+                user = await _userManagerRepository.FindUserByNameAsync(username);
             }
             else
             {
                 if (stayLoggedIn)
                 {
-                    var oldRefreshToken = await _userRepository.GetOldRefreshToken(refreshToken);
+                    var oldRefreshToken = await _uow.RefreshTokens.GetOldRefreshToken(refreshToken);
 
                     if (oldRefreshToken != null && !oldRefreshToken.IsActive)
                         throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Niste autorizovani." });
@@ -65,7 +76,7 @@ namespace Application.Services
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
 
-            var token = _jwtGenerator.CreateToken(user);
+            var token = _tokenManager.CreateToken(user);
 
             var activityCounts = await GetAvailableActivitiesCount(user);
 
@@ -74,7 +85,7 @@ namespace Application.Services
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
         {
-            var user = await _userRepository.FindUserByEmailAsync(userLogin.Email);
+            var user = await _userManagerRepository.FindUserByEmailAsync(userLogin.Email);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nevalidan email ili nevalidna šifra." });
@@ -82,7 +93,7 @@ namespace Application.Services
             if (!user.EmailConfirmed)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite Vašu email adresu pre logovanja." });
 
-            var signInResult = await _userRepository.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password);
+            var signInResult = await _userManagerRepository.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password);
 
             if (!signInResult.Succeeded)
             {
@@ -92,14 +103,14 @@ namespace Application.Services
                     throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Nevalidan email ili nevalidna šifra." });
             }
 
-            var refreshToken = _jwtGenerator.GetRefreshToken();
+            var refreshToken = _tokenManager.CreateRefreshToken();
 
             user.RefreshTokens.Add(refreshToken);
 
-            if (!await _userRepository.UpdateUserAsync(user))
+            if (!await _userManagerRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
-            var userToken = _jwtGenerator.CreateToken(user);
+            var userToken = _tokenManager.CreateToken(user);
 
             var activityCounts = await GetAvailableActivitiesCount(user);
 
@@ -108,9 +119,9 @@ namespace Application.Services
 
         public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
         {
-            var currentUserName = _userRepository.GetCurrentUsername();
+            var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
 
-            var user = await _userRepository.FindUserByNameAsync(currentUserName);
+            var user = await _userManagerRepository.FindUserByNameAsync(currentUserName);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
@@ -123,24 +134,24 @@ namespace Application.Services
             if (oldToken != null)
                 oldToken.Revoked = DateTimeOffset.UtcNow;
 
-            var newRefreshToken = _jwtGenerator.GetRefreshToken();
+            var newRefreshToken = _tokenManager.CreateRefreshToken();
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            if (!await _userRepository.UpdateUserAsync(user))
+            if (!await _userManagerRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
 
-            var userToken = _jwtGenerator.CreateToken(user);
+            var userToken = _tokenManager.CreateToken(user);
 
             return new UserBaseResponse(userToken, user.UserName, newRefreshToken.Token);
         }
 
         public async Task LogoutUserAsync(string refreshToken)
         {
-            var currentUserName = _userRepository.GetCurrentUsername();
+            var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
 
-            var user = await _userRepository.FindUserByNameAsync(currentUserName);
+            var user = await _userManagerRepository.FindUserByNameAsync(currentUserName);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
@@ -153,7 +164,7 @@ namespace Application.Services
             if (oldToken != null)
                 oldToken.Revoked = DateTimeOffset.UtcNow;
 
-            if (!await _userRepository.UpdateUserAsync(user))
+            if (!await _userManagerRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
         }
 
@@ -164,16 +175,16 @@ namespace Application.Services
             if (userInfo == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena." });
 
-            var user = await _userRepository.FindUserByEmailAsync(userInfo.Email);
+            var user = await _userManagerRepository.FindUserByEmailAsync(userInfo.Email);
 
-            var refreshToken = _jwtGenerator.GetRefreshToken();
+            var refreshToken = _tokenManager.CreateRefreshToken();
 
-            var userToken = _jwtGenerator.CreateToken(user);
+            var userToken = _tokenManager.CreateToken(user);
 
             if (user != null)
             {
                 user.RefreshTokens.Add(refreshToken);
-                if (!await _userRepository.UpdateUserAsync(user))
+                if (!await _userManagerRepository.UpdateUserAsync(user))
                     throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
                 return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
@@ -191,7 +202,7 @@ namespace Application.Services
 
             user.RefreshTokens.Add(refreshToken);
 
-            if (await _userRepository.CreateUserWithoutPasswordAsync(user))
+            if (await _userManagerRepository.CreateUserWithoutPasswordAsync(user))
                 throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
 
             return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);

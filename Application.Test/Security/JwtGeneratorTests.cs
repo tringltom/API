@@ -1,7 +1,7 @@
-﻿using Application.Security;
-using AutoFixture;
-using Domain.Entities;
+﻿using AutoFixture;
+using Domain;
 using FixtureShared;
+using Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
@@ -28,7 +28,7 @@ namespace Application.Tests.Security
         {
             // Arrange
             var user = _fixture.Create<User>();
-            var sut = new JwtGenerator(_config);
+            var sut = new TokenManager(_config);
 
             // Act
             var result = sut.CreateToken(user);
@@ -41,10 +41,10 @@ namespace Application.Tests.Security
         public void GetRefreshToken()
         {
             // Arrange
-            var sut = new JwtGenerator(_config);
+            var sut = new TokenManager(_config);
 
             // Act
-            var tokenResult = sut.GetRefreshToken();
+            var tokenResult = sut.CreateRefreshToken();
 
             // Assert
             Assert.IsFalse(string.IsNullOrWhiteSpace(tokenResult.Token));

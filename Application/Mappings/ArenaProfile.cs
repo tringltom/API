@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Linq;
 using AutoMapper;
-using Domain.Entities;
+using Domain;
 using Models.User;
 
 namespace Application.Mappings
@@ -12,7 +9,7 @@ namespace Application.Mappings
     {
         public ArenaProfile()
         {
-            CreateMap<User, UserArenaGet>()
+            CreateMap<User, UserRangingGet>()
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
                .ForMember(d => d.NumberOfGoodDeeds, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.GoodDeed).Count()))
                .ForMember(d => d.NumberOfJokes, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Joke).Count()))

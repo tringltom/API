@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using Domain.Entities;
+using Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -9,10 +9,7 @@ namespace Persistence
 {
     public class DataContext : IdentityDbContext<User, IdentityRole<int>, int>
     {
-        public DataContext(DbContextOptions<DataContext> options) : base(options)
-        {
-
-        }
+        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
 
         public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
         public virtual DbSet<ActivityType> ActivityTypes { get; set; }

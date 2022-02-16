@@ -3,13 +3,13 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Media;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
-using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using DAL.RepositoryInterfaces;
+using Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Models.Activity;
 
 namespace Application.Services
@@ -19,14 +19,14 @@ namespace Application.Services
         private readonly IPhotoAccessor _photoAccessor;
         private readonly IActivityRepository _activityRepository;
         private readonly IMapper _mapper;
-        private readonly IEmailService _emailService;
+        private readonly IEmailManager _emailManager;
 
-        public ActivityService(IPhotoAccessor photoAccessor, IActivityRepository activityRepository, IMapper mapper, IEmailService emailService)
+        public ActivityService(IPhotoAccessor photoAccessor, IActivityRepository activityRepository, IMapper mapper, IEmailManager emailManager)
         {
             _photoAccessor = photoAccessor;
             _activityRepository = activityRepository;
             _mapper = mapper;
-            _emailService = emailService;
+            _emailManager = emailManager;
         }
 
         public async Task CreatePendingActivityAsync(ActivityCreate activityCreate)
@@ -88,7 +88,7 @@ namespace Application.Services
             else
                 activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
 
-            await _emailService.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
+            await _emailManager.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
 
             return await _activityRepository.DeletePendingActivity(pendingActivity);
         }

@@ -2,12 +2,12 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
+using DAL.RepositoryInterfaces;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Models.Activity;

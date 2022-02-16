@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+﻿using Domain;
 using FluentValidation;
 using Models.Activity;
 

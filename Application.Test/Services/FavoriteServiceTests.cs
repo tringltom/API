@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces.Security;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
-using Domain.Entities;
+using DAL.RepositoryInterfaces;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_CreateSuccessfull([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
-            [Frozen] Mock<IUserRepository> userRepoMock,
+            [Frozen] Mock<IUserAccessor> userAccessorMock,
             FavoriteActivityBase activity,
             int userId, FavoritesService sut)
         {
@@ -36,7 +37,7 @@ namespace Application.Tests.Services
 
             activity.Favorite = true;
 
-            userRepoMock.Setup(urm => urm.GetUserIdUsingToken())
+            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
                 .Returns(userId);
 
             favoriteRepoMock.Setup(frm => frm.AddFavoriteActivityAsync(favoriteActivity))
@@ -50,7 +51,7 @@ namespace Application.Tests.Services
 
             //Assert
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(urm => urm.GetUserIdUsingToken(), Times.Once);
+            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
             favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(It.IsAny<UserFavoriteActivity>()), Times.Once);
             favoriteRepoMock.Verify(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId), Times.Never);
         }
@@ -58,7 +59,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_AddFailed([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
-            [Frozen] Mock<IUserRepository> userRepoMock,
+            [Frozen] Mock<IUserAccessor> userAccessorMock,
             FavoriteActivityBase activity,
             int userId, FavoritesService sut)
         {
@@ -69,7 +70,7 @@ namespace Application.Tests.Services
 
             activity.Favorite = true;
 
-            userRepoMock.Setup(urm => urm.GetUserIdUsingToken())
+            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
                 .Returns(userId);
 
             favoriteRepoMock.Setup(frm => frm.AddFavoriteActivityAsync(It.IsAny<UserFavoriteActivity>()))
@@ -83,7 +84,7 @@ namespace Application.Tests.Services
 
             //Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(urm => urm.GetUserIdUsingToken(), Times.Once);
+            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
             favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(It.IsAny<UserFavoriteActivity>()), Times.Once);
             favoriteRepoMock.Verify(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId), Times.Never);
         }
@@ -91,7 +92,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_RemoveSuccessfull([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
-            [Frozen] Mock<IUserRepository> userRepoMock,
+            [Frozen] Mock<IUserAccessor> userAccessorMock,
             FavoriteActivityBase activity,
             int userId, FavoritesService sut)
         {
@@ -102,7 +103,7 @@ namespace Application.Tests.Services
 
             activity.Favorite = false;
 
-            userRepoMock.Setup(urm => urm.GetUserIdUsingToken())
+            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
                .Returns(userId);
 
             favoriteRepoMock.Setup(frm => frm.AddFavoriteActivityAsync(favoriteActivity))
@@ -116,7 +117,7 @@ namespace Application.Tests.Services
 
             //Assert
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(urm => urm.GetUserIdUsingToken(), Times.Once);
+            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
             favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(favoriteActivity), Times.Never);
             favoriteRepoMock.Verify(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId), Times.Once);
         }
@@ -124,7 +125,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ResolveFavoriteAsync_RemoveFailed([Frozen] Mock<IFavoritesRepository> favoriteRepoMock,
-           [Frozen] Mock<IUserRepository> userRepoMock,
+           [Frozen] Mock<IUserAccessor> userAccessorMock,
            FavoriteActivityBase activity,
            int userId, FavoritesService sut)
         {
@@ -135,7 +136,7 @@ namespace Application.Tests.Services
 
             activity.Favorite = false;
 
-            userRepoMock.Setup(urm => urm.GetUserIdUsingToken())
+            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
               .Returns(userId);
 
             favoriteRepoMock.Setup(frm => frm.AddFavoriteActivityAsync(favoriteActivity))
@@ -149,7 +150,7 @@ namespace Application.Tests.Services
 
             //Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(urm => urm.GetUserIdUsingToken(), Times.Once);
+            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
             favoriteRepoMock.Verify(frm => frm.AddFavoriteActivityAsync(favoriteActivity), Times.Never);
             favoriteRepoMock.Verify(frm => frm.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, favoriteActivity.ActivityId), Times.Once);
         }

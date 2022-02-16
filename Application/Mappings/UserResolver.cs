@@ -1,22 +1,22 @@
-﻿using Application.RepositoryInterfaces;
+﻿using Application.InfrastructureInterfaces.Security;
 using AutoMapper;
-using Domain.Entities;
+using Domain;
 using Models.Activity;
 
 namespace Application.Mappings
 {
     public class UserResolver : IValueResolver<ActivityCreate, PendingActivity, User>
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserAccessor _userAccessor;
 
-        public UserResolver(IUserRepository userRepository)
+        public UserResolver(IUserAccessor userAccessor)
         {
-            _userRepository = userRepository;
+            _userAccessor = userAccessor;
         }
 
         public User Resolve(ActivityCreate source, PendingActivity destination, User destMember, ResolutionContext context)
         {
-            return _userRepository.GetUserUsingTokenAsync().Result;
+            return _userAccessor.FindUserFromAccessToken().Result;
         }
     }
 }

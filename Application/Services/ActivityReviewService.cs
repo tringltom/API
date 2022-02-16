@@ -4,10 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
 using Application.ServiceInterfaces;
 using AutoMapper;
-using Domain.Entities;
+using DAL.RepositoryInterfaces;
+using Domain;
 using Microsoft.EntityFrameworkCore;
 using Models.Activity;
 

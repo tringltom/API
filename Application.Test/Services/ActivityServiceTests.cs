@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Media;
-using Application.RepositoryInterfaces;
-using Application.ServiceInterfaces;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureModels;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
+using DAL.RepositoryInterfaces;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Models.Activity;
@@ -177,7 +177,7 @@ namespace Application.Tests.Services
         public void ApprovePendingActivityAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityRepository> activityRepoMock,
-            [Frozen] Mock<IEmailService> emailServiceMock,
+            [Frozen] Mock<IEmailManager> emailManagerMock,
             int pendingActivityId,
             PendingActivity pendingActivity,
             Activity activity,
@@ -203,7 +203,7 @@ namespace Application.Tests.Services
             methodInTest.Should().NotThrow<Exception>();
             activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
             activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Once);
-            emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
         }
 
@@ -212,7 +212,7 @@ namespace Application.Tests.Services
         public void DisapprovePendingActivityAsync_Successful(
           [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IActivityRepository> activityRepoMock,
-            [Frozen] Mock<IEmailService> emailServiceMock,
+            [Frozen] Mock<IEmailManager> emailManagerMock,
             int pendingActivityId,
             PendingActivity pendingActivity,
             Activity activity,
@@ -238,7 +238,7 @@ namespace Application.Tests.Services
             methodInTest.Should().NotThrow<Exception>();
             activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
             activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Never);
-            emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
             activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
         }
 

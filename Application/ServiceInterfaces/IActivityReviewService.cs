@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Domain.Entities;
+using Domain;
 using Models.Activity;
 
 namespace Application.ServiceInterfaces

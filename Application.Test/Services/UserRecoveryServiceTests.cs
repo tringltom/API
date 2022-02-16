@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
-using Application.ServiceInterfaces;
+using Application.InfrastructureInterfaces;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
-using Domain.Entities;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
@@ -28,7 +27,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RecoverUserPasswordViaEmailAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
+        public void RecoverUserPasswordViaEmailAsync_Successful([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<IEmailManager> emailManagerMock,
             string token, string origin, User user, UserRecoveryService sut)
         {
             // Arrange
@@ -37,7 +36,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.GenerateUserPasswordResetTokenAsync(user))
                 .ReturnsAsync(token);
 
-            emailServiceMock.Setup(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email))
+            emailManagerMock.Setup(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -47,12 +46,12 @@ namespace Application.Tests.Services
             methodInTest.Should().NotThrow<Exception>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
             userRepoMock.Verify(x => x.GenerateUserPasswordResetTokenAsync(user), Times.Once);
-            emailServiceMock.Verify(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email), Times.Once);
+            emailManagerMock.Verify(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RecoverUserPasswordViaEmailAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
+        public void RecoverUserPasswordViaEmailAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<IEmailManager> emailManagerMock,
             string token, string origin, User user, UserRecoveryService sut)
         {
             // Arrange
@@ -61,7 +60,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.GenerateUserPasswordResetTokenAsync(user))
                 .ReturnsAsync(token);
 
-            emailServiceMock.Setup(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email))
+            emailManagerMock.Setup(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -71,12 +70,12 @@ namespace Application.Tests.Services
             methodInTest.Should().Throw<RestException>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
             userRepoMock.Verify(x => x.GenerateUserPasswordResetTokenAsync(user), Times.Never);
-            emailServiceMock.Verify(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
+            emailManagerMock.Verify(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
+        public void ConfirmUserPasswordRecoveryAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
              User user, UserPasswordRecoveryVerification userPasswordRecovery, UserRecoveryService sut)
         {
             // Arrange
@@ -98,7 +97,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ConfirmUserPasswordRecoveryAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailService> emailServiceMock,
+        public void ConfirmUserPasswordRecoveryAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<IEmailManager> emailManagerMock,
              User user, UserPasswordRecoveryVerification userPasswordRecovery, UserRecoveryService sut)
         {
             // Arrange
@@ -120,7 +119,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ConfirmUserPasswordRecoveryAsync_PasswordRecoveryFailed([Frozen] Mock<IUserRepository> userRepoMock,
+        public void ConfirmUserPasswordRecoveryAsync_PasswordRecoveryFailed([Frozen] Mock<IUserManager> userRepoMock,
              UserPasswordRecoveryVerification userPasswordRecovery, User user, UserRecoveryService sut)
         {
             // Arrange
@@ -142,7 +141,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ChangeUserPasswordAsync_Successful([Frozen] Mock<IUserRepository> userRepoMock,
+        public void ChangeUserPasswordAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
             // Arrange
@@ -162,7 +161,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ChangeUserPasswordAsync_UserNotFound([Frozen] Mock<IUserRepository> userRepoMock,
+        public void ChangeUserPasswordAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
             // Arrange
@@ -182,7 +181,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ChangeUserPasswordAsync_ChangePasswordFailed([Frozen] Mock<IUserRepository> userRepoMock,
+        public void ChangeUserPasswordAsync_ChangePasswordFailed([Frozen] Mock<IUserManager> userRepoMock,
              User user, UserPasswordChange userPassChange, UserRecoveryService sut)
         {
             // Arrange
