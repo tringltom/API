@@ -35,7 +35,10 @@ namespace Application.ServiceInterfaces
             if (activity.Favorite)
                 _uow.UserFavorites.Add(userFavoriteActivity);
             else
-                _uow.UserFavorites.Remove(userFavoriteActivity);
+            {
+                var existingFavoriteActivity = await _uow.UserFavorites.GetFavoriteActivityAsync(userId, activity.ActivityId);
+                _uow.UserFavorites.Remove(existingFavoriteActivity);
+            }
 
             if (!await _uow.CompleteAsync())
                 throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." });

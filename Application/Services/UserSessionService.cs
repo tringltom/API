@@ -214,6 +214,9 @@ namespace Application.Services
         {
             var activityCountersForDelete = user.ActivityCreationCounters.Where(ac => ac.DateCreated.AddDays(7) < DateTimeOffset.Now).ToList();
 
+            if (activityCountersForDelete.Count == 0)
+                return true;
+
             _uow.ActivityCreationCounters.RemoveRange(activityCountersForDelete);
             return await _uow.CompleteAsync();
         }

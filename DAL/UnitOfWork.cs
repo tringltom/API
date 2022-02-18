@@ -12,7 +12,14 @@ namespace DAL
         public UnitOfWork(DataContext dbContext)
         {
             _dbContext = dbContext;
-            Users = new UserRepository(_dbContext);
+            Users = new UserRepository(dbContext);
+            RefreshTokens = new RefreshTokenRepository(dbContext);
+            ActivityReviewXps = new ActivityReviewXpRepository(dbContext);
+            Activities = new ActivityRepository(dbContext);
+            ActivityCreationCounters = new ActivityCreationCounterRepository(dbContext);
+            PendingActivities = new PendingActivityRepository(dbContext);
+            UserFavorites = new UserFavortitesRepository(dbContext);
+            UserReviews = new UserReviewRepository(dbContext);
         }
 
         public IUserRepository Users { get; private set; }
