@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Models.Activity;
+using Application.Models.Activity;
 
 namespace Application.ServiceInterfaces
 {

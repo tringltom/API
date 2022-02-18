@@ -2,7 +2,7 @@
 using Domain;
 using Microsoft.AspNetCore.Http;
 
-namespace Models.Activity
+namespace Application.Models.Activity
 {
     public class ActivityCreate
     {

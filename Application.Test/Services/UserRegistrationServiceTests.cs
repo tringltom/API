@@ -2,14 +2,14 @@
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
+using Application.Models.User;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
-using DAL.RepositoryInterfaces;
+using DAL;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
-using Models.User;
 using Moq;
 using NUnit.Framework;
 
@@ -27,12 +27,14 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void RegisterAsync_Successful([Frozen] Mock<IUserManager> userManagerRepoMock, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailManager> emailManagerMock,
+        public void RegisterAsync_Successful([Frozen] Mock<IUserManager> userManagerRepoMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IEmailManager> emailManagerMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
@@ -46,20 +48,22 @@ namespace Application.Tests.Services
             // Assert
 
             methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once);
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Once);
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once);
+            uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Once);
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Once);
             emailManagerMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void RegisterAsync_UserEmailTaken([Frozen] Mock<IUserManager> userManagerRepoMock, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailManager> emailServiceMock,
+        public void RegisterAsync_UserEmailTaken([Frozen] Mock<IUserManager> userManagerRepoMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IEmailManager> emailServiceMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(true);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(true);
+            uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
@@ -72,20 +76,22 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once());
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Never());
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Never());
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Never);
             emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void RegisterAsync_UserNameTaken([Frozen] Mock<IUserManager> userManagerRepoMock, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailManager> emailServiceMock,
+        public void RegisterAsync_UserNameTaken([Frozen] Mock<IUserManager> userManagerRepoMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IEmailManager> emailServiceMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(true);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
@@ -98,20 +104,22 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once());
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Never);
             emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void RegisterAsync_UserCreationFails([Frozen] Mock<IUserManager> userManagerRepoMock, [Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IEmailManager> emailManagerMock,
+        public void RegisterAsync_UserCreationFails([Frozen] Mock<IUserManager> userManagerRepoMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IEmailManager> emailManagerMock,
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
-            userRepoMock.Setup(x => x.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
                 .ReturnsAsync(_fixture.Create<string>());
@@ -124,8 +132,8 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().Throw<RestException>();
-            userRepoMock.Verify(x => x.ExistsWithEmailAsync(userRegister.Email), Times.Once());
-            userRepoMock.Verify(x => x.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Once());
             emailManagerMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
         }

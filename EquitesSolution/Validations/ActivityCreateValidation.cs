@@ -1,6 +1,6 @@
-﻿using Domain;
+﻿using Application.Models.Activity;
+using Domain;
 using FluentValidation;
-using Models.Activity;
 
 namespace API.Validations
 {

@@ -1,4 +1,4 @@
-﻿namespace Models.Activity
+﻿namespace Application.Models.Activity
 {
     public class PendingActivityApproval
     {

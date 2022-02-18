@@ -3,8 +3,8 @@ using Domain;
 
 namespace DAL.RepositoryInterfaces
 {
-    public interface IActivityReviewXpRepository
+    public interface IActivityReviewXpRepository : IBaseRepository<ActivityReviewXp>
     {
-        Task<int> GetXpRewardByActivityAndReviewTypeIdsAsync(ActivityTypeId activityTypeId, ReviewTypeId reviewTypeId);
+        Task<ActivityReviewXp> GetXpRewardAsync(ActivityTypeId activityTypeId, ReviewTypeId reviewTypeId);
     }
 }

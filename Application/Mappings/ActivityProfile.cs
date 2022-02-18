@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Application.Models;
+using Application.Models.Activity;
 using AutoMapper;
 using Domain;
-using Models;
-using Models.Activity;
 
 namespace Application.Mappings
 {

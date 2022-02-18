@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
+using Application.Models.Activity;
 using AutoMapper;
-using DAL.RepositoryInterfaces;
+using DAL;
 using Domain;
-using Models.Activity;
 
 namespace Application.ServiceInterfaces
 {
@@ -16,15 +15,15 @@ namespace Application.ServiceInterfaces
     {
         private readonly IUserManager _userManager;
         private readonly IUserAccessor _userAccessor;
-        private readonly IFavoritesRepository _favoritesRepository;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public FavoritesService(IFavoritesRepository favoritesRepository, IMapper mapper, IUserManager userManager, IUserAccessor userAccessor)
+        public FavoritesService(IMapper mapper, IUserManager userManager, IUserAccessor userAccessor, IUnitOfWork uow)
         {
-            _favoritesRepository = favoritesRepository;
             _mapper = mapper;
             _userManager = userManager;
             _userAccessor = userAccessor;
+            _uow = uow;
         }
 
         public async Task ResolveFavoriteActivityAsync(FavoriteActivityBase activity)
@@ -33,27 +32,18 @@ namespace Application.ServiceInterfaces
 
             var userFavoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
 
-            try
-            {
-                if (activity.Favorite)
-                {
-                    await _favoritesRepository.AddFavoriteActivityAsync(userFavoriteActivity);
-                }
-                else
-                {
-                    if (!await _favoritesRepository.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, activity.ActivityId))
-                        throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, aktivnost je nepostojeća." });
-                }
-            }
-            catch (Exception)
-            {
+            if (activity.Favorite)
+                _uow.UserFavorites.Add(userFavoriteActivity);
+            else
+                _uow.UserFavorites.Remove(userFavoriteActivity);
+
+            if (!await _uow.CompleteAsync())
                 throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." });
-            }
         }
 
         public async Task<IList<FavoriteActivityReturn>> GetAllFavoritesForUserAsync(int userId)
         {
-            var favoriteActivities = await _favoritesRepository.GetFavoriteActivitiesByUserIdAsync(userId);
+            var favoriteActivities = await _uow.UserFavorites.GetFavoriteActivitiesAsync(userId);
 
             return _mapper.Map<List<FavoriteActivityReturn>>(favoriteActivities);
         }

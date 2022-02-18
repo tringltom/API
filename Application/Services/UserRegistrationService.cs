@@ -3,12 +3,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
+using Application.Models.User;
 using Application.ServiceInterfaces;
 using DAL;
-using DAL.RepositoryInterfaces;
 using Domain;
 using Microsoft.AspNetCore.WebUtilities;
-using Models.User;
 
 
 
@@ -16,11 +15,11 @@ namespace Application.Services
 {
     public class UserRegistrationService : IUserRegistrationService
     {
-        private readonly InfrastructureInterfaces.IUserManager _userManagerRepository;
+        private readonly IUserManager _userManagerRepository;
         private readonly IEmailManager _emailManager;
         private readonly IUnitOfWork _uow;
 
-        public UserRegistrationService(InfrastructureInterfaces.IUserManager userManagerRepository, IEmailManager emailManager, IUnitOfWork uow)
+        public UserRegistrationService(IUserManager userManagerRepository, IEmailManager emailManager, IUnitOfWork uow)
         {
             _userManagerRepository = userManagerRepository;
             _emailManager = emailManager;

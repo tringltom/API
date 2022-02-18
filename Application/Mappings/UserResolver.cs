@@ -1,7 +1,7 @@
 ﻿using Application.InfrastructureInterfaces.Security;
+using Application.Models.Activity;
 using AutoMapper;
 using Domain;
-using Models.Activity;
 
 namespace Application.Mappings
 {

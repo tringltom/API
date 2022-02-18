@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
+using Application.Models.Activity;
+using Application.Models.User;
 using Application.ServiceInterfaces;
 using DAL;
-using DAL.RepositoryInterfaces;
 using Domain;
-using Models.Activity;
-using Models.User;
 
 
 namespace Application.Services
@@ -22,21 +21,18 @@ namespace Application.Services
         private readonly IUserManager _userManagerRepository;
         private readonly ITokenManager _tokenManager;
         private readonly IFacebookAccessor _facebookAccessor;
-        private readonly IActivityRepository _activityRepository;
         private readonly IUserAccessor _userAccessor;
         private readonly IUnitOfWork _uow;
 
         public UserSessionService(IUserManager userManagerRepository,
             ITokenManager tokenManger,
             IFacebookAccessor facebookAccessor,
-            IActivityRepository activityRepository,
             IUserAccessor userAccessor,
             IUnitOfWork uow)
         {
             _userManagerRepository = userManagerRepository;
             _tokenManager = tokenManger;
             _facebookAccessor = facebookAccessor;
-            _activityRepository = activityRepository;
             _userAccessor = userAccessor;
             _uow = uow;
         }
@@ -76,9 +72,12 @@ namespace Application.Services
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
 
-            var token = _tokenManager.CreateToken(user);
+            var token = _tokenManager.CreateJWTToken(user);
 
-            var activityCounts = await GetAvailableActivitiesCount(user);
+            if (!await RemoveExpiredCounters(user))
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešmo resetovanje aktivnosti" });
+
+            var activityCounts = GetAvailableActivitiesCount(user);
 
             return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
         }
@@ -110,9 +109,12 @@ namespace Application.Services
             if (!await _userManagerRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
-            var userToken = _tokenManager.CreateToken(user);
+            var userToken = _tokenManager.CreateJWTToken(user);
 
-            var activityCounts = await GetAvailableActivitiesCount(user);
+            if (!await RemoveExpiredCounters(user))
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešmo resetovanje aktivnosti" });
+
+            var activityCounts = GetAvailableActivitiesCount(user);
 
             return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
         }
@@ -142,7 +144,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
 
-            var userToken = _tokenManager.CreateToken(user);
+            var userToken = _tokenManager.CreateJWTToken(user);
 
             return new UserBaseResponse(userToken, user.UserName, newRefreshToken.Token);
         }
@@ -179,7 +181,7 @@ namespace Application.Services
 
             var refreshToken = _tokenManager.CreateRefreshToken();
 
-            var userToken = _tokenManager.CreateToken(user);
+            var userToken = _tokenManager.CreateJWTToken(user);
 
             if (user != null)
             {
@@ -208,14 +210,16 @@ namespace Application.Services
             return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
         }
 
-        // This will be moved to activity service so UserActivityManager can consume it along with GetcurrentUser and Login
-        // Also tests will be added after refactoring
-        private async Task<List<ActivityCount>> GetAvailableActivitiesCount(User user)
+        private async Task<bool> RemoveExpiredCounters(User user)
         {
-            var activityCounterForDelete = user.ActivityCreationCounters.Where(ac => ac.DateCreated.AddDays(7) < DateTimeOffset.Now).ToList();
+            var activityCountersForDelete = user.ActivityCreationCounters.Where(ac => ac.DateCreated.AddDays(7) < DateTimeOffset.Now).ToList();
 
-            await _activityRepository.DeleteActivityCountersAsync(activityCounterForDelete);
+            _uow.ActivityCreationCounters.RemoveRange(activityCountersForDelete);
+            return await _uow.CompleteAsync();
+        }
 
+        private List<ActivityCount> GetAvailableActivitiesCount(User user)
+        {
             var usedActivitiesCount = user.ActivityCreationCounters
                 .GroupBy(acc => acc.ActivityTypeId)
                 .Select(ac => new { Type = ac.Key, UsedCount = ac.Count() }).ToList();

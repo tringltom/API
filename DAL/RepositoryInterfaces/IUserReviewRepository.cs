@@ -1,14 +1,12 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Domain;
 
 namespace DAL.RepositoryInterfaces
 {
-    public interface IUserReviewRepository
+    public interface IUserReviewRepository : IBaseRepository<UserReview>
     {
-        Task<UserReview> GetUserReviewByActivityAndUserIdAsync(int activityId, int userId);
-        Task ReviewUserActivityAsync(UserReview userReview);
-        Task UpdateUserActivityReviewAsync(UserReview userReview);
-        IQueryable<UserReview> GetAllUserReviewsAsQeuriable();
+        Task<UserReview> GetUserReview(int activityId, int userId);
+        Task<IEnumerable<UserReview>> GetUserReviews(int userId);
     }
 }

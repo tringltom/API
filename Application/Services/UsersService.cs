@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Models.User;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
 using Domain;
-using Models.User;
 
 namespace Application.Services
 {
@@ -20,18 +20,17 @@ namespace Application.Services
             _mapper = mapper;
         }
 
-        public async Task<UserRangingEnvelope> GetTopXpUsers(int? limit, int? offset)
+        public async Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset)
         {
-            var topXpUsers = await _uow.Users.GetTopXpUsersAsync(limit, offset);
+            var topXpUsers = await _uow.Users.GetRangingUsers(limit, offset);
 
-            var userArenaEnvelope = new UserRangingEnvelope
+            var userRangingEnvelope = new UserRangingEnvelope
             {
                 Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserRangingGet>>(topXpUsers).ToList(),
                 UserCount = await _uow.Users.CountAsync(),
             };
 
-            return userArenaEnvelope;
+            return userRangingEnvelope;
         }
-
     }
 }

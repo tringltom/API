@@ -1,4 +1,4 @@
-﻿namespace Models.User
+﻿namespace Application.Models.User
 {
     public class UserRangingGet
     {

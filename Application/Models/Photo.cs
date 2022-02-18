@@ -1,4 +1,4 @@
-﻿namespace Models
+﻿namespace Application.Models
 {
     public class Photo
     {

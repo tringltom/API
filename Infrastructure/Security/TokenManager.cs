@@ -21,7 +21,7 @@ namespace Infrastructure.Security
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("TokenKey").Value));
         }
 
-        public string CreateToken(User user)
+        public string CreateJWTToken(User user)
         {
 
             var claims = new List<Claim>

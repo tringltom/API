@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
+using Application.Models;
 using Application.ServiceInterfaces;
-using Models;
 
 namespace Application.Services
 {

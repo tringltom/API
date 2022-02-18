@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using Models.User;
+using Application.Models.User;
 
 namespace Application.ServiceInterfaces
 {
     public interface IUsersService
     {
-        Task<UserRangingEnvelope> GetTopXpUsers(int? limit, int? offset);
+        Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset);
     }
 }

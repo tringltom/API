@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
+using Application.Models.User;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
@@ -9,7 +10,6 @@ using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Identity;
-using Models.User;
 using Moq;
 using NUnit.Framework;
 

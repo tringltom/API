@@ -17,6 +17,12 @@ namespace DAL
 
         public IUserRepository Users { get; private set; }
         public IRefreshTokenRepository RefreshTokens { get; private set; }
+        public IActivityReviewXpRepository ActivityReviewXps { get; private set; }
+        public IActivityRepository Activities { get; private set; }
+        public IActivityCreationCounterRepository ActivityCreationCounters { get; private set; }
+        public IPendingActivityRepository PendingActivities { get; private set; }
+        public IUserFavoritesRepository UserFavorites { get; private set; }
+        public IUserReviewRepository UserReviews { get; private set; }
         public async Task<bool> CompleteAsync() => await _dbContext.SaveChangesAsync() > 0;
         public void Dispose() => _dbContext.Dispose();
     }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Models.User
+namespace Application.Models.User
 {
     public class UserRangingEnvelope
     {

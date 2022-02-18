@@ -3,21 +3,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
+using Application.Models.User;
 using Application.ServiceInterfaces;
-using DAL.RepositoryInterfaces;
 using Domain;
 using Microsoft.AspNetCore.WebUtilities;
-using Models.User;
 
 namespace Application.Services
 {
     public class UserRecoveryService : IUserRecoveryService
     {
 
-        private readonly InfrastructureInterfaces.IUserManager _userRepository;
+        private readonly IUserManager _userRepository;
         private readonly IEmailManager _emailManager;
 
-        public UserRecoveryService(InfrastructureInterfaces.IUserManager userRepository, IEmailManager emailManager)
+        public UserRecoveryService(IUserManager userRepository, IEmailManager emailManager)
         {
             _userRepository = userRepository;
             _emailManager = emailManager;

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Models.Activity
+namespace Application.Models.Activity
 {
     public class PendingActivityReturn : ActivityBase
     {

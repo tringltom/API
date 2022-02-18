@@ -5,13 +5,10 @@ using API.Middleware;
 using API.Validations;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
-using Application.Managers;
 using Application.Mappings;
 using Application.ServiceInterfaces;
 using Application.Services;
 using DAL;
-using DAL.Repositories;
-using DAL.RepositoryInterfaces;
 using Domain;
 using FluentValidation.AspNetCore;
 using Infrastructure.Email;
@@ -64,33 +61,24 @@ namespace API
 
             services.AddAutoMapper(typeof(ActivityProfile));
 
-            //Add Transient Repositories
-
-            services.AddTransient<IActivityRepository, ActivityRepository>();
-            services.AddTransient<IFavoritesRepository, FavortitesRepository>();
-            services.AddTransient<IUserReviewRepository, UserReviewRepository>();
-            services.AddTransient<IActivityReviewXpRepository, ActivityReviewXpRepository>();
-
             //Add Scoped Managers
-            services.AddScoped<IReviewManager, ReviewManager>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IActivityReviewService, ActivityReviewService>();
             services.AddScoped<IFavoritesService, FavoritesService>();
-            services.AddScoped<IEmailManager, EmailManager>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddScoped<IActivityService, ActivityService>();
-            services.AddScoped<IUserLevelingService, UserLevelingService>();
             services.AddScoped<IDiceService, DiceService>();
             services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IReviewService, ReviewService>();
 
             services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
             services.AddScoped<IUserAccessor, UserAccessor>();
             services.AddScoped<IUserManager, Infrastructure.UserManager>();
+            services.AddScoped<IEmailManager, EmailManager>();
 
 
             services.AddDefaultIdentity<User>(options =>

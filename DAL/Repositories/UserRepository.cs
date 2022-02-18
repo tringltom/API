@@ -12,7 +12,7 @@ namespace DAL.Repositories
 
         public async Task<bool> ExistsWithEmailAsync(string email) => await AnyAsync(u => u.Email == email);
         public async Task<bool> ExistsWithUsernameAsync(string username) => await AnyAsync(u => u.UserName == username);
-        public async Task<IEnumerable<User>> GetTopXpUsersAsync(int? limit, int? offset) => await FindAsync(limit, offset, u => true, u => u.CurrentXp);
+        public async Task<IEnumerable<User>> GetRangingUsers(int? limit, int? offset) => await FindAsync(limit, offset, u => true, u => u.CurrentXp);
     }
 }
 

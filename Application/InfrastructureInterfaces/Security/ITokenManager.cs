@@ -4,7 +4,7 @@ namespace Application.InfrastructureInterfaces.Security
 {
     public interface ITokenManager
     {
-        string CreateToken(User user);
+        string CreateJWTToken(User user);
         RefreshToken CreateRefreshToken();
     }
 }

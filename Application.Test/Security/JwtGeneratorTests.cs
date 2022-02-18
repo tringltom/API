@@ -31,7 +31,7 @@ namespace Application.Tests.Security
             var sut = new TokenManager(_config);
 
             // Act
-            var result = sut.CreateToken(user);
+            var result = sut.CreateJWTToken(user);
 
             // Assert
             Assert.IsNotNull(result);

@@ -25,10 +25,10 @@ namespace DAL.Repositories
 
         public async Task<IEnumerable<TEntity>> GetAllAsync() => await _dbSet.ToListAsync();
         public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate) => await _dbSet.Where(predicate).ToListAsync();
-        public async Task<IEnumerable<TEntity>> FindAsync(int? limit, int? offset, Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, int>> orderPredicate)
+        public async Task<IEnumerable<TEntity>> FindAsync(int? limit, int? offset, Expression<Func<TEntity, bool>> wherePredicate, Expression<Func<TEntity, int>> orderPredicate)
         {
             return await _dbSet
-                .Where(predicate)
+                .Where(wherePredicate)
                 .OrderByDescending(orderPredicate)
                 .Skip(offset ?? 0)
                 .Take(limit ?? 3)

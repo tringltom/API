@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Domain;
 
-namespace Models.Activity
+namespace Application.Models.Activity
 {
     public abstract class ActivityBase
     {

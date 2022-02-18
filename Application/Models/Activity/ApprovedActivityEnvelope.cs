@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Models.Activity
+namespace Application.Models.Activity
 {
     public class ApprovedActivityEnvelope
     {

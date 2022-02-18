@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using Models.Activity;
+using Application.Models.Activity;
 
-namespace Models.User
+namespace Application.Models.User
 {
     public class UserBaseResponse
     {
