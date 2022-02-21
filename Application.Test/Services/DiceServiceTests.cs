@@ -1,9 +1,10 @@
 ﻿using System;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
-using Domain.Entities;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
 using Moq;
@@ -24,7 +25,8 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetDiceRollResultAsync_Successful(
-            [Frozen] Mock<IUserRepository> userRepoMock,
+            [Frozen] Mock<IUserAccessor> userAccessorMock,
+            [Frozen] Mock<IUserManager> userManagerRepoMock,
             DiceService sut)
         {
 
@@ -34,10 +36,10 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddDays(-2))
               .Create();
 
-            userRepoMock.Setup(x => x.GetUserUsingTokenAsync())
+            userAccessorMock.Setup(x => x.FindUserFromAccessToken())
                 .ReturnsAsync(eligableUser);
 
-            userRepoMock.Setup(x => x.UpdateUserAsync(eligableUser))
+            userManagerRepoMock.Setup(x => x.UpdateUserAsync(eligableUser))
                 .ReturnsAsync(true);
 
             // Act
@@ -50,7 +52,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetDiceRollResultAsync_Unsuccessful(
-        [Frozen] Mock<IUserRepository> userRepoMock,
+        [Frozen] Mock<IUserAccessor> userAccessorMock,
         DiceService sut)
         {
 
@@ -60,7 +62,7 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddMinutes(-20))
               .Create();
 
-            userRepoMock.Setup(x => x.GetUserUsingTokenAsync())
+            userAccessorMock.Setup(x => x.FindUserFromAccessToken())
                 .ReturnsAsync(nonEligableUser);
 
             // Act

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<InfoWarnings>
+  <Info>Begin full analysis with NDepend v2021.2.5</Info>
+  <Info>Visual Studio solution file resolved to absolute file path: from    {.\EquitesSolution.sln}    to    {C:\Users\Marko\Source\Repos\API\EquitesSolution\EquitesSolution.sln}</Info>
+  <Info>Output directory resolved to absolute directory path: C:\Users\Marko\Source\Repos\API\EquitesSolution\NDependOut</Info>
+  <Info>Compare with analysis result obtained on 2022 February - 17 Thursday 22:00  (which is the analysis result with date closest to 30 days ago)</Info>
+  <Info>.NET Assemblies resolved from the Visual Studio solution file {C:\Users\Marko\Source\Repos\API\EquitesSolution\EquitesSolution.sln}
+   C:\Users\Marko\Source\Repos\API\EquitesSolution\bin\Debug\netcoreapp3.1\API.dll
+   C:\Users\Marko\Source\Repos\API\Domain\bin\Debug\netcoreapp3.1\Domain.dll
+   C:\Users\Marko\Source\Repos\API\Application\bin\Debug\netcoreapp3.1\Application.dll
+   C:\Users\Marko\Source\Repos\API\Persistence\bin\Debug\netcoreapp3.1\Persistence.dll
+   C:\Users\Marko\Source\Repos\API\SuperFixture\bin\Debug\netcoreapp3.1\FixtureShared.dll
+   C:\Users\Marko\Source\Repos\API\Infrastructure\bin\Debug\netcoreapp3.1\Infrastructure.dll
+   C:\Users\Marko\Source\Repos\API\DAL\bin\Debug\netcoreapp3.1\DAL.dll</Info>
+  <Info>.NET Assemblies filtered out from the Visual Studio solution file {C:\Users\Marko\Source\Repos\API\EquitesSolution\EquitesSolution.sln}
+   Application.Tests
+   API.Tests</Info>
+  <Info>Concurrent mode</Info>
+  <Info>.NET Assemblies loaded from {C:\Program Files\dotnet\shared\Microsoft.NETCore.App\3.1.22} 
+   System.Linq.Queryable.dll   v4.0.4.0
+   System.Security.Cryptography.Algorithms.dll   v4.3.2.0
+   System.Security.Claims.dll   v4.1.2.0
+   System.Net.Http.dll   v4.2.2.0
+   System.Linq.dll   v4.2.2.0
+   System.Runtime.Extensions.dll   v4.2.2.0
+   System.ComponentModel.Annotations.dll   v4.3.1.0
+   System.Text.Json.dll   v4.0.1.2
+   System.Net.Primitives.dll   v4.1.2.0
+   System.Collections.dll   v4.1.2.0
+   System.Threading.Tasks.dll   v4.1.2.0
+   System.Linq.Expressions.dll   v4.2.2.0
+   System.ComponentModel.dll   v4.0.4.0
+   System.Diagnostics.Debug.dll   v4.1.2.0
+   System.Runtime.dll   v4.2.2.0</Info>
+  <Info>.NET Assemblies loaded from {C:\Program Files\dotnet\sdk\NuGetFallbackFolder} 
+   .\Microsoft.AspNetCore.WebUtilities\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.WebUtilities.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Mvc.Abstractions\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Abstractions.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Hosting\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Hosting.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Authorization.Policy\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Authorization.Policy.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.HttpsPolicy\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.HttpsPolicy.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Mvc\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Authentication\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Authentication.dll   v2.2.0.0
+   .\Microsoft.Extensions.Options.ConfigurationExtensions\2.2.0\lib\netstandard2.0\Microsoft.Extensions.Options.ConfigurationExtensions.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Identity\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Identity.dll   v2.2.0.0
+   .\Microsoft.AspNetCore\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.dll   v2.2.0.0
+   .\Microsoft.Extensions.Hosting\2.2.0\lib\netstandard2.0\Microsoft.Extensions.Hosting.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Authorization\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Authorization.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Routing\2.2.0\lib\netcoreapp2.2\Microsoft.AspNetCore.Routing.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Cors\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Cors.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Http.Abstractions\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Http.Abstractions.dll   v2.2.0.0
+   .\Microsoft.AspNetCore.Hosting.Abstractions\2.2.0\lib\netstandard2.0\Microsoft.AspNetCore.Hosting.Abstractions.dll   v2.2.0.0</Info>
+  <Info>.NET Assemblies loaded from {C:\Users\Marko\.nuget\packages} 
+   .\AutoFixture.AutoMoq\4.17.0\lib\net452\AutoFixture.AutoMoq.dll   v4.17.0.0
+   .\AutoFixture\4.17.0\lib\net452\AutoFixture.dll   v4.17.0.0
+   .\AutoFixture.NUnit3\4.17.0\lib\net452\AutoFixture.NUnit3.dll   v4.17.0.0
+   .\Microsoft.Extensions.Hosting.Abstractions\3.1.8\lib\netcoreapp3.1\Microsoft.Extensions.Hosting.Abstractions.dll   v3.1.8.0
+   .\Microsoft.AspNetCore.Mvc.Core\2.2.5\lib\netstandard2.0\Microsoft.AspNetCore.Mvc.Core.dll   v2.2.5.0</Info>
+  <Info>102 source files parsed ; all source files found ; all source files in-sync with PDB</Info>
+  <Info>0 code rule has been extracted from code.</Info>
+  <Info>No dependency cycle detected in assemblies referencement graph.</Info>
+  <Info>Do merge code generated by compiler into application code.</Info>
+  <Info>No SuppressMessageAttribute found in the analyzed code base. Since NDepend v2018.2 SuppressMessageAttribute can be used to suppress NDepend issues. Don't forget to set in your projects the compilation symbol CODE_ANALYSIS to use this attribute to suppress NDepend issues.</Info>
+  <Info>Persisting code model snapshot in {C:\Users\Marko\Source\Repos\API\EquitesSolution\NDependOut\NDependAnalysisResult_EquitesSolution_2022Feb18_00h45.ndar}</Info>
+  <Info>Start log trend metrics values out-of-process.</Info>
+  <Info>NDepend analysis done. Duration: 00:16.224</Info>
+</InfoWarnings>

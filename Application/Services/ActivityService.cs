@@ -3,30 +3,29 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Media;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces;
+using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoMapper;
-using Domain.Entities;
-using Microsoft.EntityFrameworkCore;
+using DAL;
+using Domain;
 using Microsoft.AspNetCore.Http;
-using Models.Activity;
 
 namespace Application.Services
 {
     public class ActivityService : IActivityService
     {
         private readonly IPhotoAccessor _photoAccessor;
-        private readonly IActivityRepository _activityRepository;
         private readonly IMapper _mapper;
-        private readonly IEmailService _emailService;
+        private readonly IEmailManager _emailManager;
+        private readonly IUnitOfWork _uow;
 
-        public ActivityService(IPhotoAccessor photoAccessor, IActivityRepository activityRepository, IMapper mapper, IEmailService emailService)
+        public ActivityService(IPhotoAccessor photoAccessor, IMapper mapper, IEmailManager emailManager, IUnitOfWork uow)
         {
             _photoAccessor = photoAccessor;
-            _activityRepository = activityRepository;
             _mapper = mapper;
-            _emailService = emailService;
+            _emailManager = emailManager;
+            _uow = uow;
         }
 
         public async Task CreatePendingActivityAsync(ActivityCreate activityCreate)
@@ -37,7 +36,7 @@ namespace Application.Services
                 .Where(ac => ac.ActivityTypeId == activityCreate.Type && ac.DateCreated.AddDays(7) >= DateTimeOffset.Now)
                 .Count() >= 2)
             {
-                throw new RestException(HttpStatusCode.BadRequest, new { Greska = $"Nemate pravo da kreirate aktivnost" });
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Nemate pravo da kreirate aktivnost" });
             }
 
             foreach (var image in activityCreate?.Images ?? new IFormFile[0])
@@ -47,7 +46,7 @@ namespace Application.Services
                     activity.PendingActivityMedias.Add(new PendingActivityMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
             }
 
-            await _activityRepository.CreatePendingActivityAsync(activity);
+            _uow.PendingActivities.Add(activity);
 
             var activityCreationCounter = new ActivityCreationCounter
             {
@@ -55,56 +54,50 @@ namespace Application.Services
                 ActivityTypeId = activity.ActivityTypeId,
                 DateCreated = DateTimeOffset.Now
             };
+            _uow.ActivityCreationCounters.Add(activityCreationCounter);
 
-            await _activityRepository.CreateActivityCreationCounter(activityCreationCounter);
-        }
-
-        public async Task<Activity> GetActivityUserIdByActivityId(int activityId)
-        {
-            return await _activityRepository.GetActivityByIdAsync(activityId)
-                ?? throw new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" });
+            if (!await _uow.CompleteAsync())
+                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Greska pri kreiranju aktivnosti" });
         }
 
         public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)
         {
-            var pendingActivities = await _activityRepository.GetPendingActivitiesAsync(limit, offset);
+            var pendingActivities = await _uow.PendingActivities.GetLatestPendingActivities(limit, offset);
 
             return new PendingActivityEnvelope
             {
                 Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityReturn>(pa)).ToList(),
-                ActivityCount = await _activityRepository.GetPendingActivitiesCountAsync(),
+                ActivityCount = await _uow.PendingActivities.CountAsync()
             };
         }
 
-        public async Task<bool> ReslovePendingActivityAsync(int pendingActivityID, PendingActivityApproval approval)
+        public async Task<bool> ReslovePendingActivityAsync(int pendingActivityId, PendingActivityApproval approval)
         {
-            var pendingActivity = await _activityRepository.GetPendingActivityByIdAsync(pendingActivityID)
+            var pendingActivity = await _uow.PendingActivities.GetAsync(pendingActivityId)
                 ?? throw new NotFound("Aktivnost nije pronadjena");
 
             var activity = _mapper.Map<Activity>(pendingActivity);
 
             if (approval.Approve)
-                await _activityRepository.CreateActivityAsync(activity);
+                _uow.Activities.Add(activity);
             else
                 activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
 
-            await _emailService.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
+            await _emailManager.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
 
-            return await _activityRepository.DeletePendingActivity(pendingActivity);
+            _uow.PendingActivities.Remove(pendingActivity);
+
+            return await _uow.CompleteAsync();
         }
 
         public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesFromOtherUsersAsync(int userId, int? limit, int? offset)
         {
-            var approvedActivities = await _activityRepository.GetApprovedActivitiesAsQueriable()
-                .Where(x => x.User.Id != userId)
-                .Skip(offset ?? 0)
-                .Take(limit ?? 3)
-                .ToListAsync();
+            var approvedActivities = await _uow.Activities.FindAsync(limit, offset, a => a.User.Id != userId, a => a.Id);
 
             return new ApprovedActivityEnvelope
             {
                 Activities = approvedActivities.Select(pa => _mapper.Map<ApprovedActivityReturn>(pa)).ToList(),
-                ActivityCount = await _activityRepository.GetApprovedActivitiesCountAsync(),
+                ActivityCount = await _uow.Activities.CountAsync(a => a.User.Id != userId)
             };
         }
 

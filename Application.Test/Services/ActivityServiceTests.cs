@@ -1,19 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.Media;
-using Application.RepositoryInterfaces;
-using Application.ServiceInterfaces;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureModels;
+using Application.Models.Activity;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
+using DAL;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
-using Models.Activity;
 using Moq;
 using NUnit.Framework;
 
@@ -33,6 +32,7 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void CreateActivityWithoutImageAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
             PendingActivity activity,
             ActivityService sut)
         {
@@ -47,6 +47,9 @@ namespace Application.Tests.Services
                 .Setup(x => x.Map<PendingActivity>(activityCreate))
                 .Returns(activity);
 
+            uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
             // Act
             Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
 
@@ -59,6 +62,7 @@ namespace Application.Tests.Services
         public void CreateActivityWithImageAsync_Successful(
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
             ActivityCreate activityCreate,
             PhotoUploadResult photoUploadResult,
             PendingActivity activity,
@@ -74,6 +78,9 @@ namespace Application.Tests.Services
                 .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
                 .ReturnsAsync(photoUploadResult);
 
+            uowMock.Setup(x => x.CompleteAsync())
+               .ReturnsAsync(true);
+
             // Act
             Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
 
@@ -87,7 +94,7 @@ namespace Application.Tests.Services
         public void CreatePendingActivity_ExceededCount(
            [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
            [Frozen] Mock<IMapper> mapperMock,
-           [Frozen] Mock<IActivityRepository> activityRepoMock,
+           [Frozen] Mock<IUnitOfWork> uowMock,
            ActivityCreate activityCreate,
            ActivityService sut,
            User user)
@@ -130,15 +137,14 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().Throw<RestException>();
             photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Never);
-            activityRepoMock.Verify(x => x.CreatePendingActivityAsync(pendingActivity), Times.Never);
-            activityRepoMock.Verify(x => x.CreateActivityCreationCounter(It.IsAny<ActivityCreationCounter>()), Times.Never);
+            uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetPendingActivitiesAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IActivityRepository> activityRepoMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
             List<PendingActivity> pendingActivities,
             List<PendingActivityReturn> pendingActivitiesGet,
             int limit, int offset,
@@ -154,12 +160,12 @@ namespace Application.Tests.Services
                 .Setup(x => x.Map<List<PendingActivityReturn>>(It.IsAny<PendingActivity>()))
                 .Returns(pendingActivitiesGet);
 
-            activityRepoMock
-                .Setup(x => x.GetPendingActivitiesAsync(limit, offset))
+            uowMock
+                .Setup(x => x.PendingActivities.GetLatestPendingActivities(limit, offset))
                 .ReturnsAsync(pendingActivities);
 
-            activityRepoMock
-                .Setup(x => x.GetPendingActivitiesCountAsync())
+            uowMock
+                .Setup(x => x.PendingActivities.CountAsync())
                 .ReturnsAsync(pendingActivities.Count);
 
             // Act
@@ -167,8 +173,8 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivitiesAsync(limit, offset), Times.Once);
-            activityRepoMock.Verify(x => x.GetPendingActivitiesCountAsync(), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivities(limit, offset), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.CountAsync(), Times.Once);
 
         }
 
@@ -176,8 +182,8 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void ApprovePendingActivityAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IActivityRepository> activityRepoMock,
-            [Frozen] Mock<IEmailService> emailServiceMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IEmailManager> emailManagerMock,
             int pendingActivityId,
             PendingActivity pendingActivity,
             Activity activity,
@@ -192,8 +198,8 @@ namespace Application.Tests.Services
                 .Setup(x => x.Map<Activity>(pendingActivity))
                 .Returns(activity);
 
-            activityRepoMock
-                .Setup(x => x.GetPendingActivityByIdAsync(pendingActivityId))
+            uowMock
+                .Setup(x => x.PendingActivities.GetAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
             // Act
@@ -201,18 +207,17 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
-            activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Once);
-            emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
-            activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.GetAsync(pendingActivityId), Times.Once);
+            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void DisapprovePendingActivityAsync_Successful(
-          [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IActivityRepository> activityRepoMock,
-            [Frozen] Mock<IEmailService> emailServiceMock,
+            [Frozen] Mock<IMapper> mapperMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IEmailManager> emailManagerMock,
             int pendingActivityId,
             PendingActivity pendingActivity,
             Activity activity,
@@ -227,8 +232,8 @@ namespace Application.Tests.Services
                 .Setup(x => x.Map<Activity>(pendingActivity))
                 .Returns(activity);
 
-            activityRepoMock
-                .Setup(x => x.GetPendingActivityByIdAsync(pendingActivityId))
+            uowMock
+                .Setup(x => x.PendingActivities.GetAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
             // Act
@@ -236,50 +241,9 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            activityRepoMock.Verify(x => x.GetPendingActivityByIdAsync(pendingActivityId), Times.Once);
-            activityRepoMock.Verify(x => x.CreateActivityAsync(activity), Times.Never);
-            emailServiceMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
-            activityRepoMock.Verify(x => x.DeletePendingActivity(pendingActivity), Times.Once);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetActivityUserIdByActivityId_Successful(
-            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
-            int activityId,
-            Activity activity,
-            ActivityService sut)
-        {
-
-            // Arrange
-            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
-                .ReturnsAsync(activity);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
-        }
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetActivityUserIdByActivityId_ActivityNotFound(
-            [Frozen] Mock<IActivityRepository> activityRepositoryMock,
-            int activityId,
-            ActivityService sut)
-        {
-
-            // Arrange
-            activityRepositoryMock.Setup(x => x.GetActivityByIdAsync(activityId))
-                .ThrowsAsync(new RestException(HttpStatusCode.BadRequest, new { Activity = "Greška, aktivnost nije pronadjena" }));
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.GetActivityUserIdByActivityId(activityId);
-
-            // Assert
-            methodInTest.Should().Throw<RestException>();
-            activityRepositoryMock.Verify(x => x.GetActivityByIdAsync(activityId), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.GetAsync(pendingActivityId), Times.Once);
+            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
         }
     }
 }

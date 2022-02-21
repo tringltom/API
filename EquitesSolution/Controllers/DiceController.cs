@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Application.Models;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
-using Models;
 
 namespace API.Controllers
 {

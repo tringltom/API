@@ -3,18 +3,18 @@ using System.Reflection;
 using System.Text;
 using API.Middleware;
 using API.Validations;
-using Application.Managers;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
 using Application.Mappings;
-using Application.Media;
-using Application.Repositories;
-using Application.RepositoryInterfaces;
-using Application.Security;
-using Application.ServiceHelpers;
 using Application.ServiceInterfaces;
 using Application.Services;
-using Application.Settings;
-using Domain.Entities;
+using DAL;
+using Domain;
 using FluentValidation.AspNetCore;
+using Infrastructure.Email;
+using Infrastructure.Media;
+using Infrastructure.Security;
+using Infrastructure.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -61,32 +61,24 @@ namespace API
 
             services.AddAutoMapper(typeof(ActivityProfile));
 
-            services.AddSingleton<IUserServiceHelper, UserServiceHelper>();
-
-            //Add Transient Repositories
-            services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IActivityRepository, ActivityRepository>();
-            services.AddTransient<IFavoritesRepository, FavortitesRepository>();
-            services.AddTransient<IUserReviewRepository, UserReviewRepository>();
-            services.AddTransient<IActivityReviewXpRepository, ActivityReviewXpRepository>();
-
             //Add Scoped Managers
-            services.AddScoped<IReviewManager, ReviewManager>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IActivityReviewService, ActivityReviewService>();
             services.AddScoped<IFavoritesService, FavoritesService>();
-            services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddScoped<IActivityService, ActivityService>();
-            services.AddScoped<IUserLevelingService, UserLevelingService>();
-
             services.AddScoped<IDiceService, DiceService>();
-            services.AddScoped<IJwtGenerator, JwtGenerator>();
+            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IReviewService, ReviewService>();
+
+            services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
-            services.AddScoped<IUsersService, UsersService>();
+            services.AddScoped<IUserAccessor, UserAccessor>();
+            services.AddScoped<IUserManager, Infrastructure.UserManager>();
+            services.AddScoped<IEmailManager, EmailManager>();
 
 
             services.AddDefaultIdentity<User>(options =>

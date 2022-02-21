@@ -1,5 +1,5 @@
-﻿using FluentValidation;
-using Models.Activity;
+﻿using Application.Models.Activity;
+using FluentValidation;
 
 namespace API.Validations
 {

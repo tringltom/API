@@ -1,55 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
+using Application.Models.Activity;
 using AutoMapper;
-using Domain.Entities;
-using Models.Activity;
+using DAL;
+using Domain;
 
 namespace Application.ServiceInterfaces
 {
     public class FavoritesService : IFavoritesService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IFavoritesRepository _favoritesRepository;
+        private readonly IUserManager _userManager;
+        private readonly IUserAccessor _userAccessor;
+        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public FavoritesService(IFavoritesRepository favoritesRepository, IMapper mapper, IUserRepository userRepository)
+        public FavoritesService(IMapper mapper, IUserManager userManager, IUserAccessor userAccessor, IUnitOfWork uow)
         {
-            _favoritesRepository = favoritesRepository;
             _mapper = mapper;
-            _userRepository = userRepository;
+            _userManager = userManager;
+            _userAccessor = userAccessor;
+            _uow = uow;
         }
 
         public async Task ResolveFavoriteActivityAsync(FavoriteActivityBase activity)
         {
-            var userId = _userRepository.GetUserIdUsingToken();
+            var userId = _userAccessor.GetUserIdFromAccessToken();
 
             var userFavoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
 
-            try
+            if (activity.Favorite)
+                _uow.UserFavorites.Add(userFavoriteActivity);
+            else
             {
-                if (activity.Favorite)
-                {
-                    await _favoritesRepository.AddFavoriteActivityAsync(userFavoriteActivity);
-                }
-                else
-                {
-                    if (!await _favoritesRepository.RemoveFavoriteActivityByActivityAndUserIdAsync(userId, activity.ActivityId))
-                        throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, aktivnost je nepostojeća." });
-                }
+                var existingFavoriteActivity = await _uow.UserFavorites.GetFavoriteActivityAsync(userId, activity.ActivityId);
+                _uow.UserFavorites.Remove(existingFavoriteActivity);
             }
-            catch (Exception)
-            {
+
+            if (!await _uow.CompleteAsync())
                 throw new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." });
-            }
         }
 
         public async Task<IList<FavoriteActivityReturn>> GetAllFavoritesForUserAsync(int userId)
         {
-            var favoriteActivities = await _favoritesRepository.GetFavoriteActivitiesByUserIdAsync(userId);
+            var favoriteActivities = await _uow.UserFavorites.GetFavoriteActivitiesAsync(userId);
 
             return _mapper.Map<List<FavoriteActivityReturn>>(favoriteActivities);
         }

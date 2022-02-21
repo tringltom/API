@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Models.User;
 
 namespace API.Controllers
 {
@@ -33,7 +33,7 @@ namespace API.Controllers
 
             var origin = Request.Headers["origin"];
 
-            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
+            await _userRegistrationService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
@@ -69,9 +69,9 @@ namespace API.Controllers
         }
 
         [HttpGet("getTopXpUsers")]
-        public async Task<ActionResult<UserArenaEnvelope>> GetTopXpUsers(int? limit, int? offset)
+        public async Task<ActionResult<UserRangingEnvelope>> GetTopXpUsers(int? limit, int? offset)
         {
-            return await _usersService.GetTopXpUsers(limit, offset);
+            return await _usersService.GetRangingUsers(limit, offset);
         }
 
         [AllowAnonymous]

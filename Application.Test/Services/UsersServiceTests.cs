@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Application.RepositoryInterfaces;
+using Application.Models.User;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using AutoMapper;
-using Domain.Entities;
+using DAL;
+using Domain;
 using FixtureShared;
 using FluentAssertions;
-using Models.User;
 using Moq;
 using NUnit.Framework;
 
@@ -27,33 +27,34 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsers_Successfull([Frozen] Mock<IUserRepository> userRepoMock, [Frozen] Mock<IMapper> mapperMock, int? limit,
-            int? offset,
-            List<UserArenaGet> userArenaGet,
+        public void GetTopXpUsers_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IMapper> mapperMock,
+            int? limit, int? offset,
+            List<UserRangingGet> userArenaGet,
             List<User> users, int usersCount,
             UsersService sut)
         {
             // Arrange
-            userRepoMock.Setup(x => x.GetTopXpUsersAsync(limit, offset))
+            uowMock.Setup(x => x.Users.GetRangingUsers(limit, offset))
                 .ReturnsAsync(users);
 
-            userRepoMock.Setup(x => x.GetUserCountAsync())
+            uowMock.Setup(x => x.Users.CountAsync())
                 .ReturnsAsync(usersCount);
 
-            mapperMock.Setup(x => x.Map<List<UserArenaGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
+            mapperMock.Setup(x => x.Map<List<UserRangingGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
 
-            var userArenaEnvelope = _fixture.Create<UserArenaEnvelope>();
+            var userArenaEnvelope = _fixture.Create<UserRangingEnvelope>();
             userArenaEnvelope.Users = userArenaGet;
             userArenaEnvelope.UserCount = usersCount;
 
             // Act
-            Func<Task<UserArenaEnvelope>> methodInTest = async () => await sut.GetTopXpUsers(limit, offset);
+            Func<Task<UserRangingEnvelope>> methodInTest = async () => await sut.GetRangingUsers(limit, offset);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             methodInTest.Should().NotBeNull();
-            userRepoMock.Verify(x => x.GetTopXpUsersAsync(limit, offset), Times.Once);
-            userRepoMock.Verify(x => x.GetUserCountAsync(), Times.Once);
+            uowMock.Verify(x => x.Users.GetRangingUsers(limit, offset), Times.Once);
+            uowMock.Verify(x => x.Users.CountAsync(), Times.Once);
         }
     }
 }

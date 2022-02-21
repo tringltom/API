@@ -1,29 +1,26 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Application.Managers;
+using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Models.Activity;
 
 namespace API.Controllers
 {
     [Route("reviews")]
     public class ReviewController : BaseController
     {
-        private readonly IReviewManager _reviewManager;
-        private readonly IActivityReviewService _activityReviewService;
+        private readonly IReviewService _reviewService;
 
-        public ReviewController(IReviewManager reviewManager, IActivityReviewService activityReviewService)
+        public ReviewController(IReviewService reviewManager)
         {
-            _reviewManager = reviewManager;
-            _activityReviewService = activityReviewService;
+            _reviewService = reviewManager;
         }
 
         [HttpPost("reviewActivity")]
         public async Task<ActionResult> ReviewActivity([FromBody] ActivityReview activityReview)
         {
-            await _reviewManager.ReviewActivityAsync(activityReview);
+            await _reviewService.ReviewActivityAsync(activityReview);
 
             return Ok("Uspešno ste ocenili aktivnost");
         }
@@ -32,7 +29,7 @@ namespace API.Controllers
         [AllowAnonymous]
         public async Task<IList<UserReviewedActivity>> GetReviewsForUser([FromQuery] int userId)
         {
-            return await _activityReviewService.GetAllReviewsByUserId(userId);
+            return await _reviewService.GetAllReviews(userId);
         }
     }
 }

@@ -2,24 +2,27 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
+using Application.Models;
 using Application.ServiceInterfaces;
-using Models;
 
 namespace Application.Services
 {
     public class DiceService : IDiceService
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserManager _userManagerRepository;
+        private readonly IUserAccessor _userAccessor;
 
-        public DiceService(IUserRepository userRepository)
+        public DiceService(IUserManager userManagerRepostiory, IUserAccessor userAccessor)
         {
-            _userRepository = userRepository;
+            _userManagerRepository = userManagerRepostiory;
+            _userAccessor = userAccessor;
         }
 
         public async Task<DiceResult> GetDiceRollResult()
         {
-            var user = await _userRepository.GetUserUsingTokenAsync();
+            var user = await _userAccessor.FindUserFromAccessToken();
 
             if (user.LastRollDate != null && (DateTimeOffset.Now - user.LastRollDate) < TimeSpan.FromDays(1))
                 return new DiceResult { Result = 0, Message = "Bacanje kockice je moguće jednom dnevno" };
@@ -79,7 +82,7 @@ namespace Application.Services
                     break;
             }
 
-            if (!await _userRepository.UpdateUserAsync(user))
+            if (!await _userManagerRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.BadRequest, new { Error = "Neuspešno ažuriranje korisnika" });
 
             return new DiceResult { Result = diceResult, Message = message };
