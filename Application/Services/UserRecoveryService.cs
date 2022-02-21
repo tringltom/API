@@ -2,27 +2,24 @@
 using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.RepositoryInterfaces;
-using Application.ServiceHelpers;
+using Application.InfrastructureInterfaces;
+using Application.Models.User;
 using Application.ServiceInterfaces;
-using Domain.Entities;
+using Domain;
 using Microsoft.AspNetCore.WebUtilities;
-using Models.User;
 
 namespace Application.Services
 {
     public class UserRecoveryService : IUserRecoveryService
     {
 
-        private readonly IUserRepository _userRepository;
-        private readonly IEmailService _emailService;
-        private readonly IUserServiceHelper _userServiceHelper;
+        private readonly IUserManager _userRepository;
+        private readonly IEmailManager _emailManager;
 
-        public UserRecoveryService(IUserRepository userRepository, IEmailService emailService, IUserServiceHelper userServiceHelper)
+        public UserRecoveryService(IUserManager userRepository, IEmailManager emailManager)
         {
             _userRepository = userRepository;
-            _emailService = emailService;
-            _userServiceHelper = userServiceHelper;
+            _emailManager = emailManager;
         }
 
         public async Task RecoverUserPasswordViaEmailAsync(string email, string origin)
@@ -35,7 +32,7 @@ namespace Application.Services
             var token = await GenerateUserTokenForPasswordResetAsync(user);
             var verifyUrl = GenerateVerifyPasswordRecoveryUrl(origin, token, email);
 
-            await _emailService.SendPasswordRecoveryEmailAsync(verifyUrl, user.Email);
+            await _emailManager.SendPasswordRecoveryEmailAsync(verifyUrl, user.Email);
         }
 
         public async Task ConfirmUserPasswordRecoveryAsync(UserPasswordRecoveryVerification userPasswordRecovery)
@@ -45,7 +42,7 @@ namespace Application.Services
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
 
-            var decodedToken = _userServiceHelper.DecodeToken(userPasswordRecovery.Token);
+            var decodedToken = _emailManager.DecodeVerificationToken(userPasswordRecovery.Token);
 
             var passwordRecoveryResult = await _userRepository.RecoverUserPasswordAsync(user, decodedToken, userPasswordRecovery.NewPassword);
 

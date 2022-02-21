@@ -1,12 +1,12 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
+using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Models.Activity;
 using Moq;
 using NUnit.Framework;
 

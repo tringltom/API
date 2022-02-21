@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
+using Application.Models.User;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using AutoMapper;
@@ -8,7 +9,6 @@ using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Models.User;
 using Moq;
 using NUnit.Framework;
 
@@ -106,12 +106,12 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserArenaEnvelope userArenaEnvelope, int? limit,
+        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserRangingEnvelope userArenaEnvelope, int? limit,
             int? offset,
             [Greedy] UserController sut)
         {
             // Arrange
-            usersServiceMock.Setup(x => x.GetTopXpUsers(limit, offset))
+            usersServiceMock.Setup(x => x.GetRangingUsers(limit, offset))
             .ReturnsAsync(userArenaEnvelope);
 
             // Act
@@ -119,7 +119,7 @@ namespace API.Tests.Controllers
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserArenaEnvelope>>>();
+            result.Should().BeOfType<Task<ActionResult<UserRangingEnvelope>>>();
         }
 
         [Test]

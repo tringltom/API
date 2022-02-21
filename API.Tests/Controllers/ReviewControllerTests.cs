@@ -2,13 +2,12 @@
 using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
-using Application.Managers;
+using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoFixture.NUnit3;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
-using Models.Activity;
 using Moq;
 using NUnit.Framework;
 
@@ -22,7 +21,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void ReviewActivity_Successfull([Frozen] Mock<IReviewManager> reviewManagerMock,
+        public void ReviewActivity_Successfull([Frozen] Mock<IReviewService> reviewManagerMock,
             ActivityReview activityReview,
             [Greedy] ReviewController sut)
         {
@@ -41,12 +40,12 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void GetReviewsForUser_Successfull([Frozen] Mock<IActivityReviewService> activityReviewServiceMock,
+        public void GetReviewsForUser_Successfull([Frozen] Mock<IReviewService> reviewServiceMock,
             int userId, List<UserReviewedActivity> acitvitiesReviewed,
             [Greedy] ReviewController sut)
         {
             // Arrange
-            activityReviewServiceMock.Setup(x => x.GetAllReviewsByUserId(userId))
+            reviewServiceMock.Setup(x => x.GetAllReviews(userId))
                 .ReturnsAsync(acitvitiesReviewed);
 
             // Act
@@ -54,7 +53,7 @@ namespace API.Tests.Controllers
 
             // Assert
             res.Result.Should().Equal(acitvitiesReviewed);
-            activityReviewServiceMock.Verify(x => x.GetAllReviewsByUserId(userId), Times.Once);
+            reviewServiceMock.Verify(x => x.GetAllReviews(userId), Times.Once);
         }
     }
 }
