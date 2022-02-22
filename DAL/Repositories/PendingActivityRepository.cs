@@ -8,10 +8,8 @@ namespace DAL.Repositories
 {
     public class PendingActivityRepository : BaseRepository<PendingActivity>, IPendingActivityRepository
     {
-        public PendingActivityRepository(DataContext dbContext) : base(dbContext)
-        {
-        }
+        public PendingActivityRepository(DataContext dbContext) : base(dbContext) { }
         public async Task<IEnumerable<PendingActivity>> GetLatestPendingActivities(int? limit, int? offset) => await FindAsync(limit, offset, u => true, u => u.Id);
-
+        public async Task<IEnumerable<PendingActivity>> GetLatestPendingActivities(int userId, int? limit, int? offset) => await FindAsync(limit, offset, u => u.User.Id == userId, u => u.Id);
     }
 }

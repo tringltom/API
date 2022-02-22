@@ -24,10 +24,16 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpGet]
+        [HttpGet("getPending")]
         public async Task<ActionResult<PendingActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
         {
             return await _activityService.GetPendingActivitiesAsync(limit, offset);
+        }
+
+        [HttpGet("getUserPending")]
+        public async Task<ActionResult<PendingActivityForUserEnvelope>> GetPendingActivitiesForLoggedInUser(int? limit, int? offset)
+        {
+            return await _activityService.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
         }
 
         // TODO - Add checking if user is Admin

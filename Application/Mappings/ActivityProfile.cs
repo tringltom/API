@@ -27,6 +27,9 @@ namespace Application.Mappings
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
                 .ForMember(d => d.Photos, o => o.MapFrom(s => s.PendingActivityMedias));
 
+            CreateMap<PendingActivity, PendingActivityForUserReturn>()
+                .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId));
+
             CreateMap<Activity, ApprovedActivityReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
