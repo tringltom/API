@@ -8,5 +8,6 @@ namespace DAL.RepositoryInterfaces
     {
         Task<IEnumerable<PendingActivity>> GetLatestPendingActivities(int? limit, int? offset);
         Task<IEnumerable<PendingActivity>> GetLatestPendingActivities(int userId, int? limit, int? offset);
+        Task<int> CountPendingActivities(int userId);
     }
 }

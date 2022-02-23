@@ -82,7 +82,7 @@ namespace Application.Services
             return new PendingActivityForUserEnvelope
             {
                 Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityForUserReturn>(pa)).ToList(),
-                ActivityCount = await _uow.PendingActivities.CountAsync(pa => pa.User.Id == userId)
+                ActivityCount = await _uow.PendingActivities.CountPendingActivities(userId)
             };
         }
 
