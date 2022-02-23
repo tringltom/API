@@ -4,6 +4,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoMapper;
@@ -16,13 +17,15 @@ namespace Application.Services
     public class ActivityService : IActivityService
     {
         private readonly IPhotoAccessor _photoAccessor;
+        private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
         private readonly IEmailManager _emailManager;
         private readonly IUnitOfWork _uow;
 
-        public ActivityService(IPhotoAccessor photoAccessor, IMapper mapper, IEmailManager emailManager, IUnitOfWork uow)
+        public ActivityService(IPhotoAccessor photoAccessor, IUserAccessor userAccessor, IMapper mapper, IEmailManager emailManager, IUnitOfWork uow)
         {
             _photoAccessor = photoAccessor;
+            _userAccessor = userAccessor;
             _mapper = mapper;
             _emailManager = emailManager;
             _uow = uow;
@@ -68,6 +71,18 @@ namespace Application.Services
             {
                 Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityReturn>(pa)).ToList(),
                 ActivityCount = await _uow.PendingActivities.CountAsync()
+            };
+        }
+
+        public async Task<PendingActivityForUserEnvelope> GetPendingActivitiesForLoggedInUserAsync(int? limit, int? offset)
+        {
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var pendingActivities = await _uow.PendingActivities.GetLatestPendingActivities(userId, limit, offset);
+
+            return new PendingActivityForUserEnvelope
+            {
+                Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityForUserReturn>(pa)).ToList(),
+                ActivityCount = await _uow.PendingActivities.CountPendingActivities(userId)
             };
         }
 

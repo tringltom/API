@@ -42,18 +42,41 @@ namespace API.Tests.Controllers
         public void GetPendingActivities_Successfull(
             [Frozen] Mock<IActivityService> activityServiceMock,
             PendingActivityEnvelope pendingActivityEnvelope,
-            [Greedy] ActivityController sut)
+            [Greedy] ActivityController sut,
+            int offset,
+            int limit)
         {
             // Arrange
             activityServiceMock.Setup(x => x.GetPendingActivitiesAsync(5, 2))
                .ReturnsAsync(pendingActivityEnvelope);
 
             // Act
-            var res = sut.GetPendingActivities(5, 2);
+            var res = sut.GetPendingActivities(limit, offset);
 
             // Assert
 
             res.Should().BeOfType<Task<ActionResult<PendingActivityEnvelope>>>();
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public void GetPendingActivitiesForLoggedInUser_Successfull(
+            [Frozen] Mock<IActivityService> activityServiceMock,
+            PendingActivityForUserEnvelope pendingActivityForUserEnvelope,
+            [Greedy] ActivityController sut,
+            int offset,
+            int limit)
+        {
+            // Arrange
+            activityServiceMock.Setup(x => x.GetPendingActivitiesForLoggedInUserAsync(limit, offset))
+               .ReturnsAsync(pendingActivityForUserEnvelope);
+
+            // Act
+            var res = sut.GetPendingActivitiesForLoggedInUser(limit, offset);
+
+            // Assert
+
+            res.Should().BeOfType<Task<ActionResult<PendingActivityForUserEnvelope>>>();
         }
 
         [Test]
