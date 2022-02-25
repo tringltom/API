@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
@@ -10,6 +9,7 @@ using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.Models.User;
 using Application.ServiceInterfaces;
+using AutoMapper;
 using DAL;
 using Domain;
 
@@ -22,24 +22,22 @@ namespace Application.Services
         private readonly ITokenManager _tokenManager;
         private readonly IFacebookAccessor _facebookAccessor;
         private readonly IUserAccessor _userAccessor;
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public UserSessionService(IUserManager userManagerRepository,
             ITokenManager tokenManger,
             IFacebookAccessor facebookAccessor,
             IUserAccessor userAccessor,
+            IMapper mapper,
             IUnitOfWork uow)
         {
             _userManagerRepository = userManagerRepository;
             _tokenManager = tokenManger;
             _facebookAccessor = facebookAccessor;
             _userAccessor = userAccessor;
+            _mapper = mapper;
             _uow = uow;
-        }
-
-        public int GetUserIdByToken()
-        {
-            return _userAccessor.GetUserIdFromAccessToken();
         }
 
         public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
@@ -72,6 +70,8 @@ namespace Application.Services
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
 
+            var userResponse = _mapper.Map<UserBaseResponse>(user);
+
             var token = _tokenManager.CreateJWTToken(user);
 
             if (!await RemoveExpiredCounters(user))
@@ -79,7 +79,10 @@ namespace Application.Services
 
             var activityCounts = GetAvailableActivitiesCount(user);
 
-            return new UserBaseResponse(token, user.UserName, "", user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
+            userResponse.Token = token;
+            userResponse.ActivityCounts = activityCounts;
+
+            return userResponse;
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
@@ -109,6 +112,8 @@ namespace Application.Services
             if (!await _userManagerRepository.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
+            var userResponse = _mapper.Map<UserBaseResponse>(user);
+
             var userToken = _tokenManager.CreateJWTToken(user);
 
             if (!await RemoveExpiredCounters(user))
@@ -116,10 +121,14 @@ namespace Application.Services
 
             var activityCounts = GetAvailableActivitiesCount(user);
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token, user.XpLevelId, user.CurrentXp, user.LastRollDate, activityCounts, user.Id);
+            userResponse.Token = userToken;
+            userResponse.ActivityCounts = activityCounts;
+            userResponse.RefreshToken = refreshToken.Token;
+
+            return userResponse;
         }
 
-        public async Task<UserBaseResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<UserRefreshResponse> RefreshTokenAsync(string refreshToken)
         {
             var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
 
@@ -146,7 +155,7 @@ namespace Application.Services
 
             var userToken = _tokenManager.CreateJWTToken(user);
 
-            return new UserBaseResponse(userToken, user.UserName, newRefreshToken.Token);
+            return new UserRefreshResponse(userToken, newRefreshToken.Token);
         }
 
         public async Task LogoutUserAsync(string refreshToken)
@@ -170,45 +179,45 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
         }
 
-        public async Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)
-        {
-            var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
+        //public async Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)
+        //{
+        //    var userInfo = await _facebookAccessor.FacebookLogin(accessToken);
 
-            if (userInfo == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena." });
+        //    if (userInfo == null)
+        //        throw new RestException(HttpStatusCode.BadRequest, new { User = "Problem tokom validiranja tokena." });
 
-            var user = await _userManagerRepository.FindUserByEmailAsync(userInfo.Email);
+        //    var user = await _userManagerRepository.FindUserByEmailAsync(userInfo.Email);
 
-            var refreshToken = _tokenManager.CreateRefreshToken();
+        //    var refreshToken = _tokenManager.CreateRefreshToken();
 
-            var userToken = _tokenManager.CreateJWTToken(user);
+        //    var userToken = _tokenManager.CreateJWTToken(user);
 
-            if (user != null)
-            {
-                user.RefreshTokens.Add(refreshToken);
-                if (!await _userManagerRepository.UpdateUserAsync(user))
-                    throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
+        //    if (user != null)
+        //    {
+        //        user.RefreshTokens.Add(refreshToken);
+        //        if (!await _userManagerRepository.UpdateUserAsync(user))
+        //            throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
-                return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
-            }
+        //        return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
+        //    }
 
-            user = new User
-            {
-                Id = userInfo.Id,
-                Email = userInfo.Email,
-                UserName = "fb_" + userInfo.Id,
-                EmailConfirmed = true,
-                XpLevelId = 1,
-                CurrentXp = 0
-            };
+        //    user = new User
+        //    {
+        //        Id = userInfo.Id,
+        //        Email = userInfo.Email,
+        //        UserName = "fb_" + userInfo.Id,
+        //        EmailConfirmed = true,
+        //        XpLevelId = 1,
+        //        CurrentXp = 0
+        //    };
 
-            user.RefreshTokens.Add(refreshToken);
+        //    user.RefreshTokens.Add(refreshToken);
 
-            if (await _userManagerRepository.CreateUserWithoutPasswordAsync(user))
-                throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
+        //    if (await _userManagerRepository.CreateUserWithoutPasswordAsync(user))
+        //        throw new RestException(HttpStatusCode.BadRequest, new { User = "Neuspešno dodavanje korisnika." });
 
-            return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
-        }
+        //    return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
+        //}
 
         private async Task<bool> RemoveExpiredCounters(User user)
         {

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Errors;
+using Application.InfrastructureInterfaces.Security;
 using Application.Models.User;
 using Application.ServiceInterfaces;
 using AutoMapper;
@@ -13,11 +15,13 @@ namespace Application.Services
     {
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private readonly IUserAccessor _userAccessor;
 
-        public UsersService(IUnitOfWork uow, IMapper mapper)
+        public UsersService(IUnitOfWork uow, IMapper mapper, IUserAccessor userAccessor)
         {
             _uow = uow;
             _mapper = mapper;
+            _userAccessor = userAccessor;
         }
 
         public async Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset)
@@ -31,6 +35,19 @@ namespace Application.Services
             };
 
             return userRangingEnvelope;
+        }
+
+        public async Task UpdateLoggedUserAbout(UserAbout userAbout)
+        {
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var user = await _uow.Users.GetAsync(userId);
+
+            if (user == null)
+                throw new NotFound("Nepostojeci korisnik");
+
+            user.About = userAbout.About;
+
+            await _uow.CompleteAsync();
         }
     }
 }

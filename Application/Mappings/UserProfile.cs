@@ -1,13 +1,15 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using Application.Models;
 using Application.Models.User;
 using AutoMapper;
 using Domain;
 
 namespace Application.Mappings
 {
-    public class UserRangingProfile : Profile
+    public class UserProfile : Profile
     {
-        public UserRangingProfile()
+        public UserProfile()
         {
             CreateMap<User, UserRangingGet>()
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
@@ -17,6 +19,15 @@ namespace Application.Mappings
                .ForMember(d => d.NumberOfPuzzles, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Puzzle).Count()))
                .ForMember(d => d.NumberOfHappenings, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Happening).Count()))
                .ForMember(d => d.NumberOfChallenges, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Challenge).Count()));
+
+            CreateMap<User, UserBaseResponse>()
+               .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
+               .ForMember(d => d.IsDiceRollAllowed, o => o.MapFrom(s => s.LastRollDate == null || (DateTimeOffset.Now - s.LastRollDate) >= TimeSpan.FromDays(1)))
+               .ForMember(d => d.Image, o =>
+               {
+                   o.PreCondition(s => s.ImageApproved);
+                   o.MapFrom(s => new Photo() { Id = s.ImagePublicId, Url = s.ImageUrl });
+               });
         }
     }
 }

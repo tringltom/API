@@ -349,7 +349,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
-            UserBaseResponse result = null;
+            UserRefreshResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(user.RefreshTokens.ElementAt(0).Token);
@@ -382,7 +382,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
-            UserBaseResponse result = null;
+            UserRefreshResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -412,7 +412,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
-            UserBaseResponse result = null;
+            UserRefreshResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -447,7 +447,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
-            UserBaseResponse result = null;
+            UserRefreshResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
@@ -477,7 +477,7 @@ namespace Application.Tests.Services
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
             jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
-            UserBaseResponse result = null;
+            UserRefreshResponse result = null;
 
             // Act
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);

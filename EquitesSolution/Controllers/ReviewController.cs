@@ -18,7 +18,7 @@ namespace API.Controllers
         }
 
         [HttpPost("reviewActivity")]
-        public async Task<ActionResult> ReviewActivity([FromBody] ActivityReview activityReview)
+        public async Task<ActionResult> ReviewActivity(ActivityReview activityReview)
         {
             await _reviewService.ReviewActivityAsync(activityReview);
 

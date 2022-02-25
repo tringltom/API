@@ -6,5 +6,6 @@ namespace Application.ServiceInterfaces
     public interface IUsersService
     {
         Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset);
+        Task UpdateLoggedUserAbout(UserAbout user);
     }
 }

@@ -33,7 +33,7 @@ namespace API.Controllers
 
             var origin = Request.Headers["origin"];
 
-            await _userRegistrationService.RegisterAsync(userToRegister, origin);
+            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
@@ -111,7 +111,7 @@ namespace API.Controllers
         }
 
         [HttpPost("refreshToken")]
-        public async Task<ActionResult<UserBaseResponse>> RefreshToken()
+        public async Task<ActionResult<UserRefreshResponse>> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
@@ -150,6 +150,22 @@ namespace API.Controllers
 
             return Ok("Uspešna izmena šifre.");
         }
+
+        [HttpPatch("updateAbout")]
+        public async Task<ActionResult> UpdateLoggedUserAbout(UserAbout user)
+        {
+            await _usersService.UpdateLoggedUserAbout(user);
+
+            return Ok("Uspešna izmena o korisniku.");
+        }
+
+        //[HttpPatch("updateImage")]
+        //public async Task<ActionResult> UpdateLoggedUserImage(UserPasswordChange user)
+        //{
+        //    await _userRecoveryService.UpdateLoggedUserImage(user);
+
+        //    return Ok("Uspešna izmena šifre.");
+        //}
 
         private void SetTokenCookie(string refreshToken, bool stayLoggedIn)
         {
