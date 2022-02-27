@@ -6,6 +6,9 @@ namespace Application.ServiceInterfaces
     public interface IUsersService
     {
         Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset);
-        Task UpdateLoggedUserAbout(UserAbout user);
+        Task UpdateLoggedUserAboutAsync(UserAbout userAbout);
+        Task UpdateLoggedUserImageAsync(UserImageUpdate userImage);
+        Task<UserImageEnvelope> GetImagesForApprovalAsync(int? limit, int? offset);
+        Task<bool> ResolveUserImageAsync(int userId, bool approve);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Models;
 using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -154,18 +155,32 @@ namespace API.Controllers
         [HttpPatch("updateAbout")]
         public async Task<ActionResult> UpdateLoggedUserAbout(UserAbout user)
         {
-            await _usersService.UpdateLoggedUserAbout(user);
+            await _usersService.UpdateLoggedUserAboutAsync(user);
 
             return Ok("Uspešna izmena o korisniku.");
         }
 
-        //[HttpPatch("updateImage")]
-        //public async Task<ActionResult> UpdateLoggedUserImage(UserPasswordChange user)
-        //{
-        //    await _userRecoveryService.UpdateLoggedUserImage(user);
+        [HttpPatch("updateImage")]
+        public async Task<ActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
+        {
+            await _usersService.UpdateLoggedUserImageAsync(userImage);
 
-        //    return Ok("Uspešna izmena šifre.");
-        //}
+            return Ok("Uspešna izmena profilne slike, molimo Vas sačekajte odobrenje.");
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpGet("getImagesForApproval")]
+        public async Task<ActionResult<UserImageEnvelope>> GetImagesForApproval(int? limit, int? offset)
+        {
+            return await _usersService.GetImagesForApprovalAsync(limit, offset);
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPost("resolve/{id}")]
+        public async Task<ActionResult<bool>> ResolveUserImage(int id, PhotoApprove photoApprove)
+        {
+            return await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
+        }
 
         private void SetTokenCookie(string refreshToken, bool stayLoggedIn)
         {

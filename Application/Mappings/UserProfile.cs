@@ -18,7 +18,12 @@ namespace Application.Mappings
                .ForMember(d => d.NumberOfQuotes, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Quote).Count()))
                .ForMember(d => d.NumberOfPuzzles, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Puzzle).Count()))
                .ForMember(d => d.NumberOfHappenings, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Happening).Count()))
-               .ForMember(d => d.NumberOfChallenges, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Challenge).Count()));
+               .ForMember(d => d.NumberOfChallenges, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Challenge).Count()))
+               .ForMember(d => d.Image, o =>
+               {
+                   o.PreCondition(s => s.ImageApproved);
+                   o.MapFrom(s => new Photo() { Id = s.ImagePublicId, Url = s.ImageUrl });
+               });
 
             CreateMap<User, UserBaseResponse>()
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
@@ -28,6 +33,9 @@ namespace Application.Mappings
                    o.PreCondition(s => s.ImageApproved);
                    o.MapFrom(s => new Photo() { Id = s.ImagePublicId, Url = s.ImageUrl });
                });
+
+            CreateMap<User, UserImageResponse>()
+               .ForMember(d => d.Image, o => { o.MapFrom(s => new Photo() { Id = s.ImagePublicId, Url = s.ImageUrl }); });
         }
     }
 }
