@@ -18,13 +18,15 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IUserAccessor _userAccessor;
         private readonly IPhotoAccessor _photoAccessor;
+        private readonly IEmailManager _emailManager;
 
-        public UsersService(IUnitOfWork uow, IMapper mapper, IUserAccessor userAccessor, IPhotoAccessor photoAccessor)
+        public UsersService(IUnitOfWork uow, IMapper mapper, IUserAccessor userAccessor, IPhotoAccessor photoAccessor, IEmailManager emailManager)
         {
             _uow = uow;
             _mapper = mapper;
             _userAccessor = userAccessor;
             _photoAccessor = photoAccessor;
+            _emailManager = emailManager;
         }
 
         public async Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset)
@@ -61,9 +63,7 @@ namespace Application.Services
             if (user == null)
                 throw new NotFound("Nepostojeci korisnik");
 
-            var image = userImage.Images.SingleOrDefault();
-
-            var photoResult = image != null ? await _photoAccessor.AddPhotoAsync(image) : null;
+            var photoResult = userImage.Image != null ? await _photoAccessor.AddPhotoAsync(userImage.Image) : null;
 
             if (photoResult == null)
                 throw new NotFound("Neuspešna promena profilne slike, molimo vas pokušajte kasnije");
@@ -107,7 +107,15 @@ namespace Application.Services
                 user.ImageUrl = null;
             }
 
-            return await _uow.CompleteAsync();
+            var result = await _uow.CompleteAsync();
+
+            if (result)
+            {
+                await _emailManager.SendProfileImageApprovalEmailAsync(user.UserName, approve);
+                return true;
+            }
+
+            return false;
         }
     }
 }

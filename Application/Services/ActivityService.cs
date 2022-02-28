@@ -98,11 +98,17 @@ namespace Application.Services
             else
                 activity.ActivityMedias.ToList().ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
 
-            await _emailManager.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
-
             _uow.PendingActivities.Remove(pendingActivity);
 
-            return await _uow.CompleteAsync();
+            var result = await _uow.CompleteAsync();
+
+            if (result)
+            {
+                await _emailManager.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesFromOtherUsersAsync(int userId, int? limit, int? offset)

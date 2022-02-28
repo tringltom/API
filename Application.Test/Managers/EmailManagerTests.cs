@@ -88,5 +88,17 @@ namespace Application.Tests.Managers
             // Assert
             methodInTest.Should().Throw<RestException>();
         }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq, " ")]
+        public void SendUserImageApprovalEmailAsync_IncorrectEmail(string userEmail, EmailManager sut)
+        {
+            // Arrange
+            // Act
+            Func<Task> methodInTest = async () => await sut.SendProfileImageApprovalEmailAsync(userEmail, true);
+
+            // Assert
+            methodInTest.Should().Throw<RestException>();
+        }
     }
 }

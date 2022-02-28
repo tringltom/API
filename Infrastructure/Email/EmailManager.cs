@@ -98,6 +98,16 @@ namespace Infrastructure.Email
 
             await SendEmail(activity.User.Email, $"Ekviti - Obaveštenje u vezi aktivnosti: {activity.Title}", bodyBuilder);
         }
+        public async Task SendProfileImageApprovalEmailAsync(string userEmail, bool approved)
+        {
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Vaša profilna slika je {(approved ? "prihvaćena" : "odbijena")}!</p>",
+                TextBody = $"Vaša profilna slika je {(approved ? "prihvaćena" : "odbijena")}!"
+            };
+
+            await SendEmail(userEmail, $"Ekviti - Obaveštenje u vezi profilne slike", bodyBuilder);
+        }
 
         public string DecodeVerificationToken(string token)
         {

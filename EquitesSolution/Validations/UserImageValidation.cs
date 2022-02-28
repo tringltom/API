@@ -7,7 +7,7 @@ namespace API.Validations
     {
         public UserImageValidation()
         {
-            RuleFor(x => x.Images).NotEmpty().WithMessage("Slika je obavezna");
+            RuleFor(x => x.Image).NotEmpty().WithMessage("Slika je obavezna");
         }
     }
 }

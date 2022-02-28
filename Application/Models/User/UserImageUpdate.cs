@@ -4,6 +4,6 @@ namespace Application.Models.User
 {
     public class UserImageUpdate
     {
-        public IFormFile[] Images { get; set; }
+        public IFormFile Image { get; set; }
     }
 }
