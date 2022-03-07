@@ -6,5 +6,7 @@ namespace Application.Models.Activity
     {
         public List<PendingActivityReturn> Activities { get; set; }
         public int ActivityCount { get; set; }
+
+        public bool Test { get; set; }
     }
 }

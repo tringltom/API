@@ -70,7 +70,8 @@ namespace Application.Services
             return new PendingActivityEnvelope
             {
                 Activities = pendingActivities.Select(pa => _mapper.Map<PendingActivityReturn>(pa)).ToList(),
-                ActivityCount = await _uow.PendingActivities.CountAsync()
+                ActivityCount = await _uow.PendingActivities.CountAsync(),
+                Test = true
             };
         }
 
