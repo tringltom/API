@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Application.Models;
 using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +34,7 @@ namespace API.Controllers
 
             var origin = Request.Headers["origin"];
 
-            await _userRegistrationService.RegisterAsync(userToRegister, origin);
+            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
@@ -111,7 +112,7 @@ namespace API.Controllers
         }
 
         [HttpPost("refreshToken")]
-        public async Task<ActionResult<UserBaseResponse>> RefreshToken()
+        public async Task<ActionResult<UserRefreshResponse>> RefreshToken()
         {
             var refreshToken = Request.Cookies["refreshToken"];
             bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
@@ -149,6 +150,36 @@ namespace API.Controllers
             await _userRecoveryService.ChangeUserPasswordAsync(user);
 
             return Ok("Uspešna izmena šifre.");
+        }
+
+        [HttpPatch("updateAbout")]
+        public async Task<ActionResult> UpdateLoggedUserAbout(UserAbout user)
+        {
+            await _usersService.UpdateLoggedUserAboutAsync(user);
+
+            return Ok("Uspešna izmena o korisniku.");
+        }
+
+        [HttpPatch("updateImage")]
+        public async Task<ActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
+        {
+            await _usersService.UpdateLoggedUserImageAsync(userImage);
+
+            return Ok("Uspešna izmena profilne slike, molimo Vas sačekajte odobrenje.");
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpGet("getImagesForApproval")]
+        public async Task<ActionResult<UserImageEnvelope>> GetImagesForApproval(int? limit, int? offset)
+        {
+            return await _usersService.GetImagesForApprovalAsync(limit, offset);
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPost("resolve/{id}")]
+        public async Task<ActionResult<bool>> ResolveUserImage(int id, PhotoApprove photoApprove)
+        {
+            return await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
         }
 
         private void SetTokenCookie(string refreshToken, bool stayLoggedIn)

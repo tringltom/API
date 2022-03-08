@@ -2,7 +2,8 @@
 {
     public class UserRangingGet
     {
-        public string Username { get; set; }
+        public string UserName { get; set; }
+        public Photo Image { get; set; }
         public string Email { get; set; }
         public int CurrentXp { get; set; }
         public int CurrentLevel { get; set; }
