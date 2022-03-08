@@ -245,6 +245,11 @@ namespace Application.Tests.Services
                 .Setup(x => x.PendingActivities.GetAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
 
+            uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve));
+
             // Act
             Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
 
@@ -278,6 +283,12 @@ namespace Application.Tests.Services
             uowMock
                 .Setup(x => x.PendingActivities.GetAsync(pendingActivityId))
                 .ReturnsAsync(pendingActivity);
+
+            uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve));
+
 
             // Act
             Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
