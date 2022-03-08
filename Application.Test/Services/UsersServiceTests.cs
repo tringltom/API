@@ -231,7 +231,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.UserName, approve));
+            emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
 
             // Act
             Func<Task> methodInTest = async () => await sut.ResolveUserImageAsync(userId, approve);
@@ -243,7 +243,7 @@ namespace Application.Tests.Services
 
             uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.UserName, approve), Times.Once);
+            emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Once);
         }
 
         [Test]
@@ -268,7 +268,7 @@ namespace Application.Tests.Services
             photoAccessorMock.Setup(x => x.DeletePhotoAsync(publicIdToRemove))
                 .ReturnsAsync(true);
 
-            emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.UserName, approve));
+            emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
 
             // Act
             Func<Task> methodInTest = async () => await sut.ResolveUserImageAsync(userId, approve);
@@ -282,7 +282,7 @@ namespace Application.Tests.Services
 
             uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.UserName, approve), Times.Once);
+            emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Once);
             photoAccessorMock.Verify(x => x.DeletePhotoAsync(publicIdToRemove), Times.Once);
         }
     }

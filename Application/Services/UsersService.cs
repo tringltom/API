@@ -111,7 +111,7 @@ namespace Application.Services
 
             if (result)
             {
-                await _emailManager.SendProfileImageApprovalEmailAsync(user.UserName, approve);
+                await _emailManager.SendProfileImageApprovalEmailAsync(user.Email, approve);
                 return true;
             }
 
