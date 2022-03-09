@@ -14,5 +14,9 @@ namespace Domain
         public int XpLevelId { get; set; }
         public virtual XpLevel XpLevel { get; set; }
         public DateTimeOffset? LastRollDate { get; set; }
+        public string About { get; set; }
+        public string ImagePublicId { get; set; }
+        public string ImageUrl { get; set; }
+        public bool ImageApproved { get; set; }
     }
 }

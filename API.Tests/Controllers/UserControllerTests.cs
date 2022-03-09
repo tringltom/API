@@ -150,7 +150,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RefreshToken_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock, UserBaseResponse userResponse,
+        public void RefreshToken_Successfull([Frozen] Mock<IUserSessionService> userSessionServiceMock, UserRefreshResponse userResponse,
            Mock<HttpRequest> request, Mock<HttpContext> context, string token, [Greedy] UserController sut)
         {
             // Arrange
@@ -168,7 +168,7 @@ namespace API.Tests.Controllers
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserBaseResponse>>>();
+            result.Should().BeOfType<Task<ActionResult<UserRefreshResponse>>>();
         }
 
         [Test]

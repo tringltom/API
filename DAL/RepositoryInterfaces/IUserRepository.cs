@@ -9,5 +9,7 @@ namespace DAL.RepositoryInterfaces
         Task<bool> ExistsWithEmailAsync(string email);
         Task<bool> ExistsWithUsernameAsync(string username);
         Task<IEnumerable<User>> GetRangingUsers(int? limit, int? offset);
+        Task<IEnumerable<User>> GetUsersForImageApproval(int? limit, int? offset);
+        Task<int> CountUsersForImageApproval();
     }
 }
