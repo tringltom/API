@@ -72,6 +72,7 @@ namespace API
             services.AddScoped<IDiceService, DiceService>();
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<ISkillService, SkillService>();
 
             services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
