@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
-using Application.Models.Activity;
+using Application.ManagerInterfaces;
 using Application.Models.User;
 using Application.ServiceInterfaces;
 using AutoMapper;
@@ -18,21 +16,24 @@ namespace Application.Services
 {
     public class UserSessionService : IUserSessionService
     {
-        private readonly IUserManager _userManagerRepository;
+        private readonly IUserManager _userManager;
+        private readonly IActivityCounterManager _activityCounterManager;
         private readonly ITokenManager _tokenManager;
         private readonly IFacebookAccessor _facebookAccessor;
         private readonly IUserAccessor _userAccessor;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
-        public UserSessionService(IUserManager userManagerRepository,
+        public UserSessionService(IUserManager userManager,
+            IActivityCounterManager activityCounterManager,
             ITokenManager tokenManger,
             IFacebookAccessor facebookAccessor,
             IUserAccessor userAccessor,
             IMapper mapper,
             IUnitOfWork uow)
         {
-            _userManagerRepository = userManagerRepository;
+            _userManager = userManager;
+            _activityCounterManager = activityCounterManager;
             _tokenManager = tokenManger;
             _facebookAccessor = facebookAccessor;
             _userAccessor = userAccessor;
@@ -48,7 +49,7 @@ namespace Application.Services
 
             if (username != null)
             {
-                user = await _userManagerRepository.FindUserByNameAsync(username);
+                user = await _userManager.FindUserByNameAsync(username);
             }
             else
             {
@@ -72,22 +73,15 @@ namespace Application.Services
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
 
-            var token = _tokenManager.CreateJWTToken(user);
-
-            if (!await RemoveExpiredCounters(user))
-                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešmo resetovanje aktivnosti" });
-
-            var activityCounts = GetAvailableActivitiesCount(user);
-
-            userResponse.Token = token;
-            userResponse.ActivityCounts = activityCounts;
+            userResponse.Token = _tokenManager.CreateJWTToken(user);
+            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCounts(user);
 
             return userResponse;
         }
 
         public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
         {
-            var user = await _userManagerRepository.FindUserByEmailAsync(userLogin.Email);
+            var user = await _userManager.FindUserByEmailAsync(userLogin.Email);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nevalidan email ili nevalidna šifra." });
@@ -95,7 +89,7 @@ namespace Application.Services
             if (!user.EmailConfirmed)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite Vašu email adresu pre logovanja." });
 
-            var signInResult = await _userManagerRepository.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password);
+            var signInResult = await _userManager.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password);
 
             if (!signInResult.Succeeded)
             {
@@ -109,20 +103,13 @@ namespace Application.Services
 
             user.RefreshTokens.Add(refreshToken);
 
-            if (!await _userManagerRepository.UpdateUserAsync(user))
+            if (!await _userManager.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
 
-            var userToken = _tokenManager.CreateJWTToken(user);
-
-            if (!await RemoveExpiredCounters(user))
-                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešmo resetovanje aktivnosti" });
-
-            var activityCounts = GetAvailableActivitiesCount(user);
-
-            userResponse.Token = userToken;
-            userResponse.ActivityCounts = activityCounts;
+            userResponse.Token = _tokenManager.CreateJWTToken(user);
+            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCounts(user);
             userResponse.RefreshToken = refreshToken.Token;
 
             return userResponse;
@@ -132,7 +119,7 @@ namespace Application.Services
         {
             var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
 
-            var user = await _userManagerRepository.FindUserByNameAsync(currentUserName);
+            var user = await _userManager.FindUserByNameAsync(currentUserName);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
@@ -149,7 +136,7 @@ namespace Application.Services
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            if (!await _userManagerRepository.UpdateUserAsync(user))
+            if (!await _userManager.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
 
@@ -162,7 +149,7 @@ namespace Application.Services
         {
             var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
 
-            var user = await _userManagerRepository.FindUserByNameAsync(currentUserName);
+            var user = await _userManager.FindUserByNameAsync(currentUserName);
 
             if (user == null)
                 throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
@@ -175,7 +162,7 @@ namespace Application.Services
             if (oldToken != null)
                 oldToken.Revoked = DateTimeOffset.UtcNow;
 
-            if (!await _userManagerRepository.UpdateUserAsync(user))
+            if (!await _userManager.UpdateUserAsync(user))
                 throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
         }
 
@@ -218,35 +205,5 @@ namespace Application.Services
 
         //    return new UserBaseResponse(userToken, user.UserName, refreshToken.Token);
         //}
-
-        private async Task<bool> RemoveExpiredCounters(User user)
-        {
-            var activityCountersForDelete = user.ActivityCreationCounters.Where(ac => ac.DateCreated.AddDays(7) < DateTimeOffset.Now).ToList();
-
-            if (activityCountersForDelete.Count == 0)
-                return true;
-
-            _uow.ActivityCreationCounters.RemoveRange(activityCountersForDelete);
-            return await _uow.CompleteAsync();
-        }
-
-        private List<ActivityCount> GetAvailableActivitiesCount(User user)
-        {
-            var usedActivitiesCount = user.ActivityCreationCounters
-                .GroupBy(acc => acc.ActivityTypeId)
-                .Select(ac => new { Type = ac.Key, UsedCount = ac.Count() }).ToList();
-
-            return Enum.GetValues(typeof(ActivityTypeId)).OfType<ActivityTypeId>()
-                .GroupJoin(usedActivitiesCount,
-                    atEnum => atEnum,
-                    ac => ac.Type,
-                    (type, counts) => new ActivityCount
-                    {
-                        Type = type,
-                        Available = 2 - counts.Select(used => used.UsedCount).FirstOrDefault(),
-                        Max = 2
-                    })
-                .ToList();
-        }
     }
 }

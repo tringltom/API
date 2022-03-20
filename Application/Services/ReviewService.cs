@@ -35,13 +35,20 @@ namespace Application.ServiceInterfaces
         public async Task ReviewActivityAsync(ActivityReview activityReview)
         {
             var reviewerId = _userAccessor.GetUserIdFromAccessToken();
+            var creator = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User;
 
-            var activityCreatorId = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User.Id;
+            var activityCreatorId = creator.Id;
 
             if (reviewerId == activityCreatorId)
                 throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, ne možete oceniti svoju aktivnost." });
 
             var xpRewardToYield = await _uow.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId);
+
+            var userSkill = await _uow.Skills.GetSkill(activityCreatorId, activityReview.ActivityTypeId);
+
+            var xpMultiplier = userSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplier(userSkill) : 1;
+
+            var xpRewardValue = xpRewardToYield.Xp * xpMultiplier;
 
             var existingReview = await _uow.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId);
 
@@ -52,7 +59,7 @@ namespace Application.ServiceInterfaces
                 _uow.UserReviews.Add(review);
 
                 var user = await _uow.Users.GetAsync(activityCreatorId);
-                user.CurrentXp += xpRewardToYield.Xp;
+                user.CurrentXp += xpRewardValue;
 
                 await _uow.CompleteAsync();
 
@@ -60,15 +67,16 @@ namespace Application.ServiceInterfaces
             }
 
             var existingXpReward = await _uow.ActivityReviewXps.GetXpRewardAsync(existingReview.Activity.ActivityTypeId, existingReview.ReviewTypeId);
+            var existingXpRewardValue = existingXpReward.Xp * xpMultiplier;
 
-            if (existingXpReward.Xp == xpRewardToYield.Xp)
+            if (existingXpRewardValue == xpRewardValue)
             {
                 return;
             }
 
             existingReview.ReviewTypeId = activityReview.ReviewTypeId;
 
-            var difference = CalculateAmountToChange(xpRewardToYield.Xp, existingXpReward.Xp);
+            var difference = CalculateAmountToChange(xpRewardValue, existingXpRewardValue);
 
             var userToUpdate = await _uow.Users.GetAsync(activityCreatorId);
             userToUpdate.CurrentXp += difference;

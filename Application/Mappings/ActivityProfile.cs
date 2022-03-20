@@ -40,7 +40,7 @@ namespace Application.Mappings
                 .ForMember(d => d.Id, o => o.MapFrom(src => 0));
 
             CreateMap<ActivityMedia, Photo>()
-                  .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
+                .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
 
             CreateMap<PendingActivityMedia, Photo>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));

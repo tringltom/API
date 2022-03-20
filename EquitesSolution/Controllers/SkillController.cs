@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Application.Models;
+using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,19 +23,15 @@ namespace API.Controllers
         }
 
         [HttpPut("reset")]
-        public async Task<ActionResult> ResetSkillsDataAsync()
+        public async Task<ActionResult<UserBaseResponse>> ResetSkillsDataAsync()
         {
-            await _skillService.ResetSkillsDataAsync();
-
-            return Ok("Uspešno ste poništili vaše odabrane poene");
+            return await _skillService.ResetSkillsDataAsync();
         }
 
         [HttpPut("update")]
-        public async Task<ActionResult> UpdateSkillsDataAsync(SkillData skillData)
+        public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
         {
-            await _skillService.UpdateSkillsDataAsync(skillData);
-
-            return Ok("Uspešno ste izabrali dodatne poene");
+            return await _skillService.UpdateSkillsDataAsync(skillData);
         }
     }
 }

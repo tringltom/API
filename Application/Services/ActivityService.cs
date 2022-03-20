@@ -35,9 +35,13 @@ namespace Application.Services
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);
 
+            var skill = await _uow.Skills.GetSkill(activity.User.Id, activityCreate.Type);
+            var skillActivities = await _uow.SkillActivities.GetAllAsync();
+            var maxActivityCounter = skillActivities.First(sa => sa.Level == (skill?.Level > 3 ? 3 : skill?.Level != null ? skill.Level : 0)).Counter;
+
             if (activity.User.ActivityCreationCounters
                 .Where(ac => ac.ActivityTypeId == activityCreate.Type && ac.DateCreated.AddDays(7) >= DateTimeOffset.Now)
-                .Count() >= 2)
+                .Count() >= maxActivityCounter)
             {
                 throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Nemate pravo da kreirate aktivnost" });
             }

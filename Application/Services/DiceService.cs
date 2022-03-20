@@ -2,8 +2,8 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
+using Application.ManagerInterfaces;
 using Application.Models;
 using Application.ServiceInterfaces;
 

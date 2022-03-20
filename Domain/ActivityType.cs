@@ -9,5 +9,6 @@ namespace Domain
 
         public virtual List<PendingActivity> PendingActivities { get; set; }
         public virtual List<Activity> Activities { get; set; }
+        public virtual List<Skill> Skills { get; set; }
     }
 }
