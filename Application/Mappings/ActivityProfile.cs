@@ -14,8 +14,7 @@ namespace Application.Mappings
             CreateMap<ActivityCreate, PendingActivity>()
                 .BeforeMap((s, d) => d.DateCreated = DateTimeOffset.Now)
                 .BeforeMap((s, d) => d.PendingActivityMedias = new List<PendingActivityMedia>())
-                .ForMember(d => d.ActivityTypeId, o => o.MapFrom(s => s.Type))
-                .ForMember(d => d.User, o => o.MapFrom<UserResolver>());
+                .ForMember(d => d.ActivityTypeId, o => o.MapFrom(s => s.Type));
 
             CreateMap<PendingActivity, Activity>()
                 .BeforeMap((s, d) => d.DateApproved = DateTimeOffset.Now)

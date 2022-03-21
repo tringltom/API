@@ -7,6 +7,6 @@ namespace Application.ManagerInterfaces
 {
     public interface IActivityCounterManager
     {
-        Task<List<ActivityCount>> GetActivityCounts(User user);
+        Task<List<ActivityCount>> GetActivityCountsAsync(User user);
     }
 }

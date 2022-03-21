@@ -72,7 +72,7 @@ namespace Application.Services
             await _uow.CompleteAsync();
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
-            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCounts(user);
+            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCountsAsync(user);
 
             return userResponse;
         }
@@ -104,7 +104,7 @@ namespace Application.Services
             await _uow.CompleteAsync();
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
-            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCounts(user);
+            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCountsAsync(user);
 
             return userResponse;
         }

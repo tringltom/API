@@ -73,8 +73,8 @@ namespace Application.Services
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
 
-            userResponse.Token = _tokenManager.CreateJWTToken(user);
-            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCounts(user);
+            userResponse.Token = _tokenManager.CreateJWTToken(user.Id, user.UserName);
+            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCountsAsync(user);
 
             return userResponse;
         }
@@ -99,7 +99,7 @@ namespace Application.Services
                     throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Nevalidan email ili nevalidna šifra." });
             }
 
-            var refreshToken = _tokenManager.CreateRefreshToken();
+            var refreshToken = new RefreshToken() { Token = _tokenManager.CreateRefreshToken() };
 
             user.RefreshTokens.Add(refreshToken);
 
@@ -108,8 +108,8 @@ namespace Application.Services
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
 
-            userResponse.Token = _tokenManager.CreateJWTToken(user);
-            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCounts(user);
+            userResponse.Token = _tokenManager.CreateJWTToken(user.Id, user.UserName);
+            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCountsAsync(user);
             userResponse.RefreshToken = refreshToken.Token;
 
             return userResponse;
@@ -132,7 +132,7 @@ namespace Application.Services
             if (oldToken != null)
                 oldToken.Revoked = DateTimeOffset.UtcNow;
 
-            var newRefreshToken = _tokenManager.CreateRefreshToken();
+            var newRefreshToken = new RefreshToken() { Token = _tokenManager.CreateRefreshToken() };
 
             user.RefreshTokens.Add(newRefreshToken);
 
@@ -140,7 +140,7 @@ namespace Application.Services
                 throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
 
 
-            var userToken = _tokenManager.CreateJWTToken(user);
+            var userToken = _tokenManager.CreateJWTToken(user.Id, user.UserName);
 
             return new UserRefreshResponse(userToken, newRefreshToken.Token);
         }

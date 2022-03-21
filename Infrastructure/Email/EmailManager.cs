@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
-using Domain;
 using Infrastructure.Settings;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.WebUtilities;
@@ -88,15 +87,15 @@ namespace Infrastructure.Email
             await SendEmail(email, "Ekviti - Potvrda oporavka šifre", bodyBuilder);
         }
 
-        public async Task SendActivityApprovalEmailAsync(PendingActivity activity, bool approved)
+        public async Task SendActivityApprovalEmailAsync(string activityTitle, string userEmail, bool approved)
         {
             var bodyBuilder = new BodyBuilder
             {
-                HtmlBody = $"<p>Vaša aktivnost pod nazivom {activity.Title} je {(approved ? "prihvaćena" : "odbijena")}!</p>",
-                TextBody = $"Vaša aktivnost pod nazivom {activity.Title} je {(approved ? "prihvaćena" : "odbijena")}!"
+                HtmlBody = $"<p>Vaša aktivnost pod nazivom {activityTitle} je {(approved ? "prihvaćena" : "odbijena")}!</p>",
+                TextBody = $"Vaša aktivnost pod nazivom {activityTitle} je {(approved ? "prihvaćena" : "odbijena")}!"
             };
 
-            await SendEmail(activity.User.Email, $"Ekviti - Obaveštenje u vezi aktivnosti: {activity.Title}", bodyBuilder);
+            await SendEmail(userEmail, $"Ekviti - Obaveštenje u vezi aktivnosti: {activityTitle}", bodyBuilder);
         }
         public async Task SendProfileImageApprovalEmailAsync(string userEmail, bool approved)
         {

@@ -1,9 +1,9 @@
 ﻿using System;
-using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Services;
 using AutoFixture;
 using AutoFixture.NUnit3;
+using DAL;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
@@ -26,7 +26,8 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetDiceRollResultAsync_Successful(
             [Frozen] Mock<IUserAccessor> userAccessorMock,
-            [Frozen] Mock<IUserManager> userManagerRepoMock,
+            [Frozen] Mock<IUnitOfWork> uowMock,
+            int userId,
             DiceService sut)
         {
 
@@ -36,10 +37,13 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddDays(-2))
               .Create();
 
-            userAccessorMock.Setup(x => x.FindUserFromAccessToken())
+            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            uowMock.Setup(x => x.Users.GetAsync(userId))
                 .ReturnsAsync(eligableUser);
 
-            userManagerRepoMock.Setup(x => x.UpdateUserAsync(eligableUser))
+            uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
             // Act
@@ -53,6 +57,8 @@ namespace Application.Tests.Services
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetDiceRollResultAsync_Unsuccessful(
         [Frozen] Mock<IUserAccessor> userAccessorMock,
+        [Frozen] Mock<IUnitOfWork> uowMock,
+        int userId,
         DiceService sut)
         {
 
@@ -62,8 +68,14 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddMinutes(-20))
               .Create();
 
-            userAccessorMock.Setup(x => x.FindUserFromAccessToken())
+            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            uowMock.Setup(x => x.Users.GetAsync(userId))
                 .ReturnsAsync(nonEligableUser);
+
+            uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
 
             // Act
             var diceResult = sut.GetDiceRollResult().Result;

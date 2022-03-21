@@ -3,26 +3,28 @@ using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
-using Application.ManagerInterfaces;
 using Application.Models;
 using Application.ServiceInterfaces;
+using DAL;
 
 namespace Application.Services
 {
     public class DiceService : IDiceService
     {
-        private readonly IUserManager _userManagerRepository;
-        private readonly IUserAccessor _userAccessor;
 
-        public DiceService(IUserManager userManagerRepostiory, IUserAccessor userAccessor)
+        private readonly IUserAccessor _userAccessor;
+        private readonly IUnitOfWork _uow;
+
+        public DiceService(IUserAccessor userAccessor, IUnitOfWork uow)
         {
-            _userManagerRepository = userManagerRepostiory;
             _userAccessor = userAccessor;
+            _uow = uow;
         }
 
         public async Task<DiceResult> GetDiceRollResult()
         {
-            var user = await _userAccessor.FindUserFromAccessToken();
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var user = await _uow.Users.GetAsync(userId);
 
             if (user.LastRollDate != null && (DateTimeOffset.Now - user.LastRollDate) < TimeSpan.FromDays(1))
                 return new DiceResult { Result = 0, Message = "Bacanje kockice je moguće jednom dnevno" };
@@ -82,7 +84,7 @@ namespace Application.Services
                     break;
             }
 
-            if (!await _userManagerRepository.UpdateUserAsync(user))
+            if (!await _uow.CompleteAsync())
                 throw new RestException(HttpStatusCode.BadRequest, new { Error = "Neuspešno ažuriranje korisnika" });
 
             return new DiceResult { Result = diceResult, Message = message };

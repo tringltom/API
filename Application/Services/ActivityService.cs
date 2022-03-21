@@ -34,10 +34,12 @@ namespace Application.Services
         public async Task CreatePendingActivityAsync(ActivityCreate activityCreate)
         {
             var activity = _mapper.Map<PendingActivity>(activityCreate);
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            activity.User = await _uow.Users.GetAsync(userId);
 
             var skill = await _uow.Skills.GetSkill(activity.User.Id, activityCreate.Type);
             var skillActivities = await _uow.SkillActivities.GetAllAsync();
-            var maxActivityCounter = skillActivities.First(sa => sa.Level == (skill?.Level > 3 ? 3 : skill?.Level != null ? skill.Level : 0)).Counter;
+            var maxActivityCounter = skillActivities.FirstOrDefault(sa => sa.Level == (skill?.Level > 3 ? 3 : skill?.Level != null ? skill.Level : 0))?.Counter;
 
             if (activity.User.ActivityCreationCounters
                 .Where(ac => ac.ActivityTypeId == activityCreate.Type && ac.DateCreated.AddDays(7) >= DateTimeOffset.Now)
@@ -108,7 +110,7 @@ namespace Application.Services
 
             if (result)
             {
-                await _emailManager.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve);
+                await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve);
                 return true;
             }
 

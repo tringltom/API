@@ -18,7 +18,7 @@ namespace Application.Managers
             _uow = uow;
         }
 
-        public async Task<List<ActivityCount>> GetActivityCounts(User user)
+        public async Task<List<ActivityCount>> GetActivityCountsAsync(User user)
         {
             var activityCountersForDelete = user.ActivityCreationCounters.Where(ac => ac.DateCreated.AddDays(7) < DateTimeOffset.Now).ToList();
 
@@ -44,7 +44,7 @@ namespace Application.Managers
                 {
                     Type = type,
                     SkillActivityBonus = skillActivities
-                    .Single(ab => ab.Level == (iskills.FirstOrDefault()?.Level > 3 ? 3 : iskills.FirstOrDefault() != null ? iskills.FirstOrDefault().Level : 0))
+                    .SingleOrDefault(ab => ab.Level == (iskills.FirstOrDefault()?.Level > 3 ? 3 : iskills.FirstOrDefault() != null ? iskills.FirstOrDefault().Level : 0))
                 }).ToList();
 
             return Enum.GetValues(typeof(ActivityTypeId)).OfType<ActivityTypeId>()
@@ -62,8 +62,8 @@ namespace Application.Managers
                     (inter, sbs) => new ActivityCount
                     {
                         Type = inter.Type,
-                        Available = sbs.SkillActivityBonus.Counter - inter.Used,
-                        Max = sbs.SkillActivityBonus.Counter
+                        Available = sbs?.SkillActivityBonus?.Counter - inter.Used,
+                        Max = sbs?.SkillActivityBonus?.Counter
                     })
                 .ToList();
         }
