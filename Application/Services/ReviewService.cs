@@ -35,9 +35,7 @@ namespace Application.ServiceInterfaces
         public async Task ReviewActivityAsync(ActivityReview activityReview)
         {
             var reviewerId = _userAccessor.GetUserIdFromAccessToken();
-            var creator = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User;
-
-            var activityCreatorId = creator.Id;
+            var activityCreatorId = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User.Id;
 
             if (reviewerId == activityCreatorId)
                 throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, ne možete oceniti svoju aktivnost." });
