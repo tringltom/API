@@ -1,10 +1,8 @@
-﻿using Domain;
-
-namespace Application.InfrastructureInterfaces.Security
+﻿namespace Application.InfrastructureInterfaces.Security
 {
     public interface ITokenManager
     {
-        string CreateJWTToken(User user);
-        RefreshToken CreateRefreshToken();
+        string CreateJWTToken(int id, string userName);
+        string CreateRefreshToken();
     }
 }

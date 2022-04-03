@@ -31,7 +31,7 @@ namespace Application.Tests.Security
             var sut = new TokenManager(_config);
 
             // Act
-            var result = sut.CreateJWTToken(user);
+            var result = sut.CreateJWTToken(user.Id, user.UserName);
 
             // Assert
             Assert.IsNotNull(result);
@@ -47,7 +47,7 @@ namespace Application.Tests.Security
             var tokenResult = sut.CreateRefreshToken();
 
             // Assert
-            Assert.IsFalse(string.IsNullOrWhiteSpace(tokenResult.Token));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(tokenResult));
         }
     }
 }

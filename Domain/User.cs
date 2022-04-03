@@ -10,6 +10,7 @@ namespace Domain
         public virtual ICollection<Activity> Activities { get; set; }
         public virtual ICollection<PendingActivity> PendingActivities { get; set; }
         public virtual ICollection<ActivityCreationCounter> ActivityCreationCounters { get; set; }
+        public virtual ICollection<Skill> Skills { get; set; }
         public int CurrentXp { get; set; }
         public int XpLevelId { get; set; }
         public virtual XpLevel XpLevel { get; set; }
@@ -18,5 +19,6 @@ namespace Domain
         public string ImagePublicId { get; set; }
         public string ImageUrl { get; set; }
         public bool ImageApproved { get; set; }
+        public virtual SkillSpecial SkillSpecial { get; set; }
     }
 }

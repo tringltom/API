@@ -34,7 +34,11 @@ namespace Application.Tests.Services
         public void CreateActivityWithoutImageAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IUserAccessor> userAccessorMock,
+            int userId,
+            User user,
             PendingActivity activity,
+            List<SkillActivity> skillActivities,
             ActivityService sut)
         {
 
@@ -44,9 +48,26 @@ namespace Application.Tests.Services
                 .Without(p => p.Images)
                 .Create();
 
+            var skill = _fixture
+                .Build<Skill>()
+                .With(s => s.ActivityTypeId, activityCreate.Type)
+                .Create();
+
             mapperMock
                 .Setup(x => x.Map<PendingActivity>(activityCreate))
                 .Returns(activity);
+
+            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+               .Returns(userId);
+
+            uowMock.Setup(x => x.Users.GetAsync(userId))
+               .ReturnsAsync(user);
+
+            uowMock.Setup(x => x.Skills.GetSkill(It.IsAny<int>(), activityCreate.Type))
+                .ReturnsAsync(skill);
+
+            uowMock.Setup(x => x.SkillActivities.GetAllAsync())
+                .ReturnsAsync(skillActivities);
 
             uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
@@ -64,13 +85,22 @@ namespace Application.Tests.Services
             [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IUnitOfWork> uowMock,
+            [Frozen] Mock<IUserAccessor> userAccessorMock,
+            int userId,
+            User user,
             ActivityCreate activityCreate,
             PhotoUploadResult photoUploadResult,
             PendingActivity activity,
+            List<SkillActivity> skillActivities,
             ActivityService sut)
         {
 
             // Arrange
+            var skill = _fixture
+              .Build<Skill>()
+              .With(s => s.ActivityTypeId, activityCreate.Type)
+              .Create();
+
             mapperMock
                 .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
                 .Returns(activity);
@@ -79,8 +109,20 @@ namespace Application.Tests.Services
                 .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
                 .ReturnsAsync(photoUploadResult);
 
+            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+               .Returns(userId);
+
+            uowMock.Setup(x => x.Users.GetAsync(userId))
+               .ReturnsAsync(user);
+
+            uowMock.Setup(x => x.Skills.GetSkill(It.IsAny<int>(), activityCreate.Type))
+                .ReturnsAsync(skill);
+
+            uowMock.Setup(x => x.SkillActivities.GetAllAsync())
+                .ReturnsAsync(skillActivities);
+
             uowMock.Setup(x => x.CompleteAsync())
-               .ReturnsAsync(true);
+                .ReturnsAsync(true);
 
             // Act
             Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
@@ -96,7 +138,10 @@ namespace Application.Tests.Services
            [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
            [Frozen] Mock<IMapper> mapperMock,
            [Frozen] Mock<IUnitOfWork> uowMock,
+           [Frozen] Mock<IUserAccessor> userAccessorMock,
+           int userId,
            ActivityCreate activityCreate,
+           List<SkillActivity> skillActivities,
            ActivityService sut,
            User user)
         {
@@ -127,9 +172,38 @@ namespace Application.Tests.Services
             .With(u => u.User, userWithNoMoreGoodDeedCount)
             .Create();
 
+            var skill = _fixture
+                .Build<Skill>()
+                .With(s => s.ActivityTypeId, activityCreate.Type)
+                .With(s => s.Level, 0)
+                .Create();
+
+            var skillActivity = _fixture
+                .Build<SkillActivity>()
+                .With(s => s.Level, 0)
+                .With(s => s.Counter, 2)
+                .Create();
+
+            skillActivities.Add(skillActivity);
+
             mapperMock
              .Setup(x => x.Map<PendingActivity>(activityCreate))
              .Returns(pendingActivity);
+
+            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+               .Returns(userId);
+
+            uowMock.Setup(x => x.Users.GetAsync(userId))
+               .ReturnsAsync(userWithNoMoreGoodDeedCount);
+
+            uowMock.Setup(x => x.Skills.GetSkill(It.IsAny<int>(), activityCreate.Type))
+                .ReturnsAsync(skill);
+
+            uowMock.Setup(x => x.SkillActivities.GetAllAsync())
+                .ReturnsAsync(skillActivities);
+
+            uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
 
 
             // Act
@@ -248,7 +322,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve));
+            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve));
 
             // Act
             Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
@@ -257,7 +331,7 @@ namespace Application.Tests.Services
             methodInTest.Should().NotThrow<Exception>();
             uowMock.Verify(x => x.PendingActivities.GetAsync(pendingActivityId), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve), Times.Once);
         }
 
         [Test]
@@ -287,7 +361,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve));
+            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve));
 
 
             // Act
@@ -296,7 +370,7 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             uowMock.Verify(x => x.PendingActivities.GetAsync(pendingActivityId), Times.Once);
-            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity, approval.Approve), Times.Once);
+            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
         }
     }

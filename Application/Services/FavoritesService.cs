@@ -2,7 +2,6 @@
 using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using AutoMapper;
@@ -13,15 +12,13 @@ namespace Application.ServiceInterfaces
 {
     public class FavoritesService : IFavoritesService
     {
-        private readonly IUserManager _userManager;
         private readonly IUserAccessor _userAccessor;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public FavoritesService(IMapper mapper, IUserManager userManager, IUserAccessor userAccessor, IUnitOfWork uow)
+        public FavoritesService(IMapper mapper, IUserAccessor userAccessor, IUnitOfWork uow)
         {
             _mapper = mapper;
-            _userManager = userManager;
             _userAccessor = userAccessor;
             _uow = uow;
         }

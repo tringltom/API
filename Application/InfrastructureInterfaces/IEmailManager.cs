@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Domain;
 
 namespace Application.InfrastructureInterfaces
 {
@@ -7,7 +6,7 @@ namespace Application.InfrastructureInterfaces
     {
         Task SendConfirmationEmailAsync(string verifyUrl, string email);
         Task SendPasswordRecoveryEmailAsync(string verifyUrl, string email);
-        Task SendActivityApprovalEmailAsync(PendingActivity activity, bool approved);
+        Task SendActivityApprovalEmailAsync(string activityTitle, string userEmail, bool approved);
         Task SendProfileImageApprovalEmailAsync(string userName, bool approved);
         string DecodeVerificationToken(string token);
     }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
+using Application.ManagerInterfaces;
 using Application.Models.User;
 using Application.Services;
 using AutoFixture;

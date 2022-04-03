@@ -20,6 +20,11 @@ namespace DAL
             PendingActivities = new PendingActivityRepository(dbContext);
             UserFavorites = new UserFavortitesRepository(dbContext);
             UserReviews = new UserReviewRepository(dbContext);
+            Skills = new SkillRepository(dbContext);
+            XpLevels = new XpLevelRepository(dbContext);
+            SkillSpecials = new SkillSpecialRepostiory(dbContext);
+            SkillXpBonuses = new SkillXpBonusRepository(dbContext);
+            SkillActivities = new SkillActivityRepository(dbContext);
         }
 
         public IUserRepository Users { get; private set; }
@@ -30,6 +35,12 @@ namespace DAL
         public IPendingActivityRepository PendingActivities { get; private set; }
         public IUserFavoritesRepository UserFavorites { get; private set; }
         public IUserReviewRepository UserReviews { get; private set; }
+        public ISkillRepository Skills { get; private set; }
+        public IXpLevelRepository XpLevels { get; private set; }
+        public ISkillSpecialRepository SkillSpecials { get; private set; }
+        public ISkillXpBonusRepository SkillXpBonuses { get; private set; }
+        public ISkillActivityRepository SkillActivities { get; private set; }
+
         public async Task<bool> CompleteAsync() => await _dbContext.SaveChangesAsync() > 0;
         public void Dispose() => _dbContext.Dispose();
     }

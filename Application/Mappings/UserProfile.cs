@@ -12,6 +12,7 @@ namespace Application.Mappings
         public UserProfile()
         {
             CreateMap<User, UserRangingGet>()
+               .ForMember(d => d.UserName, o => o.MapFrom(s => s.UserName + (s.SkillSpecial != null ? " " + s.SkillSpecial.Title : "")))
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
                .ForMember(d => d.NumberOfGoodDeeds, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.GoodDeed).Count()))
                .ForMember(d => d.NumberOfJokes, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.Joke).Count()))
@@ -26,6 +27,7 @@ namespace Application.Mappings
                });
 
             CreateMap<User, UserBaseResponse>()
+               .ForMember(d => d.UserName, o => o.MapFrom(s => s.UserName + (s.SkillSpecial != null ? " " + s.SkillSpecial.Title : "")))
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
                .ForMember(d => d.IsDiceRollAllowed, o => o.MapFrom(s => s.LastRollDate == null || (DateTimeOffset.Now - s.LastRollDate) >= TimeSpan.FromDays(1)))
                .ForMember(d => d.Image, o =>
