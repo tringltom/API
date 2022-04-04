@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using Application.InfrastructureInterfaces;
+using Application.ManagerInterfaces;
 using Domain;
 using Microsoft.AspNetCore.Identity;
 
-namespace Infrastructure
+namespace Application.Managers
 {
     public class UserManager : IUserManager
     {

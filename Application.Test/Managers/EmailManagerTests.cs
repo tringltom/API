@@ -48,7 +48,7 @@ namespace Application.Tests.Managers
         }
 
         [Test]
-        [Fixture(FixtureType.WithAutoMoq, (string)null, "email@email")]
+        [Fixture(FixtureType.WithAutoMoq, null, "email@email")]
         [Fixture(FixtureType.WithAutoMoq, "", "email@email")]
         [Fixture(FixtureType.WithAutoMoq, "   ", "email@email")]
         public void SendPasswordRecoveryEmailAsync_IncorrectUrl(string url, string email, EmailManager sut)
@@ -83,7 +83,7 @@ namespace Application.Tests.Managers
             activity.User.Email = "";
 
             // Act
-            Func<Task> methodInTest = async () => await sut.SendActivityApprovalEmailAsync(activity, true);
+            Func<Task> methodInTest = async () => await sut.SendActivityApprovalEmailAsync(activity.Title, activity.User.Email, true);
 
             // Assert
             methodInTest.Should().Throw<RestException>();

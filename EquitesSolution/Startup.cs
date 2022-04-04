@@ -5,6 +5,8 @@ using API.Middleware;
 using API.Validations;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
+using Application.ManagerInterfaces;
+using Application.Managers;
 using Application.Mappings;
 using Application.ServiceInterfaces;
 using Application.Services;
@@ -72,12 +74,14 @@ namespace API
             services.AddScoped<IDiceService, DiceService>();
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IReviewService, ReviewService>();
+            services.AddScoped<ISkillService, SkillService>();
 
             services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
             services.AddScoped<IFacebookAccessor, FacebookAccessor>();
             services.AddScoped<IUserAccessor, UserAccessor>();
-            services.AddScoped<IUserManager, Infrastructure.UserManager>();
+            services.AddScoped<IUserManager, UserManager>();
+            services.AddScoped<IActivityCounterManager, ActivityCounterManager>();
             services.AddScoped<IEmailManager, EmailManager>();
 
 

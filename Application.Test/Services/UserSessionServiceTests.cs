@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
-using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
+using Application.ManagerInterfaces;
 using Application.Models.User;
 using Application.Services;
 using AutoFixture;
@@ -47,7 +47,7 @@ namespace Application.Tests.Services
             userManagerMock.Setup(x => x.FindUserByNameAsync(currentUser.UserName))
                 .ReturnsAsync(currentUser);
 
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(currentUser))
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName))
                 .Returns(token);
 
             UserBaseResponse result = null;
@@ -64,7 +64,7 @@ namespace Application.Tests.Services
             result.Should().NotBeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userManagerMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser), Times.Once);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Once);
         }
 
         [Test]
@@ -81,7 +81,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.FindUserByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((User)null);
 
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(It.IsAny<User>()))
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(token);
 
             UserBaseResponse result = null;
@@ -95,7 +95,7 @@ namespace Application.Tests.Services
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Never);
         }
 
         [Test]
@@ -112,7 +112,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.FindUserByNameAsync(currentUser.UserName))
                 .ReturnsAsync((User)null);
 
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(currentUser))
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName))
                 .Returns(token);
 
             UserBaseResponse result = null;
@@ -126,7 +126,7 @@ namespace Application.Tests.Services
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Never);
         }
 
         [Test]
@@ -134,7 +134,7 @@ namespace Application.Tests.Services
         public void LoginAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
             [Frozen] Mock<ITokenManager> jwtGeneratorMock,
             [Frozen] Mock<IUnitOfWork> uowMock,
-            RefreshToken refreshToken,
+            string refreshToken,
             UserLogin userLogin,
             UserSessionService sut)
         {
@@ -151,7 +151,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
 
             uowMock.Setup(x => x.CompleteAsync())
                .ReturnsAsync(true);
@@ -165,13 +165,13 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Once);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
+            string refreshToken, UserLogin userLogin, UserSessionService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -186,7 +186,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
 
             // Act
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
@@ -197,13 +197,13 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_UserEmailNotConfirmed([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
+            string refreshToken, UserLogin userLogin, UserSessionService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -218,7 +218,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
 
             // Act
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
@@ -229,13 +229,13 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_SignInFailedGeneral([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
+            string refreshToken, UserLogin userLogin, UserSessionService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -250,7 +250,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
 
             // Act
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
@@ -261,13 +261,13 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_SignInFailedUserLockedOut([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
+            string refreshToken, UserLogin userLogin, UserSessionService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -282,7 +282,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
 
             // Act
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
@@ -293,13 +293,13 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void LoginAsync_UpdateUserFailed([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            RefreshToken refreshToken, UserLogin userLogin, UserSessionService sut)
+            string refreshToken, UserLogin userLogin, UserSessionService sut)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -314,7 +314,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
 
             // Act
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
@@ -325,7 +325,7 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
@@ -333,7 +333,7 @@ namespace Application.Tests.Services
         public void RefreshTokenAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
             [Frozen] Mock<ITokenManager> jwtGeneratorMock,
             [Frozen] Mock<IUserAccessor> userAccessorMock,
-            User user, RefreshToken newToken, UserSessionService sut)
+            User user, string newToken, UserSessionService sut)
         {
             // Arrange
             user.RefreshTokens = new List<RefreshToken>
@@ -348,7 +348,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
             UserRefreshResponse result = null;
 
             // Act
@@ -361,7 +361,7 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Once);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
 
         }
 
@@ -370,7 +370,7 @@ namespace Application.Tests.Services
         public void RefreshTokenAsync_NoTokenFound([Frozen] Mock<IUserManager> userRepoMock,
             [Frozen] Mock<ITokenManager> jwtGeneratorMock,
             [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, RefreshToken newToken, UserSessionService sut)
+            string oldToken, string newToken, UserSessionService sut)
         {
             // Arrange
             var user = _fixture.Build<User>().With(x => x.RefreshTokens, new List<RefreshToken>()).Create();
@@ -381,7 +381,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
             UserRefreshResponse result = null;
 
             // Act
@@ -394,7 +394,7 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Once);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
         }
 
         [Test]
@@ -402,7 +402,7 @@ namespace Application.Tests.Services
         public void RefreshTokenAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock,
             [Frozen] Mock<ITokenManager> jwtGeneratorMock,
             [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, User user, RefreshToken newToken, UserSessionService sut)
+            string oldToken, User user, string newToken, UserSessionService sut)
         {
             // Arrange
             userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
@@ -411,7 +411,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
             UserRefreshResponse result = null;
 
             // Act
@@ -424,7 +424,7 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
@@ -432,7 +432,7 @@ namespace Application.Tests.Services
         public void RefreshTokenAsync_TokenInactive([Frozen] Mock<IUserManager> userRepoMock,
             [Frozen] Mock<ITokenManager> jwtGeneratorMock,
             [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, User user, RefreshToken newToken, UserSessionService sut)
+            string oldToken, User user, string newToken, UserSessionService sut)
         {
             // Arrange
             user.RefreshTokens = new List<RefreshToken>
@@ -446,7 +446,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
             UserRefreshResponse result = null;
 
             // Act
@@ -459,7 +459,7 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
@@ -467,7 +467,7 @@ namespace Application.Tests.Services
         public void RefreshTokenAsync_UserUpdateFailed([Frozen] Mock<IUserManager> userRepoMock,
             [Frozen] Mock<ITokenManager> jwtGeneratorMock,
             [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, User user, RefreshToken newToken, UserSessionService sut)
+            string oldToken, User user, string newToken, UserSessionService sut)
         {
             // Arrange
             userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
@@ -476,7 +476,7 @@ namespace Application.Tests.Services
             userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
 
             jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user)).Returns(_fixture.Create<string>());
+            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
             UserRefreshResponse result = null;
 
             // Act
@@ -489,7 +489,7 @@ namespace Application.Tests.Services
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user), Times.Never);
+            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]

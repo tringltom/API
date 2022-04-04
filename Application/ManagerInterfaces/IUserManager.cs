@@ -2,7 +2,7 @@
 using Domain;
 using Microsoft.AspNetCore.Identity;
 
-namespace Application.InfrastructureInterfaces
+namespace Application.ManagerInterfaces
 {
     public interface IUserManager
     {

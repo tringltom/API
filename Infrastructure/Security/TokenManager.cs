@@ -5,7 +5,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Application.InfrastructureInterfaces.Security;
-using Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -21,16 +20,15 @@ namespace Infrastructure.Security
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config.GetSection("TokenKey").Value));
         }
 
-        public string CreateJWTToken(User user)
+        public string CreateJWTToken(int id, string userName)
         {
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, user.UserName),
-                new Claim(JwtRegisteredClaimNames.Sid, user.Id.ToString())
+                new Claim(JwtRegisteredClaimNames.NameId, userName),
+                new Claim(JwtRegisteredClaimNames.Sid, id.ToString())
             };
 
-            // generate signin credentials
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -47,16 +45,13 @@ namespace Infrastructure.Security
             return tokenHandler.WriteToken(token);
         }
 
-        public RefreshToken CreateRefreshToken()
+        public string CreateRefreshToken()
         {
             var randomNumber = new byte[32];
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(randomNumber);
-                return new RefreshToken
-                {
-                    Token = Convert.ToBase64String(randomNumber)
-                };
+                return Convert.ToBase64String(randomNumber);
             }
         }
     }
