@@ -29,21 +29,21 @@ namespace API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult> Register(UserRegister userToRegister)
+        public async Task<ActionResult> Register(UserRegister userToRegister, string prefix)
         {
 
-            var origin = Request.Headers["origin"];
+            var origin = prefix ?? Request.Headers["origin"];
 
-            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
+            await _userRegistrationService.RegisterAsync(userToRegister, origin);
 
             return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
         }
 
         [AllowAnonymous]
         [HttpGet("resendEmailVerification")]
-        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserEmail user)
+        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserEmail user, string prefix)
         {
-            var origin = Request.Headers["origin"];
+            var origin = prefix ?? Request.Headers["origin"];
 
             await _userRegistrationService.ResendConfirmationEmailAsync(user.Email, origin);
 
