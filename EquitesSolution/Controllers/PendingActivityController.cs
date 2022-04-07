@@ -37,6 +37,7 @@ namespace API.Controllers
             //return await _activityService.GetPendingActivitiesAsync(limit, offset);
         }
 
+        // TODO - Add checking if user is Admin
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeletePendingActivitiy(int id)
         {

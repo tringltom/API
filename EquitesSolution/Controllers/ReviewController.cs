@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using Microsoft.AspNetCore.Authorization;
+using Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,19 +17,25 @@ namespace API.Controllers
             _reviewService = reviewManager;
         }
 
-        [HttpPost("reviewActivity")]
-        public async Task<ActionResult> ReviewActivity(ActivityReview activityReview)
+        [HttpGet("logged-user")]
+        public async Task<IList<UserReviewedActivity>> ReviewsLoggedUser()
+        {
+            return await _reviewService.GetAllReviews(1);
+        }
+
+        [HttpPut()]
+        public async Task<ActionResult<UserReview>> ReviewActivity(ActivityReview activityReview)
         {
             await _reviewService.ReviewActivityAsync(activityReview);
 
             return Ok("Uspešno ste ocenili aktivnost");
         }
 
-        [HttpGet("getReviewsForUser")]
-        [AllowAnonymous]
-        public async Task<IList<UserReviewedActivity>> GetReviewsForUser([FromQuery] int userId)
-        {
-            return await _reviewService.GetAllReviews(userId);
-        }
+        //[HttpGet("getReviewsForUser")]
+        //[AllowAnonymous]
+        //public async Task<IList<UserReviewedActivity>> GetReviewsForUser([FromQuery] int userId)
+        //{
+        //    return await _reviewService.GetAllReviews(userId);
+        //}
     }
 }

@@ -16,7 +16,7 @@ namespace API.Controllers
             _activityService = activityService;
         }
 
-        [HttpGet("review")]
+        [HttpGet("for-review")]
         public async Task<ActionResult<ApprovedActivityEnvelope>> ActivitiesForReview(int? limit, int? offset)
         {
             return Ok();
