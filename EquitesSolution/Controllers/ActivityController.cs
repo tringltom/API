@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -15,39 +16,26 @@ namespace API.Controllers
             _activityService = activityService;
         }
 
-        [HttpPost("create")]
-        public async Task<ActionResult> CreatePendingActivity([FromForm] ActivityCreate activityCreate)
+        [HttpGet("review")]
+        public async Task<ActionResult<ApprovedActivityEnvelope>> ActivitiesForReview(int? limit, int? offset)
         {
-            await _activityService.CreatePendingActivityAsync(activityCreate);
-
-            return Ok("Uspešno kreiranje, molimo Vas da sačekate odobrenje");
+            return Ok();
+            //return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
         }
 
-        // TODO - Add checking if user is Admin
-        [HttpGet("getPending")]
-        public async Task<ActionResult<PendingActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
+        [HttpGet("{id")]
+        public async Task<ActionResult<Activity>> Activity(int id)
         {
-            return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            return Ok();
+            //return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
         }
 
-        [HttpGet("getUserPending")]
-        public async Task<ActionResult<PendingActivityForUserEnvelope>> GetPendingActivitiesForLoggedInUser(int? limit, int? offset)
+        // TODO - Add checking if user is Admin/Approver
+        [HttpPost("pending-activity/{id}")]
+        public async Task<ActionResult<Activity>> ApprovePendingActivity(int id)
         {
-            return await _activityService.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
+            return Ok();
+            //return await _activityService.ReslovePendingActivityAsync(id, approval);
         }
-
-        // TODO - Add checking if user is Admin
-        [HttpPost("resolve/{id}")]
-        public async Task<ActionResult<bool>> ResolvePendingActivity(int id, PendingActivityApproval approval)
-        {
-            return await _activityService.ReslovePendingActivityAsync(id, approval);
-        }
-
-        [HttpGet("approvedActivitiesExcludeUser/{id}")]
-        public async Task<ActionResult<ApprovedActivityEnvelope>> GetApprovedActivitiesExcludeUser(int id, int? limit, int? offset)
-        {
-            return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
-        }
-
     }
 }

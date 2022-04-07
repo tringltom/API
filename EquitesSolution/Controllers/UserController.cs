@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Application.Models;
+using Application.Models.Activity;
 using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -180,6 +181,14 @@ namespace API.Controllers
         public async Task<ActionResult<bool>> ResolveUserImage(int id, PhotoApprove photoApprove)
         {
             return await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
+        }
+
+
+        [HttpGet("owner/pending-activities")]
+        public async Task<ActionResult<PendingActivityForUserEnvelope>> OwnerPendingActivities(int? limit, int? offset)
+        {
+            return Ok();
+            //return await _activityService.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
         }
 
         private void SetTokenCookie(string refreshToken, bool stayLoggedIn)
