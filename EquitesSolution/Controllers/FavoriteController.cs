@@ -18,7 +18,7 @@ namespace API.Controllers
             _favoriteService = favoriteService;
         }
 
-        [HttpGet("logged-user")]
+        [HttpGet("me/ids")]
         public async Task<ActionResult<IList<FavoriteActivityReturn>>> FavoriteActivityIdsLoggedUser()
         {
             return Ok(await _favoriteService.GetAllFavoritesForUserAsync(2));

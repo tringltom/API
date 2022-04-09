@@ -23,6 +23,12 @@ namespace API.Controllers
             return await _activityService.GetPendingActivitiesAsync(limit, offset);
         }
 
+        [HttpGet("me")]
+        public async Task<ActionResult<PendingActivityForUserEnvelope>> OwnerPendingActivities(int? limit, int? offset)
+        {
+            return await _activityService.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
+        }
+
         [HttpGet("{id}")]
         public async Task<ActionResult<PendingActivity>> PendingActivitiy(int id)
         {

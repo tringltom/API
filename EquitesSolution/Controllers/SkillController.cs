@@ -22,16 +22,22 @@ namespace API.Controllers
             return await _skillService.GetSkillsDataAsync(userId);
         }
 
-        [HttpPut("reset")]
-        public async Task<ActionResult<UserBaseResponse>> ResetSkillsDataAsync()
+        [HttpPut("users/me")]
+        public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
         {
             return await _skillService.ResetSkillsDataAsync();
         }
 
-        [HttpPut("update")]
-        public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
-        {
-            return await _skillService.UpdateSkillsDataAsync(skillData);
-        }
+        //[HttpPut("reset")]
+        //public async Task<ActionResult<UserBaseResponse>> ResetSkillsDataAsync()
+        //{
+        //    return await _skillService.ResetSkillsDataAsync();
+        //}
+
+        //[HttpPut("update")]
+        //public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
+        //{
+        //    return await _skillService.UpdateSkillsDataAsync(skillData);
+        //}
     }
 }

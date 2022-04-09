@@ -17,7 +17,7 @@ namespace API.Controllers
             _reviewService = reviewManager;
         }
 
-        [HttpGet("logged-user")]
+        [HttpGet("me")]
         public async Task<IList<UserReviewedActivity>> ReviewsLoggedUser()
         {
             return await _reviewService.GetAllReviews(1);

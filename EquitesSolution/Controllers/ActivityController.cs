@@ -16,14 +16,14 @@ namespace API.Controllers
             _activityService = activityService;
         }
 
-        [HttpGet("for-review")]
+        [HttpGet("others")]
         public async Task<ActionResult<ApprovedActivityEnvelope>> ActivitiesForReview(int? limit, int? offset)
         {
             return Ok();
             //return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
         }
 
-        [HttpGet("{id")]
+        [HttpGet("{id}")]
         public async Task<ActionResult<Activity>> Activity(int id)
         {
             return Ok();
