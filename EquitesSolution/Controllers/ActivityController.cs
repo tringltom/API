@@ -17,25 +17,22 @@ namespace API.Controllers
         }
 
         [HttpGet("others")]
-        public async Task<ActionResult<ApprovedActivityEnvelope>> ActivitiesForReview(int? limit, int? offset)
+        public async Task<ActionResult<ApprovedActivityEnvelope>> ActivitiesFromOtherUsers(int? limit, int? offset)
         {
-            return Ok();
-            //return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
+            return await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset);
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Activity>> Activity(int id)
         {
-            return Ok();
-            //return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
+            return await _activityService.GetActivityAsync(id);
         }
 
         // TODO - Add checking if user is Admin/Approver
         [HttpPost("pending-activity/{id}")]
         public async Task<ActionResult<Activity>> ApprovePendingActivity(int id)
         {
-            return Ok();
-            //return await _activityService.ReslovePendingActivityAsync(id, approval);
+            return await _activityService.ApprovePendingActivity(id);
         }
     }
 }

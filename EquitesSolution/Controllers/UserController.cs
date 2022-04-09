@@ -1,11 +1,7 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Application.Models;
 using Application.Models.User;
 using Application.ServiceInterfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -27,132 +23,20 @@ namespace API.Controllers
             _usersService = usersService;
         }
 
-        [AllowAnonymous]
-        [HttpPost("register")]
-        public async Task<ActionResult> Register(UserRegister userToRegister)
-        {
-
-            var origin = Request.Headers["origin"];
-
-            //await _userRegistrationService.RegisterAsync(userToRegister, origin);
-
-            return Ok("Registracija uspešna - Molimo proverite Vaše poštansko sanduče.");
-        }
-
-        [AllowAnonymous]
-        [HttpGet("resendEmailVerification")]
-        public async Task<ActionResult> ResendEmailVerification([FromQuery] UserEmail user)
-        {
-            var origin = Request.Headers["origin"];
-
-            await _userRegistrationService.ResendConfirmationEmailAsync(user.Email, origin);
-
-            return Ok("Email za potvrdu poslat - Molimo proverite Vaše poštansko sanduče.");
-        }
-
-        [HttpPost("verifyEmail")]
-        [AllowAnonymous]
-        public async Task<ActionResult> VerifyEmail(UserEmailVerification emailverification)
-        {
-            await _userRegistrationService.ConfirmEmailAsync(emailverification);
-
-            return Ok("Email adresa potvrđena. Možete se ulogovati.");
-        }
-
-        [AllowAnonymous]
-        [HttpGet]
-        public async Task<ActionResult<UserBaseResponse>> GetCurrentlyLoggedInUser()
-        {
-            bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
-            var refreshToken = Request.Cookies["refreshToken"];
-
-            return await _userSessionService.GetCurrentlyLoggedInUserAsync(stayLoggedIn, refreshToken);
-        }
-
-        [HttpGet("getTopXpUsers")]
+        [HttpGet("")]
         public async Task<ActionResult<UserRangingEnvelope>> GetTopXpUsers(int? limit, int? offset)
         {
             return await _usersService.GetRangingUsers(limit, offset);
         }
 
-        [AllowAnonymous]
-        [HttpPost("login")]
-        public async Task<ActionResult<UserBaseResponse>> Login(UserLogin userLogin)
+        // TODO - Add checking if user is Admin
+        [HttpGet("pending-images")]
+        public async Task<ActionResult<UserImageEnvelope>> GetImagesForApproval(int? limit, int? offset)
         {
-            var userReponse = await _userSessionService.LoginAsync(userLogin);
-
-            SetTokenCookie(userReponse.RefreshToken, userLogin.StayLoggedIn);
-
-            return userReponse;
+            return await _usersService.GetImagesForApprovalAsync(limit, offset);
         }
 
-        [HttpPost("logout")]
-        public async Task<ActionResult> Logout()
-        {
-            var refreshToken = Request.Cookies["refreshToken"];
-
-            if (refreshToken != null)
-                await _userSessionService.LogoutUserAsync(refreshToken);
-
-            return Ok("Uspešno ste izlogovani.");
-        }
-
-        [AllowAnonymous]
-        [HttpPost("facebook")]
-        public async Task<ActionResult<UserBaseResponse>> FacebookLogin(string accessToken, CancellationToken cancellationToken)
-        {
-            //var result = await _userSessionService.FacebookLoginAsync(accessToken, cancellationToken);
-
-            //var user = _mapper.Map<UserBaseResponse>(result);
-
-            //SetTokenCookie(user.RefreshToken);
-            //return user;
-
-            return StatusCode(500, "Not yet implemented. Application is not enlisted with FB.");
-        }
-
-        [HttpPost("refreshToken")]
-        public async Task<ActionResult<UserRefreshResponse>> RefreshToken()
-        {
-            var refreshToken = Request.Cookies["refreshToken"];
-            bool.TryParse(Request.Cookies["stayLoggedIn"], out var stayLoggedIn);
-
-            var userResponse = await _userSessionService.RefreshTokenAsync(refreshToken);
-
-            SetTokenCookie(userResponse.RefreshToken, stayLoggedIn);
-
-            return userResponse;
-        }
-
-        [AllowAnonymous]
-        [HttpPost("recoverPassword")]
-        public async Task<ActionResult> RecoverPassword(UserEmail user)
-        {
-            var origin = Request.Headers["origin"];
-
-            await _userRecoveryService.RecoverUserPasswordViaEmailAsync(user.Email, origin);
-
-            return Ok("Molimo proverite Vaše poštansko sanduče kako biste uneli novu šifru.");
-        }
-
-        [HttpPost("verifyPasswordRecovery")]
-        [AllowAnonymous]
-        public async Task<ActionResult> VerifyPasswordRecovery(UserPasswordRecoveryVerification passwordRecoveryVerify)
-        {
-            await _userRecoveryService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify);
-
-            return Ok("Uspešna izmena šifre. Molimo Vas da se ulogujete sa novim kredencijalima.");
-        }
-
-        [HttpPost("changePassword")]
-        public async Task<ActionResult> ChangePassword(UserPasswordChange user)
-        {
-            await _userRecoveryService.ChangeUserPasswordAsync(user);
-
-            return Ok("Uspešna izmena šifre.");
-        }
-
-        [HttpPatch("updateAbout")]
+        [HttpPatch("me")]
         public async Task<ActionResult> UpdateLoggedUserAbout(UserAbout user)
         {
             await _usersService.UpdateLoggedUserAboutAsync(user);
@@ -160,7 +44,7 @@ namespace API.Controllers
             return Ok("Uspešna izmena o korisniku.");
         }
 
-        [HttpPatch("updateImage")]
+        [HttpPatch("me")]
         public async Task<ActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
         {
             await _usersService.UpdateLoggedUserImageAsync(userImage);
@@ -169,29 +53,10 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpGet("getImagesForApproval")]
-        public async Task<ActionResult<UserImageEnvelope>> GetImagesForApproval(int? limit, int? offset)
-        {
-            return await _usersService.GetImagesForApprovalAsync(limit, offset);
-        }
-
-        // TODO - Add checking if user is Admin
-        [HttpPost("resolve/{id}")]
+        [HttpPatch("/{id}")]
         public async Task<ActionResult<bool>> ResolveUserImage(int id, PhotoApprove photoApprove)
         {
             return await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
-        }
-
-        private void SetTokenCookie(string refreshToken, bool stayLoggedIn)
-        {
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true,
-                Expires = stayLoggedIn ? DateTimeOffset.UtcNow.AddDays(7) : DateTimeOffset.MinValue
-            };
-
-            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
-            Response.Cookies.Append("stayLoggedIn", stayLoggedIn.ToString(), cookieOptions);
         }
     }
 }

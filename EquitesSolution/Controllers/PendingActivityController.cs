@@ -37,7 +37,7 @@ namespace API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<PendingActivity>> UpdatePendingActivitiy(PendingActivity pendingActivity)
+        public async Task<ActionResult<PendingActivity>> UpdatePendingActivitiy(int id, PendingActivity pendingActivity)
         {
             return Ok();
             //return await _activityService.GetPendingActivitiesAsync(limit, offset);

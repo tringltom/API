@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -117,16 +118,41 @@ namespace Application.Services
             return false;
         }
 
-        public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesFromOtherUsersAsync(int userId, int? limit, int? offset)
+        public async Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(int? limit, int? offset)
         {
-            var approvedActivities = await _uow.Activities.FindAsync(limit, offset, a => a.User.Id != userId, a => a.Id);
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+
+            var activities = await _uow.Activities.GetOrderedActivitiesFromOtherUsersAsync(limit, offset, userId);
 
             return new ApprovedActivityEnvelope
             {
-                Activities = approvedActivities.Select(pa => _mapper.Map<ApprovedActivityReturn>(pa)).ToList(),
-                ActivityCount = await _uow.Activities.CountAsync(a => a.User.Id != userId)
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountOtherUsersActivitiesAsync(userId)
             };
         }
 
+        public async Task<Activity> ApprovePendingActivity(int id)
+        {
+            var pendingActivity = await _uow.PendingActivities.GetAsync(id)
+                ?? throw new NotFound("Aktivnost nije pronadjena");
+
+            var activity = _mapper.Map<Activity>(pendingActivity);
+
+            _uow.Activities.Add(activity);
+            _uow.PendingActivities.Remove(pendingActivity);
+
+            if (await _uow.CompleteAsync())
+            {
+                await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true);
+                return activity;
+            }
+
+            return null;
+        }
+
+        public async Task<Activity> GetActivityAsync(int id)
+        {
+            return await _uow.Activities.GetAsync(id);
+        }
     }
 }
