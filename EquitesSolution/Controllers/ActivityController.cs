@@ -1,8 +1,6 @@
 ﻿using System.Threading.Tasks;
 using API.Validations;
-using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,25 +15,32 @@ namespace API.Controllers
             _activityService = activityService;
         }
 
-        [HttpGet("others")]
-        public async Task<ActionResult<ApprovedActivityEnvelope>> ActivitiesFromOtherUsers(int? limit, int? offset)
+        [HttpGet("{id}", Name = nameof(Activity))]
+        [IdValidation]
+        public async Task<IActionResult> Activity(int id)
         {
-            return await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset);
+            var activity = await _activityService.GetActivityAsync(id);
+            return Ok(activity);
         }
 
-        [IdValidation]
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Activity>> Activity(int id)
+        [HttpGet("others")]
+        public async Task<IActionResult> ActivitiesFromOtherUsers(int? limit, int? offset)
         {
-            return await _activityService.GetActivityAsync(id);
+            var activities = await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset);
+            return Ok(activities);
         }
 
         // TODO - Add checking if user is Admin/Approver
-        [IdValidation]
         [HttpPost("pending-activity/{id}")]
-        public async Task<ActionResult<Activity>> ApprovePendingActivity(int id)
+        [IdValidation]
+        public async Task<IActionResult> ApprovePendingActivity(int id)
         {
-            return await _activityService.ApprovePendingActivity(id);
+            var result = await _activityService.ApprovePendingActivity(id);
+
+            return result.Match(
+                activity => CreatedAtRoute(nameof(Activity), new { activity = activity.Id }, activity),
+                err => err.Response()
+                );
         }
     }
 }

@@ -11,7 +11,9 @@ using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
 using Domain;
+using LanguageExt;
 using Microsoft.AspNetCore.Http;
+using static LanguageExt.Prelude;
 
 namespace Application.Services
 {
@@ -131,10 +133,12 @@ namespace Application.Services
             };
         }
 
-        public async Task<Activity> ApprovePendingActivity(int id)
+        public async Task<Either<RestException, Activity>> ApprovePendingActivity(int id)
         {
-            var pendingActivity = await _uow.PendingActivities.GetAsync(id)
-                ?? throw new NotFound("Aktivnost nije pronadjena");
+            var pendingActivity = await _uow.PendingActivities.GetAsync(id);
+
+            if (pendingActivity == null)
+                return new NotFound("Aktivnost nije pronadjena");
 
             var activity = _mapper.Map<Activity>(pendingActivity);
 
@@ -146,9 +150,11 @@ namespace Application.Services
             return activity;
         }
 
-        public async Task<Activity> GetActivityAsync(int id)
+        public async Task<ApprovedActivityReturn> GetActivityAsync(int id)
         {
-            return await _uow.Activities.GetAsync(id);
+            var activity = await _uow.Activities.GetAsync(id);
+            var activityReturn = _mapper.Map<ApprovedActivityReturn>(activity);
+            return activityReturn;
         }
     }
 }

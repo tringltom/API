@@ -8,7 +8,7 @@ namespace API.Validations
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             if ((int)context.ActionArguments["id"] <= 0)
-                context.Result = new BadRequestResult();
+                context.Result = new BadRequestObjectResult(new { error = "Nevalidan Id" });
         }
     }
 }

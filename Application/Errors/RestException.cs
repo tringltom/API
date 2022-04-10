@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Errors
 {
@@ -15,6 +16,11 @@ namespace Application.Errors
         public HttpStatusCode Code { get; }
         public object Errors { get; }
         public Exception Exception { get; set; }
+
+        public IActionResult Response()
+        {
+            return new BadRequestObjectResult(Errors);
+        }
 
     }
 }
