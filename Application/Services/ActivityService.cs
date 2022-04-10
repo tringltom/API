@@ -133,6 +133,9 @@ namespace Application.Services
 
         public async Task<Activity> ApprovePendingActivity(int id)
         {
+            if (id <= 0)
+                throw new BadRequest("Nevalidan id aktivnosti");
+
             var pendingActivity = await _uow.PendingActivities.GetAsync(id)
                 ?? throw new NotFound("Aktivnost nije pronadjena");
 
@@ -140,14 +143,10 @@ namespace Application.Services
 
             _uow.Activities.Add(activity);
             _uow.PendingActivities.Remove(pendingActivity);
+            await _uow.CompleteAsync();
 
-            if (await _uow.CompleteAsync())
-            {
-                await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true);
-                return activity;
-            }
-
-            return null;
+            await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true);
+            return activity;
         }
 
         public async Task<Activity> GetActivityAsync(int id)
