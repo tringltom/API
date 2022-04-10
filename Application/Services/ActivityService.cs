@@ -133,9 +133,6 @@ namespace Application.Services
 
         public async Task<Activity> ApprovePendingActivity(int id)
         {
-            if (id <= 0)
-                throw new BadRequest("Nevalidan id aktivnosti");
-
             var pendingActivity = await _uow.PendingActivities.GetAsync(id)
                 ?? throw new NotFound("Aktivnost nije pronadjena");
 

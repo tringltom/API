@@ -80,7 +80,7 @@ namespace API.Controllers
             return userResponse;
         }
 
-        [HttpPatch("")]
+        [HttpPatch("email")]
         [AllowAnonymous]
         public async Task<ActionResult> VerifyEmail(UserEmailVerification emailverification)
         {
@@ -89,7 +89,7 @@ namespace API.Controllers
             return Ok("Email adresa potvrđena. Možete se ulogovati.");
         }
 
-        [HttpPatch("")]
+        [HttpPatch("password")]
         [AllowAnonymous]
         public async Task<ActionResult> VerifyPasswordRecovery(UserPasswordRecoveryVerification passwordRecoveryVerify)
         {

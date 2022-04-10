@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using Domain;
@@ -22,6 +23,7 @@ namespace API.Controllers
             return await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset);
         }
 
+        [IdValidation]
         [HttpGet("{id}")]
         public async Task<ActionResult<Activity>> Activity(int id)
         {
@@ -29,6 +31,7 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin/Approver
+        [IdValidation]
         [HttpPost("pending-activity/{id}")]
         public async Task<ActionResult<Activity>> ApprovePendingActivity(int id)
         {

@@ -36,7 +36,7 @@ namespace API.Controllers
             return await _usersService.GetImagesForApprovalAsync(limit, offset);
         }
 
-        [HttpPatch("me")]
+        [HttpPatch("me/about")]
         public async Task<ActionResult> UpdateLoggedUserAbout(UserAbout user)
         {
             await _usersService.UpdateLoggedUserAboutAsync(user);
@@ -44,7 +44,7 @@ namespace API.Controllers
             return Ok("Uspešna izmena o korisniku.");
         }
 
-        [HttpPatch("me")]
+        [HttpPatch("me/image")]
         public async Task<ActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
         {
             await _usersService.UpdateLoggedUserImageAsync(userImage);
@@ -53,7 +53,7 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpPatch("/{id}")]
+        [HttpPatch("{id}")]
         public async Task<ActionResult<bool>> ResolveUserImage(int id, PhotoApprove photoApprove)
         {
             return await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
