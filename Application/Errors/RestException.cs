@@ -17,9 +17,9 @@ namespace Application.Errors
         public object Errors { get; }
         public Exception Exception { get; set; }
 
-        public IActionResult Response()
+        public virtual IActionResult Response()
         {
-            return new BadRequestObjectResult(Errors);
+            return new OkObjectResult(Errors);
         }
 
     }

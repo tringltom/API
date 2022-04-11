@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models;
 using Application.ServiceInterfaces;
 using DAL;
+using LanguageExt;
 
 namespace Application.Services
 {
@@ -21,13 +21,13 @@ namespace Application.Services
             _uow = uow;
         }
 
-        public async Task<DiceResult> GetDiceRollResult()
+        public async Task<Either<RestException, DiceResult>> GetDiceRollResult()
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);
 
             if (user.LastRollDate != null && (DateTimeOffset.Now - user.LastRollDate) < TimeSpan.FromDays(1))
-                return new DiceResult { Result = 0, Message = "Bacanje kockice je moguće jednom dnevno" };
+                return new NotFound("Bacanje kockice je moguće jednom dnevno");
 
             user.LastRollDate = DateTimeOffset.Now;
 
@@ -84,8 +84,7 @@ namespace Application.Services
                     break;
             }
 
-            if (!await _uow.CompleteAsync())
-                throw new RestException(HttpStatusCode.BadRequest, new { Error = "Neuspešno ažuriranje korisnika" });
+            await _uow.CompleteAsync();
 
             return new DiceResult { Result = diceResult, Message = message };
         }

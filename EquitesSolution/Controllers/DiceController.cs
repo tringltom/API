@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Application.Models;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,9 +15,14 @@ namespace API.Controllers
         }
 
         [HttpPost("roll")]
-        public async Task<ActionResult<DiceResult>> RollTheDice()
+        public async Task<IActionResult> RollTheDice()
         {
-            return await _diceService.GetDiceRollResult();
+            var result = await _diceService.GetDiceRollResult();
+
+            return result.Match(
+               diceResult => Ok(diceResult),
+               err => err.Response()
+               );
         }
     }
 }

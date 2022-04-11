@@ -133,7 +133,7 @@ namespace Application.Services
             };
         }
 
-        public async Task<Either<RestException, Activity>> ApprovePendingActivity(int id)
+        public async Task<Either<RestException, ApprovedActivityReturn>> ApprovePendingActivity(int id)
         {
             var pendingActivity = await _uow.PendingActivities.GetAsync(id);
 
@@ -147,7 +147,8 @@ namespace Application.Services
             await _uow.CompleteAsync();
 
             await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true);
-            return activity;
+            var activityReturn = _mapper.Map<ApprovedActivityReturn>(activity);
+            return activityReturn;
         }
 
         public async Task<ApprovedActivityReturn> GetActivityAsync(int id)
