@@ -37,7 +37,7 @@ namespace API.Tests.Controllers
             };
 
             // Act
-            var res = sut.Register(userForReg);
+            var res = sut.Register(userForReg, It.IsAny<string>());
 
             // Assert
             res.Result.Should().BeOfType<OkObjectResult>();
@@ -62,7 +62,7 @@ namespace API.Tests.Controllers
             };
 
             // Act
-            var res = sut.ResendEmailVerification(user);
+            var res = sut.ResendEmailVerification(user, It.IsAny<string>());
 
             // Assert
             res.Result.Should().BeOfType<OkObjectResult>();
