@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Application.Models.Activity;
+﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.ServiceInterfaces;
-using Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -18,39 +16,42 @@ namespace API.Controllers
             _favoriteService = favoriteService;
         }
 
-        [HttpGet("me/ids")]
-        public async Task<ActionResult<IList<FavoriteActivityReturn>>> FavoriteActivityIdsLoggedUser()
+        [HttpGet("{id}", Name = nameof(GetFavoriteActivity))]
+        [IdValidation]
+        public async Task<IActionResult> GetFavoriteActivity(int id)
         {
-            return Ok(await _favoriteService.GetAllFavoritesForUserAsync(2));
+            return Ok(await _favoriteService.GetFavoriteActivityAsync(id));
+        }
+
+
+        [HttpGet("me/ids")]
+        public async Task<IActionResult> GetOwnerFavoriteActivityIds()
+        {
+            return Ok(await _favoriteService.GetAllOwnerFavoriteIds());
         }
 
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteFavorite(int id)
+        [IdValidation]
+        public async Task<IActionResult> RemoveFavouriteActivity(int id)
         {
-            return Ok();
-            //return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            var result = await _favoriteService.RemoveFavoriteActivityAsync(id);
+
+            return result.Match(
+               u => NoContent(),
+               err => err.Response()
+               );
         }
 
-        [HttpPost]
-        public async Task<ActionResult<UserFavoriteActivity>> CreateFavorite(FavoriteActivityBase favoriteActivityCreate)
+        [HttpPost("{activity-id}")]
+        [IdValidation]
+        public async Task<IActionResult> CreateFavoriteActivity(int activityId)
         {
-            //await _favoriteService.ResolveFavoriteActivityAsync(favoriteActivityCreate);
+            var result = await _favoriteService.AddFavoriteActivityAsync(activityId);
 
-            return Ok();
+            return result.Match(
+               activity => CreatedAtRoute(nameof(GetFavoriteActivity), new { activity = activity.Id }, activity),
+               err => err.Response()
+               );
         }
-
-        //[HttpPost("resolveFavorite")]
-        //public async Task<ActionResult> ResolveFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityCreate)
-        //{
-        //    await _favoriteService.ResolveFavoriteActivityAsync(favoriteActivityCreate);
-
-        //    return Ok("Uspešno ste dodali omiljenu aktivnost");
-        //}
-
-        //[HttpGet("{id}")]
-        //public async Task<IList<FavoriteActivityReturn>> GetFavoriteActivitiesForUser(int id)
-        //{
-        //    return await _favoriteService.GetAllFavoritesForUserAsync(id);
-        //}
     }
 }

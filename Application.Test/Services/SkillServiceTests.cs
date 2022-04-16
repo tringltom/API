@@ -45,13 +45,13 @@ namespace Application.Tests.Services
         public void GetSkillsDataAsync_Successful(int userId, List<Skill> skills, User user, SkillData skillData, int potentialLevel)
         {
             // Arrange
-            _uowMock.Setup(x => x.Skills.GetSkills(userId))
+            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
              .ReturnsAsync(skills);
 
             _uowMock.Setup(x => x.Users.GetAsync(userId))
              .ReturnsAsync(user);
 
-            _uowMock.Setup(x => x.XpLevels.GetPotentialLevel(user.CurrentXp))
+            _uowMock.Setup(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp))
              .ReturnsAsync(potentialLevel);
 
             // Act
@@ -59,9 +59,9 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            _uowMock.Verify(x => x.Skills.GetSkills(userId), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            _uowMock.Verify(x => x.XpLevels.GetPotentialLevel(user.CurrentXp), Times.Once);
+            _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace Application.Tests.Services
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
 
-            _uowMock.Setup(x => x.Skills.GetSkills(userId))
+            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
                 .ReturnsAsync((List<Skill>)null);
 
             _uowMock.Setup(x => x.Users.GetAsync(userId))
@@ -94,7 +94,7 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().Throw<NotFound>();
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
-            _uowMock.Verify(x => x.Skills.GetSkills(userId), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
             _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
             _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Never);
@@ -108,7 +108,7 @@ namespace Application.Tests.Services
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
 
-            _uowMock.Setup(x => x.Skills.GetSkills(userId))
+            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
                 .ReturnsAsync(skills);
 
             _uowMock.Setup(x => x.Users.GetAsync(userId))
@@ -130,7 +130,7 @@ namespace Application.Tests.Services
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
-            _uowMock.Verify(x => x.Skills.GetSkills(userId), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
             _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Once);
@@ -150,13 +150,13 @@ namespace Application.Tests.Services
             _uowMock.Setup(x => x.Users.GetAsync(userId))
                 .ReturnsAsync(user);
 
-            _uowMock.Setup(x => x.XpLevels.GetPotentialLevel(user.CurrentXp))
+            _uowMock.Setup(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp))
                 .ReturnsAsync(potentialLevel);
 
-            _uowMock.Setup(x => x.Skills.GetSkills(userId))
+            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
                 .ReturnsAsync(skills);
 
-            _uowMock.Setup(x => x.SkillSpecials.GetSkillSpecial(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()))
+            _uowMock.Setup(x => x.SkillSpecials.GetSkillSpecialAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()))
                 .ReturnsAsync(user.SkillSpecial);
 
             _uowMock.Setup(x => x.CompleteAsync())
@@ -176,9 +176,9 @@ namespace Application.Tests.Services
             methodInTest.Should().Throw<BadRequest>();
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            _uowMock.Verify(x => x.XpLevels.GetPotentialLevel(user.CurrentXp), Times.Once);
-            _uowMock.Verify(x => x.Skills.GetSkills(userId), Times.Never);
-            _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecial(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()), Times.Never);
+            _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Never);
+            _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecialAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()), Times.Never);
             _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
             _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Never);
         }
@@ -204,13 +204,13 @@ namespace Application.Tests.Services
             _uowMock.Setup(x => x.Users.GetAsync(userId))
                 .ReturnsAsync(user);
 
-            _uowMock.Setup(x => x.XpLevels.GetPotentialLevel(user.CurrentXp))
+            _uowMock.Setup(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp))
                 .ReturnsAsync(potentialLevel);
 
-            _uowMock.Setup(x => x.Skills.GetSkills(userId))
+            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
                 .ReturnsAsync(skills);
 
-            _uowMock.Setup(x => x.SkillSpecials.GetSkillSpecial(skillInThirdTree.ActivityTypeId, null))
+            _uowMock.Setup(x => x.SkillSpecials.GetSkillSpecialAsync(skillInThirdTree.ActivityTypeId, null))
                 .ReturnsAsync(user.SkillSpecial);
 
             _uowMock.Setup(x => x.CompleteAsync())
@@ -230,9 +230,9 @@ namespace Application.Tests.Services
             methodInTest.Should().NotThrow<Exception>();
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            _uowMock.Verify(x => x.XpLevels.GetPotentialLevel(user.CurrentXp), Times.Once);
-            _uowMock.Verify(x => x.Skills.GetSkills(userId), Times.Once);
-            _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecial(skillInThirdTree.ActivityTypeId, null), Times.Once);
+            _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecialAsync(skillInThirdTree.ActivityTypeId, null), Times.Once);
             _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
             _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Once);
         }

@@ -34,30 +34,30 @@ namespace Application.Tests.Services
         public void GetTopXpUsers_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
             [Frozen] Mock<IMapper> mapperMock,
             int? limit, int? offset,
-            List<UserRangingGet> userArenaGet,
+            List<UserRankedGet> userArenaGet,
             List<User> users, int usersCount,
             UsersService sut)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.GetRangingUsers(limit, offset))
+            uowMock.Setup(x => x.Users.GetRankedUsersAsync(limit, offset))
                 .ReturnsAsync(users);
 
             uowMock.Setup(x => x.Users.CountAsync())
                 .ReturnsAsync(usersCount);
 
-            mapperMock.Setup(x => x.Map<List<UserRangingGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
+            mapperMock.Setup(x => x.Map<List<UserRankedGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
 
-            var userArenaEnvelope = _fixture.Create<UserRangingEnvelope>();
+            var userArenaEnvelope = _fixture.Create<UserRankedEnvelope>();
             userArenaEnvelope.Users = userArenaGet;
             userArenaEnvelope.UserCount = usersCount;
 
             // Act
-            Func<Task<UserRangingEnvelope>> methodInTest = async () => await sut.GetRangingUsers(limit, offset);
+            Func<Task<UserRankedEnvelope>> methodInTest = async () => await sut.GetRankedUsersAsync(limit, offset);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             methodInTest.Should().NotBeNull();
-            uowMock.Verify(x => x.Users.GetRangingUsers(limit, offset), Times.Once);
+            uowMock.Verify(x => x.Users.GetRankedUsersAsync(limit, offset), Times.Once);
             uowMock.Verify(x => x.Users.CountAsync(), Times.Once);
         }
 
@@ -189,10 +189,10 @@ namespace Application.Tests.Services
              UsersService sut)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.GetUsersForImageApproval(limit, offset))
+            uowMock.Setup(x => x.Users.GetUsersForImageApprovalAsync(limit, offset))
                 .ReturnsAsync(users);
 
-            uowMock.Setup(x => x.Users.CountUsersForImageApproval())
+            uowMock.Setup(x => x.Users.CountUsersForImageApprovalAsync())
                 .ReturnsAsync(usersCount);
 
             mapperMock.Setup(x => x.Map<IEnumerable<User>, IEnumerable<UserImageResponse>>(users)).Returns(usersForImageApproval);
@@ -210,8 +210,8 @@ namespace Application.Tests.Services
             usersForImageApproval.Should().BeEquivalentTo(userImageEnvelope.Users);
             usersCount.Should().Be(userImageEnvelope.UserCount);
 
-            uowMock.Verify(x => x.Users.GetUsersForImageApproval(limit, offset), Times.Once);
-            uowMock.Verify(x => x.Users.CountUsersForImageApproval(), Times.Once);
+            uowMock.Verify(x => x.Users.GetUsersForImageApprovalAsync(limit, offset), Times.Once);
+            uowMock.Verify(x => x.Users.CountUsersForImageApprovalAsync(), Times.Once);
         }
 
         [Test]

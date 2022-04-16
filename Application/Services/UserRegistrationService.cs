@@ -1,82 +1,87 @@
-﻿using System.Net;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.ManagerInterfaces;
 using Application.Models.User;
 using Application.ServiceInterfaces;
+using AutoMapper;
 using DAL;
 using Domain;
+using LanguageExt;
 using Microsoft.AspNetCore.WebUtilities;
-
-
 
 namespace Application.Services
 {
     public class UserRegistrationService : IUserRegistrationService
     {
-        private readonly IUserManager _userManagerRepository;
+        private readonly IUserManager _userManager;
         private readonly IEmailManager _emailManager;
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
 
-        public UserRegistrationService(IUserManager userManagerRepository, IEmailManager emailManager, IUnitOfWork uow)
+        public UserRegistrationService(IUserManager userManager, IEmailManager emailManager, IUnitOfWork uow, IMapper mapper)
         {
-            _userManagerRepository = userManagerRepository;
+            _userManager = userManager;
             _emailManager = emailManager;
             _uow = uow;
+            _mapper = mapper;
         }
 
-        public async Task RegisterAsync(UserRegister user, string origin)
+        public async Task<Either<RestError, Unit>> SendConfirmationEmailAsync(string email, string origin)
         {
-            if (await _uow.Users.ExistsWithEmailAsync(user.Email))
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Već postoji nalog sa unetom email adresom." });
-
-            if (await _uow.Users.ExistsWithUsernameAsync(user.UserName))
-                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Korisničko ime već postoji." });
-
-            var newUser = new User() { UserName = user.UserName, Email = user.Email };
-
-            if (!await _userManagerRepository.CreateUserAsync(newUser, user.Password))
-                throw new RestException(HttpStatusCode.BadRequest, new { Greska = "Neuspešno dodavanje korisnika." });
-
-            var token = await GenerateUserTokenForEmailConfirmationAsync(newUser);
-            var verifyUrl = GenerateVerifyEmailUrl(origin, token, newUser.Email);
-
-            await _emailManager.SendConfirmationEmailAsync(verifyUrl, newUser.Email);
-        }
-
-        public async Task ResendConfirmationEmailAsync(string email, string origin)
-        {
-            var user = await _userManagerRepository.FindUserByEmailAsync(email);
+            var user = await _userManager.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
+                return new BadRequest("Nije pronađen korisnik sa unetom email adresom");
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyEmailUrl(origin, token, email);
 
             await _emailManager.SendConfirmationEmailAsync(verifyUrl, user.Email);
+            return Unit.Default;
         }
 
-        public async Task ConfirmEmailAsync(UserEmailVerification userEmailVerify)
+        public async Task<Either<RestError, UserBaseResponse>> RegisterAsync(UserRegister user, string origin)
         {
-            var user = await _userManagerRepository.FindUserByEmailAsync(userEmailVerify.Email);
+            if (await _uow.Users.ExistsWithEmailAsyncAsync(user.Email))
+                return new BadRequest("Korisnik sa unetom email adresom već postoji");
+
+            if (await _uow.Users.ExistsWithUsernameAsync(user.UserName))
+                return new BadRequest("Korisničko ime već postoji");
+
+            var newUser = new User() { UserName = user.UserName, Email = user.Email };
+
+            if (!await _userManager.CreateUserAsync(newUser, user.Password))
+                return new InternalServerError("Neuspešno dodavanje korisnika.");
+
+            var token = await GenerateUserTokenForEmailConfirmationAsync(newUser);
+            var verifyUrl = GenerateVerifyEmailUrl(origin, token, newUser.Email);
+
+            await _emailManager.SendConfirmationEmailAsync(verifyUrl, newUser.Email);
+
+            return _mapper.Map<UserBaseResponse>(newUser);
+        }
+
+        public async Task<Either<RestError, Unit>> VerifyEmailAsync(UserEmailVerification userEmailVerify)
+        {
+            var user = await _userManager.FindUserByEmailAsync(userEmailVerify.Email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
+                return new BadRequest("Nije pronađen korisnik sa unetom email adresom.");
 
             var decodedToken = _emailManager.DecodeVerificationToken(userEmailVerify.Token);
 
-            if (!await _userManagerRepository.ConfirmUserEmailAsync(user, decodedToken))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešno slanje verifikacionog emaila." });
+            if (!await _userManager.ConfirmUserEmailAsync(user, decodedToken))
+                return new InternalServerError("Neuspešno slanje verifikacionog emaila.");
+
+            return Unit.Default;
         }
 
         private async Task<string> GenerateUserTokenForEmailConfirmationAsync(User user)
         {
-            var token = await _userManagerRepository.GenerateUserEmailConfirmationTokenAsync(user);
+            var token = await _userManager.GenerateUserEmailConfirmationTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
             return token;
         }
 

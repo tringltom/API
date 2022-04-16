@@ -2,15 +2,9 @@
 
 namespace Application.Errors
 {
-    public class BadRequest : RestException
+    public class BadRequest : RestError
     {
-        public BadRequest(string message) : base(System.Net.HttpStatusCode.BadRequest, new { error = message })
-        {
-
-        }
-        public override IActionResult Response()
-        {
-            return new BadRequestObjectResult(Errors);
-        }
+        public BadRequest(string message) : base(System.Net.HttpStatusCode.BadRequest, new { error = message }) { }
+        public override IActionResult Response() => new BadRequestObjectResult(Errors);
     }
 }

@@ -10,34 +10,28 @@ namespace API.Controllers
     [Route("users")]
     public class UserController : BaseController
     {
-        private readonly IUserRegistrationService _userRegistrationService;
-        private readonly IUserSessionService _userSessionService;
-        private readonly IUserRecoveryService _userRecoveryService;
         private readonly IUsersService _usersService;
 
-        public UserController(IUserRegistrationService registrationService, IUserSessionService userSessionService, IUserRecoveryService userRecoveryService, IUsersService usersService)
+        public UserController(IUsersService usersService)
         {
-            _userRegistrationService = registrationService;
-            _userSessionService = userSessionService;
-            _userRecoveryService = userRecoveryService;
             _usersService = usersService;
         }
 
         [HttpGet("")]
-        public async Task<ActionResult<UserRangingEnvelope>> GetTopXpUsers(int? limit, int? offset)
+        public async Task<IActionResult> GetRankedUsers(int? limit, int? offset)
         {
-            return await _usersService.GetRangingUsers(limit, offset);
+            return Ok(await _usersService.GetRankedUsersAsync(limit, offset));
         }
 
         // TODO - Add checking if user is Admin
         [HttpGet("pending-images")]
-        public async Task<ActionResult<UserImageEnvelope>> GetImagesForApproval(int? limit, int? offset)
+        public async Task<IActionResult> GetImagesForApproval(int? limit, int? offset)
         {
-            return await _usersService.GetImagesForApprovalAsync(limit, offset);
+            return Ok(await _usersService.GetImagesForApprovalAsync(limit, offset));
         }
 
         [HttpPatch("me/about")]
-        public async Task<ActionResult> UpdateLoggedUserAbout(UserAbout user)
+        public async Task<IActionResult> UpdateLoggedUserAbout(UserAbout user)
         {
             await _usersService.UpdateLoggedUserAboutAsync(user);
 
@@ -45,18 +39,24 @@ namespace API.Controllers
         }
 
         [HttpPatch("me/image")]
-        public async Task<ActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
+        public async Task<IActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
         {
-            await _usersService.UpdateLoggedUserImageAsync(userImage);
+            var result = await _usersService.UpdateLoggedUserImageAsync(userImage);
 
-            return Ok("Uspešna izmena profilne slike, molimo Vas sačekajte odobrenje.");
+            return result.Match(
+                u => Ok("Uspešna izmena profilne slike, molimo Vas sačekajte odobrenje"),
+                err => err.Response());
         }
 
         // TODO - Add checking if user is Admin
         [HttpPatch("{id}")]
-        public async Task<ActionResult<bool>> ResolveUserImage(int id, PhotoApprove photoApprove)
+        public async Task<IActionResult> ResolveUserImage(int id, PhotoApprove photoApprove)
         {
-            return await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
+            var result = await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
+
+            return result.Match(
+                u => Ok(),
+                err => err.Response());
         }
     }
 }

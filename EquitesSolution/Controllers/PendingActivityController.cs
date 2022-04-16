@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using Domain;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -9,54 +9,72 @@ namespace API.Controllers
     [Route("pending-activities")]
     public class PendingActivityController : BaseController
     {
-        private readonly IActivityService _activityService;
+        private readonly IPendingActivityService _pendinngActivityService;
 
-        public PendingActivityController(IActivityService activityService)
+        public PendingActivityController(IPendingActivityService pendingActivityService)
         {
-            _activityService = activityService;
+            _pendinngActivityService = pendingActivityService;
         }
 
         // TODO - Add checking if user is Admin
         [HttpGet()]
-        public async Task<ActionResult<PendingActivityEnvelope>> PendingActivities(int? limit, int? offset)
+        public async Task<IActionResult> GetPendingActivities(int? limit, int? offset)
         {
-            return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            return Ok(await _pendinngActivityService.GetPendingActivitiesAsync(limit, offset));
         }
 
-        [HttpGet("me")]
-        public async Task<ActionResult<PendingActivityForUserEnvelope>> OwnerPendingActivities(int? limit, int? offset)
+        [HttpGet("me", Name = nameof(GetOwnerPendingActivities))]
+        public async Task<IActionResult> GetOwnerPendingActivities(int? limit, int? offset)
         {
-            return await _activityService.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
+            return Ok(await _pendinngActivityService.GetOwnerPendingActivitiesAsync(limit, offset));
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PendingActivity>> PendingActivitiy(int id)
+        [HttpGet("me/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> GetOwnerPendingActivity(int id)
         {
-            return Ok();
-            //return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            var result = await _pendinngActivityService.GetOwnerPendingActivityAsync(id);
+
+            return result.Match(
+                pendingActivity => Ok(pendingActivity),
+                err => err.Response()
+                );
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<PendingActivity>> UpdatePendingActivitiy(int id, PendingActivity pendingActivity)
+        [IdValidation]
+        public async Task<IActionResult> UpdatePendingActivitiy(int id, ActivityCreate pendingActivity)
         {
-            return Ok();
-            //return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            var result = await _pendinngActivityService.UpdatePendingActivityAsync(id, pendingActivity);
+
+            return result.Match(
+                activity => CreatedAtRoute(nameof(GetOwnerPendingActivities), new { activity = activity.Id }, activity),
+                err => err.Response()
+                );
         }
 
         // TODO - Add checking if user is Admin
         [HttpDelete("{id}")]
-        public async Task<ActionResult> DeletePendingActivitiy(int id)
+        [IdValidation]
+        public async Task<IActionResult> DisapprovePendingActivity(int id)
         {
-            return Ok();
-            //return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            var result = await _pendinngActivityService.DisapprovePendingActivityAsync(id);
+
+            return result.Match(
+                u => NoContent(),
+                err => err.Response()
+                );
         }
 
         [HttpPost()]
-        public async Task<ActionResult<PendingActivity>> CreatePendingActivity([FromForm] ActivityCreate activityCreate)
+        public async Task<IActionResult> CreatePendingActivity([FromForm] ActivityCreate activityCreate)
         {
-            await _activityService.CreatePendingActivityAsync(activityCreate);
+            var result = await _pendinngActivityService.CreatePendingActivityAsync(activityCreate);
 
-            return Ok("Uspešno kreiranje, molimo Vas da sačekate odobrenje");
+            return result.Match(
+               activity => CreatedAtRoute(nameof(GetOwnerPendingActivities), new { activity = activity.Id }, activity),
+               err => err.Response()
+               );
         }
 
     }

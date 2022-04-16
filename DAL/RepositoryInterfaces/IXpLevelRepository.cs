@@ -5,6 +5,6 @@ namespace DAL.RepositoryInterfaces
 {
     public interface IXpLevelRepository : IBaseRepository<XpLevel>
     {
-        Task<int> GetPotentialLevel(int xpValue);
+        Task<int> GetPotentialLevelAsync(int xpValue);
     }
 }

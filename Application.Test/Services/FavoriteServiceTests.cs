@@ -71,13 +71,13 @@ namespace Application.Tests.Services
                 .Returns(userId);
 
             uowMock.Setup(frm => frm.CompleteAsync())
-                .Throws(new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." }));
+                .Throws(new RestError(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." }));
 
             //Act
             Func<Task> methodInTest = async () => await sut.ResolveFavoriteActivityAsync(activity);
 
             //Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
             uowMock.Verify(frm => frm.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Once);
             uowMock.Verify(frm => frm.UserFavorites.Remove(It.IsAny<UserFavoriteActivity>()), Times.Never);
@@ -131,13 +131,13 @@ namespace Application.Tests.Services
               .Returns(userId);
 
             uowMock.Setup(frm => frm.CompleteAsync())
-                .Throws(new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." }));
+                .Throws(new RestError(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." }));
 
             //Act
             Func<Task> methodInTest = async () => await sut.ResolveFavoriteActivityAsync(activity);
 
             //Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
             uowMock.Verify(frm => frm.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Never);
             uowMock.Verify(frm => frm.UserFavorites.Remove(It.IsAny<UserFavoriteActivity>()), Times.Once);

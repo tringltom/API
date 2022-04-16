@@ -44,7 +44,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
                 .ReturnsAsync(activityReviewXp);
 
-            uowMock.Setup(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId))
+            uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
                 .ReturnsAsync((UserReview)null);
 
             uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
@@ -61,12 +61,12 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
 
             // Assert
-            methodInTest.Should().NotThrow<RestException>();
+            methodInTest.Should().NotThrow<RestError>();
 
             userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Once);
             uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId), Times.Once);
+            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
             uowMock.Verify(x => x.UserReviews.Add(review), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
         }
@@ -105,7 +105,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
                     .ReturnsAsync(activity);
 
-            uowMock.Setup(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId))
+            uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
                  .ReturnsAsync(userReview);
 
             uowMock.Setup(x => x.CompleteAsync())
@@ -115,12 +115,12 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
 
             // Assert
-            methodInTest.Should().NotThrow<RestException>();
+            methodInTest.Should().NotThrow<RestError>();
 
             userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
             uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId), Times.Once);
+            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
 
             uowMock.Verify(x => x.UserReviews.Add(review), Times.Never);
@@ -155,19 +155,19 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
-            uowMock.Setup(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId))
+            uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
                 .ReturnsAsync(userReview);
 
             // Act
             Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
 
             // Assert
-            methodInTest.Should().NotThrow<RestException>();
+            methodInTest.Should().NotThrow<RestError>();
 
             userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
             uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId), Times.Once);
+            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
             uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
 
@@ -195,12 +195,12 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
 
             userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
             uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Never);
-            uowMock.Verify(x => x.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId), Times.Never);
+            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Never);
             uowMock.Verify(x => x.UserReviews.Add(review), Times.Never);
         }
     }

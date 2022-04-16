@@ -1,6 +1,6 @@
 ﻿namespace Application.Models.User
 {
-    public class UserRangingGet
+    public class UserRankedGet
     {
         public string UserName { get; set; }
         public Photo Image { get; set; }

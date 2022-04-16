@@ -91,7 +91,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
 
             //Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Once);
@@ -122,7 +122,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
 
             //Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
@@ -192,7 +192,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
@@ -224,7 +224,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
@@ -256,7 +256,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
@@ -288,7 +288,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
@@ -320,7 +320,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
             userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
             jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
@@ -418,7 +418,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
@@ -453,7 +453,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
@@ -483,7 +483,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             result.Should().BeNull();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
@@ -560,7 +560,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
@@ -586,7 +586,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
@@ -608,7 +608,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
             userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
             userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);

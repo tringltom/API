@@ -1,8 +1,5 @@
-﻿using System;
-using System.Net;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
-using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Infrastructure.Settings;
 using MailKit.Net.Smtp;
@@ -52,17 +49,10 @@ namespace Infrastructure.Email
 
         private async Task SendEmail(string recipientemail, string subject, BodyBuilder emailBody)
         {
-            try
-            {
-                var message = ComposeMessage(recipientemail);
-                message.Subject = subject;
-                message.Body = emailBody.ToMessageBody();
-                await FinalizeMessageAsync(message);
-            }
-            catch (Exception e)
-            {
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešno slanje emaila pod naslovom :{subject}" }, e);
-            }
+            var message = ComposeMessage(recipientemail);
+            message.Subject = subject;
+            message.Body = emailBody.ToMessageBody();
+            await FinalizeMessageAsync(message);
         }
 
         public async Task SendConfirmationEmailAsync(string verifyUrl, string email)

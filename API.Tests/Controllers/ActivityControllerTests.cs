@@ -68,7 +68,7 @@ namespace API.Tests.Controllers
             int limit)
         {
             // Arrange
-            activityServiceMock.Setup(x => x.GetPendingActivitiesForLoggedInUserAsync(limit, offset))
+            activityServiceMock.Setup(x => x.GetOwnerPendingActivitiesAsync(limit, offset))
                .ReturnsAsync(pendingActivityForUserEnvelope);
 
             // Act

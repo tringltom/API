@@ -63,7 +63,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.Users.GetAsync(userId))
                .ReturnsAsync(user);
 
-            uowMock.Setup(x => x.Skills.GetSkill(It.IsAny<int>(), activityCreate.Type))
+            uowMock.Setup(x => x.Skills.GetSkillAsync(It.IsAny<int>(), activityCreate.Type))
                 .ReturnsAsync(skill);
 
             uowMock.Setup(x => x.SkillActivities.GetAllAsync())
@@ -115,7 +115,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.Users.GetAsync(userId))
                .ReturnsAsync(user);
 
-            uowMock.Setup(x => x.Skills.GetSkill(It.IsAny<int>(), activityCreate.Type))
+            uowMock.Setup(x => x.Skills.GetSkillAsync(It.IsAny<int>(), activityCreate.Type))
                 .ReturnsAsync(skill);
 
             uowMock.Setup(x => x.SkillActivities.GetAllAsync())
@@ -196,7 +196,7 @@ namespace Application.Tests.Services
             uowMock.Setup(x => x.Users.GetAsync(userId))
                .ReturnsAsync(userWithNoMoreGoodDeedCount);
 
-            uowMock.Setup(x => x.Skills.GetSkill(It.IsAny<int>(), activityCreate.Type))
+            uowMock.Setup(x => x.Skills.GetSkillAsync(It.IsAny<int>(), activityCreate.Type))
                 .ReturnsAsync(skill);
 
             uowMock.Setup(x => x.SkillActivities.GetAllAsync())
@@ -210,7 +210,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Never);
             uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
@@ -236,7 +236,7 @@ namespace Application.Tests.Services
                 .Returns(pendingActivitiesGet);
 
             uowMock
-                .Setup(x => x.PendingActivities.GetLatestPendingActivities(limit, offset))
+                .Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(limit, offset))
                 .ReturnsAsync(pendingActivities);
 
             uowMock
@@ -248,7 +248,7 @@ namespace Application.Tests.Services
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivities(limit, offset), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(limit, offset), Times.Once);
             uowMock.Verify(x => x.PendingActivities.CountAsync(), Times.Once);
 
         }
@@ -278,20 +278,20 @@ namespace Application.Tests.Services
              .Returns(userId);
 
             uowMock
-                .Setup(x => x.PendingActivities.GetLatestPendingActivities(userId, limit, offset))
+                .Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, limit, offset))
                 .ReturnsAsync(pendingActivities);
 
             uowMock
-                .Setup(x => x.PendingActivities.CountPendingActivities(userId))
+                .Setup(x => x.PendingActivities.CountPendingActivitiesAsync(userId))
                 .ReturnsAsync(pendingActivities.Count);
 
             // Act
-            Func<Task<PendingActivityForUserEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
+            Func<Task<PendingActivityForUserEnvelope>> methodInTest = async () => await sut.GetOwnerPendingActivitiesAsync(limit, offset);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivities(userId, limit, offset), Times.Once);
-            uowMock.Verify(x => x.PendingActivities.CountPendingActivities(userId), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, limit, offset), Times.Once);
+            uowMock.Verify(x => x.PendingActivities.CountPendingActivitiesAsync(userId), Times.Once);
 
         }
 

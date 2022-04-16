@@ -1,17 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Application.Errors
 {
-    public class NotFound : RestException
+    public class NotFound : RestError
     {
-        public NotFound(string message) : base(System.Net.HttpStatusCode.NotFound, new { error = message })
-        {
-
-        }
-
-        public override IActionResult Response()
-        {
-            return new NotFoundObjectResult(Errors);
-        }
+        public NotFound(string message) : base(HttpStatusCode.NotFound, new { error = message }) { }
+        public override IActionResult Response() => new NotFoundObjectResult(Errors);
     }
 }

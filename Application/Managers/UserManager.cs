@@ -22,11 +22,6 @@ namespace Application.Managers
             return result.Succeeded;
         }
 
-        public async Task<bool> CreateUserWithoutPasswordAsync(User user)
-        {
-            var result = await _userIdentityManager.CreateAsync(user);
-            return result.Succeeded;
-        }
         public async Task<User> FindUserByIdAsync(int userId)
         {
             return await _userIdentityManager.FindByIdAsync(userId.ToString());
@@ -42,7 +37,6 @@ namespace Application.Managers
             return await _userIdentityManager.FindByEmailAsync(email);
         }
 
-
         public async Task<bool> ConfirmUserEmailAsync(User user, string token)
         {
             var result = await _userIdentityManager.ConfirmEmailAsync(user, token);
@@ -52,11 +46,6 @@ namespace Application.Managers
         public async Task<IdentityResult> RecoverUserPasswordAsync(User user, string resetToken, string newPassword)
         {
             return await _userIdentityManager.ResetPasswordAsync(user, resetToken, newPassword);
-        }
-
-        public async Task<IdentityResult> ChangeUserPasswordAsync(User user, string oldPassword, string newPassword)
-        {
-            return await _userIdentityManager.ChangePasswordAsync(user, oldPassword, newPassword);
         }
 
         public async Task<bool> UpdateUserAsync(User user)
@@ -74,19 +63,10 @@ namespace Application.Managers
         {
             return await _userIdentityManager.GeneratePasswordResetTokenAsync(user);
         }
-        public async Task<SignInResult> SignInUserViaPasswordNoLockoutAsync(User user, string password)
-        {
-            return await _userSigninManager.CheckPasswordSignInAsync(user, password, false);
-        }
 
         public async Task<SignInResult> SignInUserViaPasswordWithLockoutAsync(User user, string password)
         {
             return await _userSigninManager.CheckPasswordSignInAsync(user, password, true);
-        }
-
-        public async Task SignOutUserAsync()
-        {
-            await _userSigninManager.SignOutAsync();
         }
     }
 }

@@ -51,7 +51,7 @@ namespace API.Tests.Controllers
            UserEmail user, Mock<HttpRequest> request, Mock<HttpContext> context, [Greedy] UserController sut)
         {
             // Arrange
-            userRegistrationServiceMock.Setup(x => x.ResendConfirmationEmailAsync(user.Email, origin))
+            userRegistrationServiceMock.Setup(x => x.SendConfirmationEmailAsync(user.Email, origin))
                 .Returns(Task.CompletedTask);
             request.SetupGet(x => x.Headers["origin"]).Returns(origin);
             context.SetupGet(x => x.Request).Returns(request.Object);
@@ -75,7 +75,7 @@ namespace API.Tests.Controllers
            UserEmailVerification user, [Greedy] UserController sut)
         {
             // Arrange
-            userRegistrationServiceMock.Setup(x => x.ConfirmEmailAsync(user))
+            userRegistrationServiceMock.Setup(x => x.VerifyEmailAsync(user))
                 .Returns(Task.CompletedTask);
 
             // Act
@@ -106,20 +106,20 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserRangingEnvelope userArenaEnvelope, int? limit,
+        public void GetTopXpUsersAsync_Successfull([Frozen] Mock<IUsersService> usersServiceMock, UserRankedEnvelope userArenaEnvelope, int? limit,
             int? offset,
             [Greedy] UserController sut)
         {
             // Arrange
-            usersServiceMock.Setup(x => x.GetRangingUsers(limit, offset))
+            usersServiceMock.Setup(x => x.GetRankedUsersAsync(limit, offset))
             .ReturnsAsync(userArenaEnvelope);
 
             // Act
-            var result = sut.GetTopXpUsers(limit, offset);
+            var result = sut.GetRankedUsers(limit, offset);
 
             // Assert
             result.Should().NotBeNull();
-            result.Should().BeOfType<Task<ActionResult<UserRangingEnvelope>>>();
+            result.Should().BeOfType<Task<ActionResult<UserRankedEnvelope>>>();
         }
 
         [Test]

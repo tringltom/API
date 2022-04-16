@@ -11,7 +11,7 @@ namespace Application.Mappings
     {
         public UserProfile()
         {
-            CreateMap<User, UserRangingGet>()
+            CreateMap<User, UserRankedGet>()
                .ForMember(d => d.UserName, o => o.MapFrom(s => s.UserName + (s.SkillSpecial != null ? " " + s.SkillSpecial.Title : "")))
                .ForMember(d => d.CurrentLevel, o => o.MapFrom(s => s.XpLevelId))
                .ForMember(d => d.NumberOfGoodDeeds, o => o.MapFrom(s => s.Activities.Where(x => x.ActivityTypeId == ActivityTypeId.GoodDeed).Count()))

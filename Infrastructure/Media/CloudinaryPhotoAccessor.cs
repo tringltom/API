@@ -51,13 +51,14 @@ namespace Infrastructure.Media
             };
         }
 
-        public async Task<bool> DeletePhotoAsync(string publicId)
+        public async Task DeletePhotoAsync(string publicId)
         {
             var deleteParams = new DeletionParams(publicId);
 
             var result = await _cloudinary.DestroyAsync(deleteParams);
 
-            return result.Result == "ok";
+            if (result.Error != null)
+                throw new Exception(result.Error.Message);
         }
     }
 }

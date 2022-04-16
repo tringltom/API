@@ -48,7 +48,9 @@ namespace Application.Mappings
 
             CreateMap<UserReview, UserReviewedActivity>();
 
-            CreateMap<UserFavoriteActivity, FavoriteActivityReturn>();
+            CreateMap<UserFavoriteActivity, FavoriteActivityIdReturn>();
+
+            CreateMap<UserFavoriteActivity, UserFavoriteActivityReturn>();
         }
     }
 }

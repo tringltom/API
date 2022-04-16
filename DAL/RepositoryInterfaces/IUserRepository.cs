@@ -6,10 +6,10 @@ namespace DAL.RepositoryInterfaces
 {
     public interface IUserRepository : IBaseRepository<User>
     {
-        Task<bool> ExistsWithEmailAsync(string email);
+        Task<bool> ExistsWithEmailAsyncAsync(string email);
         Task<bool> ExistsWithUsernameAsync(string username);
-        Task<IEnumerable<User>> GetRangingUsers(int? limit, int? offset);
-        Task<IEnumerable<User>> GetUsersForImageApproval(int? limit, int? offset);
-        Task<int> CountUsersForImageApproval();
+        Task<IEnumerable<User>> GetRankedUsersAsync(int? limit, int? offset);
+        Task<IEnumerable<User>> GetUsersForImageApprovalAsync(int? limit, int? offset);
+        Task<int> CountUsersForImageApprovalAsync();
     }
 }

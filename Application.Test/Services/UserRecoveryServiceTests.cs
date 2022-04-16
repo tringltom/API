@@ -68,7 +68,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.RecoverUserPasswordViaEmailAsync(user.Email, origin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
             userRepoMock.Verify(x => x.GenerateUserPasswordResetTokenAsync(user), Times.Never);
             emailManagerMock.Verify(x => x.SendPasswordRecoveryEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
@@ -113,7 +113,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userPasswordRecovery.Email), Times.Once);
             userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword), Times.Never);
         }
@@ -135,7 +135,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ConfirmUserPasswordRecoveryAsync(userPasswordRecovery);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userPasswordRecovery.Email), Times.Once);
             userRepoMock.Verify(x => x.RecoverUserPasswordAsync(user, It.IsAny<string>(), userPasswordRecovery.NewPassword), Times.Once);
         }
@@ -175,7 +175,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(userPassChange);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userPassChange.Email), Times.Once);
             userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword), Times.Never);
         }
@@ -195,7 +195,7 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.ChangeUserPasswordAsync(userPassChange);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userPassChange.Email), Times.Once);
             userRepoMock.Verify(x => x.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword), Times.Once);
         }

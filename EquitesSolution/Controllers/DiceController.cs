@@ -15,7 +15,7 @@ namespace API.Controllers
         }
 
         [HttpPost("roll")]
-        public async Task<IActionResult> RollTheDice()
+        public async Task<IActionResult> RollDice()
         {
             var result = await _diceService.GetDiceRollResult();
 

@@ -45,7 +45,7 @@ namespace API.Tests.Controllers
             [Greedy] ReviewController sut)
         {
             // Arrange
-            reviewServiceMock.Setup(x => x.GetAllReviews(userId))
+            reviewServiceMock.Setup(x => x.GetOwnerReviewsAsync(userId))
                 .ReturnsAsync(acitvitiesReviewed);
 
             // Act
@@ -53,7 +53,7 @@ namespace API.Tests.Controllers
 
             // Assert
             res.Result.Should().Equal(acitvitiesReviewed);
-            reviewServiceMock.Verify(x => x.GetAllReviews(userId), Times.Once);
+            reviewServiceMock.Verify(x => x.GetOwnerReviewsAsync(userId), Times.Once);
         }
     }
 }

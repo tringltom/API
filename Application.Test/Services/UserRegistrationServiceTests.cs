@@ -34,7 +34,7 @@ namespace Application.Tests.Services
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email)).ReturnsAsync(false);
             uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
@@ -49,7 +49,7 @@ namespace Application.Tests.Services
             // Assert
 
             methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once);
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email), Times.Once);
             uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Once);
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Once);
             emailManagerMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Once);
@@ -63,7 +63,7 @@ namespace Application.Tests.Services
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(true);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email)).ReturnsAsync(true);
             uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
@@ -76,8 +76,8 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
-            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            methodInTest.Should().Throw<RestError>();
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email), Times.Once());
             uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Never());
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Never);
             emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
@@ -91,7 +91,7 @@ namespace Application.Tests.Services
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email)).ReturnsAsync(false);
             uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(true);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
@@ -104,8 +104,8 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
-            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            methodInTest.Should().Throw<RestError>();
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email), Times.Once());
             uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Never);
             emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
@@ -119,7 +119,7 @@ namespace Application.Tests.Services
             UserRegister userRegister, string origin, UserRegistrationService sut)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.ExistsWithEmailAsync(userRegister.Email)).ReturnsAsync(false);
+            uowMock.Setup(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email)).ReturnsAsync(false);
             uowMock.Setup(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password)).ReturnsAsync(false);
             userManagerRepoMock.Setup(x => x.GenerateUserEmailConfirmationTokenAsync(It.IsAny<User>()))
@@ -132,8 +132,8 @@ namespace Application.Tests.Services
             Func<Task> methodInTest = async () => await sut.RegisterAsync(userRegister, origin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
-            uowMock.Verify(x => x.Users.ExistsWithEmailAsync(userRegister.Email), Times.Once());
+            methodInTest.Should().Throw<RestError>();
+            uowMock.Verify(x => x.Users.ExistsWithEmailAsyncAsync(userRegister.Email), Times.Once());
             uowMock.Verify(x => x.Users.ExistsWithUsernameAsync(userRegister.UserName), Times.Once());
             userManagerRepoMock.Verify(x => x.CreateUserAsync(It.IsAny<User>(), userRegister.Password), Times.Once());
             emailManagerMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), userRegister.Email), Times.Never);
@@ -155,7 +155,7 @@ namespace Application.Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ResendConfirmationEmailAsync(user.Email, origin);
+            Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(user.Email, origin);
 
             // Assert
             methodInTest.Should().NotThrow<Exception>();
@@ -181,10 +181,10 @@ namespace Application.Tests.Services
                 .Returns(Task.CompletedTask);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ResendConfirmationEmailAsync(user.Email, origin);
+            Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(user.Email, origin);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(user.Email), Times.Once);
             userRepoMock.Verify(x => x.GenerateUserEmailConfirmationTokenAsync(user), Times.Never);
             emailServiceMock.Verify(x => x.SendConfirmationEmailAsync(It.IsAny<string>(), user.Email), Times.Never);
@@ -204,7 +204,7 @@ namespace Application.Tests.Services
             userEmailVerify.Token = _fixture.Create<string>();
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(userEmailVerify);
+            Func<Task> methodInTest = async () => await sut.VerifyEmailAsync(userEmailVerify);
             // adding token as parameters adds name as prefix causing string to possibly have odd number of caracters
             // we cannot decode odd numbered token
 
@@ -225,10 +225,10 @@ namespace Application.Tests.Services
                 .ReturnsAsync(() => null);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(userEmailVerify);
+            Func<Task> methodInTest = async () => await sut.VerifyEmailAsync(userEmailVerify);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userEmailVerify.Email), Times.Once);
             userRepoMock.Verify(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()), Times.Never);
         }
@@ -248,10 +248,10 @@ namespace Application.Tests.Services
             userEmailVerify.Token = _fixture.Create<string>();
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ConfirmEmailAsync(userEmailVerify);
+            Func<Task> methodInTest = async () => await sut.VerifyEmailAsync(userEmailVerify);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<RestError>();
             userRepoMock.Verify(x => x.FindUserByEmailAsync(userEmailVerify.Email), Times.Once);
             userRepoMock.Verify(x => x.ConfirmUserEmailAsync(user, It.IsAny<string>()), Times.Once);
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
@@ -10,7 +9,8 @@ using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
 using Domain;
-
+using LanguageExt;
+using static LanguageExt.Prelude;
 
 namespace Application.Services
 {
@@ -41,70 +41,59 @@ namespace Application.Services
             _uow = uow;
         }
 
-        public async Task<UserBaseResponse> GetCurrentlyLoggedInUserAsync(bool stayLoggedIn, string refreshToken)
+        public async Task<Either<RestError, UserBaseResponse>> GetCurrentlyLoggedInUserAsync(string stayLoggedIn, string refreshToken)
         {
-            var username = _userAccessor.GetUsernameFromAccesssToken();
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            User user = null;
 
-            User user;
+            if (userId > 0)
+                user = await _userManager.FindUserByIdAsync(userId);
 
-            if (username != null)
+            if (userId == 0 && parseBool(stayLoggedIn).IfNone(false))
             {
-                user = await _userManager.FindUserByNameAsync(username);
-            }
-            else
-            {
-                if (stayLoggedIn)
-                {
-                    var oldRefreshToken = await _uow.RefreshTokens.GetOldRefreshToken(refreshToken);
+                var oldRefreshToken = await _uow.RefreshTokens.GetOldRefreshTokenAsync(refreshToken);
 
-                    if (oldRefreshToken != null && !oldRefreshToken.IsActive)
-                        throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Niste autorizovani." });
+                if (oldRefreshToken != null && !oldRefreshToken.IsActive)
+                    return new NotAuthorized("Niste autorizovani");
 
-                    user = oldRefreshToken.User;
-                }
-                else
-                {
-                    return null;
-                }
+                user = oldRefreshToken.User;
             }
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Username = "Greška, korisnik sa datim korisničkim imenom nije pronađen." });
+                return new BadRequest("Korisnik nije pronadjen");
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
-
             userResponse.Token = _tokenManager.CreateJWTToken(user.Id, user.UserName);
             userResponse.ActivityCounts = await _activityCounterManager.GetActivityCountsAsync(user);
 
             return userResponse;
         }
 
-        public async Task<UserBaseResponse> LoginAsync(UserLogin userLogin)
+        public async Task<Either<RestError, UserBaseResponse>> LoginAsync(UserLogin userLogin)
         {
             var user = await _userManager.FindUserByEmailAsync(userLogin.Email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nevalidan email ili nevalidna šifra." });
+                return new BadRequest("Nevalidan email ili nevalidna šifra");
 
             if (!user.EmailConfirmed)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Molimo potvrdite Vašu email adresu pre logovanja." });
+                return new BadRequest("Molimo potvrdite Vašu email adresu pre logovanja");
 
             var signInResult = await _userManager.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password);
 
             if (!signInResult.Succeeded)
             {
                 if (signInResult.IsLockedOut)
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Greska = $"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta." });
+                    return new NotAuthorized($"Vaš nalog je zaključan. Pokušajte ponovo za {Convert.ToInt32((user.LockoutEnd?.UtcDateTime - DateTime.UtcNow)?.TotalMinutes)} minuta");
                 else
-                    throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Nevalidan email ili nevalidna šifra." });
+                    return new NotAuthorized("Nevalidan email ili nevalidna šifra");
             }
 
             var refreshToken = new RefreshToken() { Token = _tokenManager.CreateRefreshToken() };
 
             user.RefreshTokens.Add(refreshToken);
 
-            if (!await _userManager.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
+            await _userManager.UpdateUserAsync(user);
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
 
@@ -115,19 +104,18 @@ namespace Application.Services
             return userResponse;
         }
 
-        public async Task<UserRefreshResponse> RefreshTokenAsync(string refreshToken)
+        public async Task<Either<RestError, UserRefreshResponse>> RefreshTokenAsync(string refreshToken)
         {
-            var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
-
-            var user = await _userManager.FindUserByNameAsync(currentUserName);
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var user = await _userManager.FindUserByIdAsync(userId);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
+                return new BadRequest("Korisnik nije pronadjen");
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
             if (oldToken != null && !oldToken.IsActive)
-                throw new RestException(HttpStatusCode.Unauthorized, new { Greska = "Niste autorizovani." });
+                return new NotAuthorized("Niste autorizovani");
 
             if (oldToken != null)
                 oldToken.Revoked = DateTimeOffset.UtcNow;
@@ -136,34 +124,32 @@ namespace Application.Services
 
             user.RefreshTokens.Add(newRefreshToken);
 
-            if (!await _userManager.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = $"Neuspešna izmena za korisnika {user.UserName}." });
-
+            await _userManager.UpdateUserAsync(user);
 
             var userToken = _tokenManager.CreateJWTToken(user.Id, user.UserName);
 
             return new UserRefreshResponse(userToken, newRefreshToken.Token);
         }
 
-        public async Task LogoutUserAsync(string refreshToken)
+        public async Task<Either<RestError, Unit>> LogoutUserAsync(string refreshToken)
         {
-            var currentUserName = _userAccessor.GetUsernameFromAccesssToken();
-
-            var user = await _userManager.FindUserByNameAsync(currentUserName);
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var user = await _userManager.FindUserByIdAsync(userId);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = $"Nije pronađen korisnik sa korisničkim imenom {currentUserName}." });
+                return new BadRequest($"Korisnik nije pronadjen");
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
             if (oldToken != null && !oldToken.IsActive)
-                throw new RestException(HttpStatusCode.Unauthorized, new { Error = "Niste autorizovani." });
+                return new NotAuthorized("Niste autorizovani");
 
             if (oldToken != null)
                 oldToken.Revoked = DateTimeOffset.UtcNow;
 
-            if (!await _userManager.UpdateUserAsync(user))
-                throw new RestException(HttpStatusCode.InternalServerError, new { Error = $"Neuspešna izmena za korisnika {user.UserName}." });
+            await _userManager.UpdateUserAsync(user);
+
+            return Unit.Default;
         }
 
         //public async Task<UserBaseResponse> FacebookLoginAsync(string accessToken, CancellationToken cancellationToken)

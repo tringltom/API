@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Application.Models;
-using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,27 +16,21 @@ namespace API.Controllers
         }
 
         [HttpGet("{userId}")]
-        public async Task<SkillData> GetSkillsDataAsync(int userId)
+        public async Task<IActionResult> GetSkillsData(int userId)
         {
-            return await _skillService.GetSkillsDataAsync(userId);
+            var result = await _skillService.GetSkillsDataAsync(userId);
+            return result.Match(
+                skillData => Ok(skillData),
+                err => err.Response());
         }
 
         [HttpPut("users/me")]
-        public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
+        public async Task<IActionResult> UpdateSkillsData(SkillData skillData)
         {
-            return await _skillService.ResetSkillsDataAsync();
+            var result = await _skillService.UpdateSkillsDataAsync(skillData);
+            return result.Match(
+                user => Ok(user),
+                err => err.Response());
         }
-
-        //[HttpPut("reset")]
-        //public async Task<ActionResult<UserBaseResponse>> ResetSkillsDataAsync()
-        //{
-        //    return await _skillService.ResetSkillsDataAsync();
-        //}
-
-        //[HttpPut("update")]
-        //public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
-        //{
-        //    return await _skillService.UpdateSkillsDataAsync(skillData);
-        //}
     }
 }

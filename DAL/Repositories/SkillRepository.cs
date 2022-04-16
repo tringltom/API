@@ -12,9 +12,9 @@ namespace DAL.Repositories
         {
         }
 
-        public async Task<IEnumerable<Skill>> GetSkills(int userId) => await FindAsync(s => s.User.Id == userId);
+        public async Task<IEnumerable<Skill>> GetSkillsAsync(int userId) => await FindAsync(s => s.User.Id == userId);
 
-        public async Task<Skill> GetSkill(int userId, ActivityTypeId activityTypeId) => await GetAsync(s => s.User.Id == userId && s.ActivityTypeId == activityTypeId);
+        public async Task<Skill> GetSkillAsync(int userId, ActivityTypeId activityTypeId) => await GetAsync(s => s.User.Id == userId && s.ActivityTypeId == activityTypeId);
 
     }
 }

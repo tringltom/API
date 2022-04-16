@@ -15,19 +15,17 @@ namespace API.Controllers
             _activityService = activityService;
         }
 
-        [HttpGet("{id}", Name = nameof(Activity))]
+        [HttpGet("{id}", Name = nameof(GetActivity))]
         [IdValidation]
-        public async Task<IActionResult> Activity(int id)
+        public async Task<IActionResult> GetActivity(int id)
         {
-            var activity = await _activityService.GetActivityAsync(id);
-            return Ok(activity);
+            return Ok(await _activityService.GetActivityAsync(id));
         }
 
         [HttpGet("others")]
-        public async Task<IActionResult> ActivitiesFromOtherUsers(int? limit, int? offset)
+        public async Task<IActionResult> GetActivitiesFromOtherUsers(int? limit, int? offset)
         {
-            var activities = await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset);
-            return Ok(activities);
+            return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset));
         }
 
         // TODO - Add checking if user is Admin/Approver
@@ -38,7 +36,7 @@ namespace API.Controllers
             var result = await _activityService.ApprovePendingActivity(id);
 
             return result.Match(
-                activity => CreatedAtRoute(nameof(Activity), new { activity = activity.Id }, activity),
+                activity => CreatedAtRoute(nameof(GetActivity), new { activity = activity.Id }, activity),
                 err => err.Response()
                 );
         }

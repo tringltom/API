@@ -56,7 +56,7 @@ namespace Application.Tests.Managers
             uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            uowMock.Setup(x => x.Skills.GetSkills(user.Id))
+            uowMock.Setup(x => x.Skills.GetSkillsAsync(user.Id))
                .ReturnsAsync(skills);
 
             uowMock.Setup(x => x.SkillActivities.GetAllAsync())
@@ -68,7 +68,7 @@ namespace Application.Tests.Managers
             // Assert
             methodInTest.Should().NotThrow<Exception>();
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            uowMock.Verify(x => x.Skills.GetSkills(user.Id), Times.Once);
+            uowMock.Verify(x => x.Skills.GetSkillsAsync(user.Id), Times.Once);
             uowMock.Verify(x => x.SkillActivities.GetAllAsync(), Times.Once);
         }
     }

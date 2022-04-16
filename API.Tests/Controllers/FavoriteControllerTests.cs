@@ -57,7 +57,7 @@ namespace API.Tests.Controllers
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public void GetFavoriteActivitiesForUser_Successfull(
             [Frozen] Mock<IFavoritesService> favoriteActivityService,
-            List<FavoriteActivityReturn> favoriteActivities,
+            List<FavoriteActivityIdReturn> favoriteActivities,
             int id,
             [Greedy] FavoriteController sut)
         {

@@ -7,6 +7,6 @@ namespace Application.ServiceInterfaces
 {
     public interface IDiceService
     {
-        Task<Either<RestException, DiceResult>> GetDiceRollResult();
+        Task<Either<RestError, DiceResult>> GetDiceRollResult();
     }
 }
