@@ -42,14 +42,14 @@ namespace API.Controllers
                );
         }
 
-        [HttpPost("{activity-id}")]
+        [HttpPost("{id}")]
         [IdValidation]
-        public async Task<IActionResult> CreateFavoriteActivity(int activityId)
+        public async Task<IActionResult> CreateFavoriteActivity(int id)
         {
-            var result = await _favoriteService.AddFavoriteActivityAsync(activityId);
+            var result = await _favoriteService.AddFavoriteActivityAsync(id);
 
             return result.Match(
-               activity => CreatedAtRoute(nameof(GetFavoriteActivity), new { activity = activity.Id }, activity),
+               activity => CreatedAtRoute(nameof(GetFavoriteActivity), new { id = activity.Id }, activity),
                err => err.Response()
                );
         }

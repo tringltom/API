@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.Models;
 using Application.Models.User;
 using Application.ServiceInterfaces;
@@ -31,28 +32,29 @@ namespace API.Controllers
         }
 
         [HttpPatch("me/about")]
-        public async Task<IActionResult> UpdateLoggedUserAbout(UserAbout user)
+        public async Task<IActionResult> UpdateAbout(UserAbout user)
         {
-            await _usersService.UpdateLoggedUserAboutAsync(user);
+            await _usersService.UpdateAboutAsync(user);
 
-            return Ok("Uspešna izmena o korisniku.");
+            return Ok();
         }
 
         [HttpPatch("me/image")]
-        public async Task<IActionResult> UpdateLoggedUserImage([FromForm] UserImageUpdate userImage)
+        public async Task<IActionResult> UpdateImage([FromForm] UserImageUpdate userImage)
         {
-            var result = await _usersService.UpdateLoggedUserImageAsync(userImage);
+            var result = await _usersService.UpdateImageAsync(userImage);
 
             return result.Match(
-                u => Ok("Uspešna izmena profilne slike, molimo Vas sačekajte odobrenje"),
+                u => Ok(),
                 err => err.Response());
         }
 
         // TODO - Add checking if user is Admin
         [HttpPatch("{id}")]
-        public async Task<IActionResult> ResolveUserImage(int id, PhotoApprove photoApprove)
+        [IdValidation]
+        public async Task<IActionResult> ResolveImage(int id, PhotoApprove photoApprove)
         {
-            var result = await _usersService.ResolveUserImageAsync(id, photoApprove.Approve);
+            var result = await _usersService.ResolveImageAsync(id, photoApprove.Approve);
 
             return result.Match(
                 u => Ok(),

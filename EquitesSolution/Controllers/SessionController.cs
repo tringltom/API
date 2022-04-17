@@ -30,35 +30,20 @@ namespace API.Controllers
         {
             var result = await _userRegistrationService.SendConfirmationEmailAsync(user.Email, Request.Headers["origin"]);
 
-            return result.Match(u => Ok(), err => err.Response());
-        }
-
-        [AllowAnonymous]
-        [HttpHead("password")]
-        public async Task<IActionResult> SendRecoverPassword(UserEmail user)
-        {
-            var result = await _userRecoveryService.RecoverUserPasswordViaEmailAsync(user.Email, Request.Headers["origin"]);
-
-            return result
-                .Match(
-                u => Ok("Molimo proverite Vaše poštansko sanduče kako biste uneli novu šifru."),
+            return result.Match(
+                u => Ok(),
                 err => err.Response());
         }
 
         [AllowAnonymous]
-        [HttpGet(Name = nameof(Login))]
-        public async Task<IActionResult> Login(UserLogin userLogin)
+        [HttpHead("password")]
+        public async Task<IActionResult> SendRecoverPassword([FromQuery] UserEmail user)
         {
-            var result = await _userSessionService.LoginAsync(userLogin);
+            var result = await _userRecoveryService.RecoverUserPasswordViaEmailAsync(user.Email, Request.Headers["origin"]);
 
             return result.Match(
-               user =>
-               {
-                   SetTokenCookie(user.RefreshToken, userLogin.StayLoggedIn);
-                   return Ok(user);
-               },
-               err => err.Response()
-               );
+                u => Ok(),
+                err => err.Response());
         }
 
         [AllowAnonymous]
@@ -73,7 +58,23 @@ namespace API.Controllers
                );
         }
 
-        [HttpPut("")]
+        [AllowAnonymous]
+        [HttpPut(Name = nameof(Login))]
+        public async Task<IActionResult> Login(UserLogin userLogin)
+        {
+            var result = await _userSessionService.LoginAsync(userLogin);
+
+            return result.Match(
+               user =>
+               {
+                   SetTokenCookie(user.RefreshToken, userLogin.StayLoggedIn);
+                   return Ok(user);
+               },
+               err => err.Response()
+               );
+        }
+
+        [HttpPut("refresh")]
         public async Task<IActionResult> RefreshToken()
         {
             var result = await _userSessionService.RefreshTokenAsync(Request.Cookies["refreshToken"]);
@@ -104,7 +105,7 @@ namespace API.Controllers
             var result = await _userRecoveryService.ConfirmUserPasswordRecoveryAsync(passwordRecoveryVerify);
 
             return result.Match(
-                u => Ok("Uspešna izmena šifre, molimo Vas da se ulogujete sa novim kredencijalima"),
+                u => Ok(),
                 err => err.Response());
         }
 

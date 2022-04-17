@@ -6,7 +6,7 @@ namespace Application.Errors
 {
     public class InternalServerError : RestError
     {
-        public InternalServerError(string message) : base(HttpStatusCode.InternalServerError, new { error = message }) { }
+        public InternalServerError(string message) : base(HttpStatusCode.InternalServerError, new { errors = new { error = message } }) { }
         public override IActionResult Response() => new StatusCodeResult(StatusCodes.Status500InternalServerError);
     }
 }

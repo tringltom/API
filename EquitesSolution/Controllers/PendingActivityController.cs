@@ -9,31 +9,31 @@ namespace API.Controllers
     [Route("pending-activities")]
     public class PendingActivityController : BaseController
     {
-        private readonly IPendingActivityService _pendinngActivityService;
+        private readonly IPendingActivityService _pendingActivityService;
 
         public PendingActivityController(IPendingActivityService pendingActivityService)
         {
-            _pendinngActivityService = pendingActivityService;
+            _pendingActivityService = pendingActivityService;
         }
 
         // TODO - Add checking if user is Admin
         [HttpGet()]
         public async Task<IActionResult> GetPendingActivities(int? limit, int? offset)
         {
-            return Ok(await _pendinngActivityService.GetPendingActivitiesAsync(limit, offset));
+            return Ok(await _pendingActivityService.GetPendingActivitiesAsync(limit, offset));
         }
 
         [HttpGet("me", Name = nameof(GetOwnerPendingActivities))]
         public async Task<IActionResult> GetOwnerPendingActivities(int? limit, int? offset)
         {
-            return Ok(await _pendinngActivityService.GetOwnerPendingActivitiesAsync(limit, offset));
+            return Ok(await _pendingActivityService.GetOwnerPendingActivitiesAsync(limit, offset));
         }
 
         [HttpGet("me/{id}")]
         [IdValidation]
         public async Task<IActionResult> GetOwnerPendingActivity(int id)
         {
-            var result = await _pendinngActivityService.GetOwnerPendingActivityAsync(id);
+            var result = await _pendingActivityService.GetOwnerPendingActivityAsync(id);
 
             return result.Match(
                 pendingActivity => Ok(pendingActivity),
@@ -43,9 +43,9 @@ namespace API.Controllers
 
         [HttpPut("{id}")]
         [IdValidation]
-        public async Task<IActionResult> UpdatePendingActivitiy(int id, ActivityCreate pendingActivity)
+        public async Task<IActionResult> UpdatePendingActivitiy(int id, [FromForm] ActivityCreate pendingActivity)
         {
-            var result = await _pendinngActivityService.UpdatePendingActivityAsync(id, pendingActivity);
+            var result = await _pendingActivityService.UpdatePendingActivityAsync(id, pendingActivity);
 
             return result.Match(
                 activity => CreatedAtRoute(nameof(GetOwnerPendingActivities), new { activity = activity.Id }, activity),
@@ -58,7 +58,7 @@ namespace API.Controllers
         [IdValidation]
         public async Task<IActionResult> DisapprovePendingActivity(int id)
         {
-            var result = await _pendinngActivityService.DisapprovePendingActivityAsync(id);
+            var result = await _pendingActivityService.DisapprovePendingActivityAsync(id);
 
             return result.Match(
                 u => NoContent(),
@@ -69,10 +69,10 @@ namespace API.Controllers
         [HttpPost()]
         public async Task<IActionResult> CreatePendingActivity([FromForm] ActivityCreate activityCreate)
         {
-            var result = await _pendinngActivityService.CreatePendingActivityAsync(activityCreate);
+            var result = await _pendingActivityService.CreatePendingActivityAsync(activityCreate);
 
             return result.Match(
-               activity => CreatedAtRoute(nameof(GetOwnerPendingActivities), new { activity = activity.Id }, activity),
+               activity => CreatedAtRoute(nameof(GetOwnerPendingActivities), new { id = activity.Id }, activity),
                err => err.Response()
                );
         }

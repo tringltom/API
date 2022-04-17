@@ -56,7 +56,7 @@ namespace Application.Services
             return userImageEnvelope;
         }
 
-        public async Task UpdateLoggedUserAboutAsync(UserAbout userAbout)
+        public async Task UpdateAboutAsync(UserAbout userAbout)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);
@@ -65,7 +65,7 @@ namespace Application.Services
             await _uow.CompleteAsync();
         }
 
-        public async Task<Either<RestError, Unit>> UpdateLoggedUserImageAsync(UserImageUpdate userImage)
+        public async Task<Either<RestError, Unit>> UpdateImageAsync(UserImageUpdate userImage)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);
@@ -86,7 +86,7 @@ namespace Application.Services
             return Unit.Default;
         }
 
-        public async Task<Either<RestError, Unit>> ResolveUserImageAsync(int userId, bool approve)
+        public async Task<Either<RestError, Unit>> ResolveImageAsync(int userId, bool approve)
         {
             var user = await _uow.Users.GetAsync(userId);
 

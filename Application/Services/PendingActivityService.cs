@@ -6,6 +6,7 @@ using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
+using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
 using Domain;
@@ -14,7 +15,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
 {
-    public class PendingActivityService
+    public class PendingActivityService : IPendingActivityService
     {
         private readonly IPhotoAccessor _photoAccessor;
         private readonly IUserAccessor _userAccessor;
@@ -109,14 +110,14 @@ namespace Application.Services
             if (pendingActivity == null)
                 return new NotFound("Aktivnost nije pronadjena");
 
-            _uow.PendingActivities.Remove(pendingActivity);
-            await _uow.CompleteAsync();
-
             pendingActivity.PendingActivityMedias
                 .ToList()
                 .ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
 
             await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, false);
+
+            _uow.PendingActivities.Remove(pendingActivity);
+            await _uow.CompleteAsync();
 
             return Unit.Default;
         }

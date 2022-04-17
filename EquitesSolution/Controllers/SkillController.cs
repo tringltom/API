@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.Models;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -15,16 +16,17 @@ namespace API.Controllers
             _skillService = skillService;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetSkillsData(int userId)
+        [HttpGet("user/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> GetSkillsData(int id)
         {
-            var result = await _skillService.GetSkillsDataAsync(userId);
+            var result = await _skillService.GetSkillsDataAsync(id);
             return result.Match(
                 skillData => Ok(skillData),
                 err => err.Response());
         }
 
-        [HttpPut("users/me")]
+        [HttpPut("user/me")]
         public async Task<IActionResult> UpdateSkillsData(SkillData skillData)
         {
             var result = await _skillService.UpdateSkillsDataAsync(skillData);

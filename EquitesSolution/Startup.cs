@@ -71,6 +71,7 @@ namespace API
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();
             services.AddScoped<IActivityService, ActivityService>();
+            services.AddScoped<IPendingActivityService, PendingActivityService>();
             services.AddScoped<IDiceService, DiceService>();
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IReviewService, ReviewService>();

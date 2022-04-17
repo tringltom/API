@@ -36,7 +36,7 @@ namespace API.Controllers
             var result = await _activityService.ApprovePendingActivity(id);
 
             return result.Match(
-                activity => CreatedAtRoute(nameof(GetActivity), new { activity = activity.Id }, activity),
+                activity => CreatedAtRoute(nameof(GetActivity), new { id = activity.Id }, activity),
                 err => err.Response()
                 );
         }
