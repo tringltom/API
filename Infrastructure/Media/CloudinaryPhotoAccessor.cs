@@ -30,15 +30,13 @@ namespace Infrastructure.Media
 
             if (file.Length > 0)
             {
-                using (var stream = file.OpenReadStream())
+                using var stream = file.OpenReadStream();
+                var uploadParams = new ImageUploadParams
                 {
-                    var uploadParams = new ImageUploadParams
-                    {
-                        File = new FileDescription(file.FileName, stream),
-                        Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
-                    };
-                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                }
+                    File = new FileDescription(file.FileName, stream),
+                    Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
+                };
+                uploadResult = await _cloudinary.UploadAsync(uploadParams);
             }
 
             if (uploadResult.Error != null)

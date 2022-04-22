@@ -55,7 +55,7 @@ namespace Application.Services
             };
         }
 
-        public async Task<Either<RestError, PendingActivityReturn>> GetOwnerPendingActivityAsync(int id)
+        public async Task<Either<RestError, ActivityCreate>> GetOwnerPendingActivityAsync(int id)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var pendingActivity = await _uow.PendingActivities.GetAsync(id);
@@ -63,7 +63,19 @@ namespace Application.Services
             if (pendingActivity.User.Id != userId)
                 return new BadRequest("Niste kreirali ovu aktivnost!");
 
-            return _mapper.Map<PendingActivityReturn>(pendingActivity);
+            var pendingActivityToReturn = _mapper.Map<ActivityCreate>(pendingActivity);
+
+            //var test = pendingActivity.PendingActivityMedias.Select(x =>
+            //{
+            //    using (var client = new WebClient())
+            //    {
+            //        client.DownloadFile(x.Url, "a.mpeg");
+            //    }
+            //});
+
+
+
+            return pendingActivityToReturn;
         }
 
         public async Task<Either<RestError, PendingActivityReturn>> UpdatePendingActivityAsync(int id, ActivityCreate updatedActivityCreate)
