@@ -174,7 +174,7 @@ namespace API.Tests.Controllers
                .ReturnsAsync(userBaseResponse);
 
             // Act
-            var res = await _sut.Register(userRegister) as CreatedAtRouteResult;
+            var res = await _sut.Register(userRegister, It.IsAny<string>()) as CreatedAtRouteResult;
 
             // Assert
             res.Value.Should().Be(userBaseResponse);
