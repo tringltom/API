@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Application.Models;
 using Application.Models.Activity;
 using AutoMapper;
@@ -17,7 +18,8 @@ namespace Application.Mappings
                 .ForMember(d => d.ActivityTypeId, o => o.MapFrom(s => s.Type));
 
             CreateMap<PendingActivity, ActivityCreate>()
-                .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId));
+                .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
+                .ForMember(d => d.Urls, o => o.MapFrom(s => s.PendingActivityMedias.Select(pa => pa.Url)));
 
             CreateMap<PendingActivity, Activity>()
                 .BeforeMap((s, d) => d.DateApproved = DateTimeOffset.Now)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Managers;
+using Application.Models.Activity;
 using AutoFixture;
 using AutoFixture.NUnit3;
 using DAL;
@@ -25,7 +26,8 @@ namespace Application.Tests.Managers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetActivityCountsAsync_Successful(User user,
+        public async Task GetActivityCountsAsync_Successful(User user,
+            List<ActivityCount> activityCounts,
             IEnumerable<Skill> skills,
             List<SkillActivity> skillActivities,
             [Frozen] Mock<IUnitOfWork> uowMock,
@@ -63,10 +65,10 @@ namespace Application.Tests.Managers
                .ReturnsAsync(skillActivities);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.GetActivityCountsAsync(user);
+            var res = await sut.GetActivityCountsAsync(user);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
+            res.Should().BeEquivalentTo(activityCounts);
             uowMock.Verify(x => x.CompleteAsync(), Times.Once);
             uowMock.Verify(x => x.Skills.GetSkillsAsync(user.Id), Times.Once);
             uowMock.Verify(x => x.SkillActivities.GetAllAsync(), Times.Once);

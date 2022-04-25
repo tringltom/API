@@ -56,13 +56,14 @@ namespace Application.Services
             return userImageEnvelope;
         }
 
-        public async Task UpdateAboutAsync(UserAbout userAbout)
+        public async Task<Unit> UpdateAboutAsync(UserAbout userAbout)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);
 
             user.About = userAbout.About;
             await _uow.CompleteAsync();
+            return Unit.Default;
         }
 
         public async Task<Either<RestError, Unit>> UpdateImageAsync(UserImageUpdate userImage)

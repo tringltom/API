@@ -14,58 +14,43 @@ namespace API.Tests.Controllers
     public class SkillControllerTests
     {
         private Mock<ISkillService> _skillServiceMock;
-        private SkillController _skillController;
+        private SkillController _sut;
 
         [SetUp]
         public void SetUp()
         {
             _skillServiceMock = new Mock<ISkillService>();
-            _skillController = new SkillController(_skillServiceMock.Object);
+            _sut = new SkillController(_skillServiceMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void GetSkillsDataAsync_Successfull(int userId, SkillData skillData)
+        public async Task GetSkillsDataAsync_Successfull(SkillData skillData)
         {
             // Arrange
-            _skillServiceMock.Setup(x => x.GetSkillsDataAsync(userId))
+            _skillServiceMock.Setup(x => x.GetSkillsDataAsync(It.IsAny<int>()))
                .ReturnsAsync(skillData);
 
             // Act
-            var res = _skillController.GetSkillsDataAsync(userId);
+            var res = await _sut.GetSkillsData(It.IsAny<int>()) as OkObjectResult;
 
             // Assert
-            res.Should().BeOfType<Task<SkillData>>();
+            res.Value.Should().Be(skillData);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void ResetSkillsDataAsync_Successfull(UserBaseResponse userBaseResponse)
-        {
-            // Arrange
-            _skillServiceMock.Setup(x => x.ResetSkillsDataAsync())
-               .ReturnsAsync(userBaseResponse);
-
-            // Act
-            var res = _skillController.ResetSkillsDataAsync();
-
-            // Assert
-            res.Should().BeOfType<Task<ActionResult<UserBaseResponse>>>();
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void UpdateSkillsDataAsync_Successfull(SkillData skillData, UserBaseResponse userBaseResponse)
+        public async Task UpdateSkillsDataAsync_Successfull(SkillData skillData, UserBaseResponse userBaseResponse)
         {
             // Arrange
             _skillServiceMock.Setup(x => x.UpdateSkillsDataAsync(skillData))
                .ReturnsAsync(userBaseResponse);
 
             // Act
-            var res = _skillController.UpdateSkillsDataAsync(skillData);
+            var res = await _sut.UpdateSkillsData(skillData) as OkObjectResult;
 
             // Assert
-            res.Should().BeOfType<Task<ActionResult<UserBaseResponse>>>();
+            res.Value.Should().Be(userBaseResponse);
         }
     }
 }

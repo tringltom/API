@@ -18,7 +18,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void RollTheDice_Successfull(
+        public async Task RollTheDice_Successfull(
             [Frozen] Mock<IDiceService> diceServiceMock,
             DiceResult diceResult,
             [Greedy] DiceController sut)
@@ -28,10 +28,10 @@ namespace API.Tests.Controllers
                .ReturnsAsync(diceResult);
 
             // Act
-            var res = sut.RollTheDice();
+            var res = await sut.RollDice() as OkObjectResult; ;
 
             // Assert
-            res.Should().BeOfType<Task<ActionResult<DiceResult>>>();
+            res.Value.Should().Be(diceResult);
         }
     }
 }

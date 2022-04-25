@@ -16,5 +16,6 @@ namespace Application.Models.Activity
         public DateTimeOffset? StartDate { get; set; }
         public DateTimeOffset? EndDate { get; set; }
         public string Location { get; set; }
+        public string[] Urls { get; set; }
     }
 }

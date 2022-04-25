@@ -31,7 +31,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void CreateActivityWithoutImageAsync_Successful(
+        public async Task CreateActivityWithoutImageAsync_Successful(
             [Frozen] Mock<IMapper> mapperMock,
             [Frozen] Mock<IUnitOfWork> uowMock,
             [Frozen] Mock<IUserAccessor> userAccessorMock,

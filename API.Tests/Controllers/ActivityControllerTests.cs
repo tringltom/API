@@ -1,9 +1,8 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using AutoFixture.NUnit3;
+using AutoFixture;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -14,110 +13,59 @@ namespace API.Tests.Controllers
 {
     public class ActivityControllerTests
     {
+        private Mock<IActivityService> _activityServiceMock;
+        private ActivityController _sut;
 
         [SetUp]
-        public void SetUp() { }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void CreateActivity_Successfull(
-            [Frozen] Mock<IActivityService> activityServiceMock,
-            ActivityCreate activityCreate,
-            [Greedy] ActivityController sut)
+        public void SetUp()
         {
-            // Arrange
-            activityServiceMock.Setup(x => x.CreatePendingActivityAsync(activityCreate))
-               .Returns(Task.CompletedTask);
-
-            // Act
-            var res = sut.CreatePendingActivity(activityCreate);
-
-            // Assert
-            res.Result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+            _activityServiceMock = new Mock<IActivityService>();
+            _sut = new ActivityController(_activityServiceMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void GetPendingActivities_Successfull(
-            [Frozen] Mock<IActivityService> activityServiceMock,
-            PendingActivityEnvelope pendingActivityEnvelope,
-            [Greedy] ActivityController sut,
-            int offset,
-            int limit)
+        public async Task GetActivity_SuccessfullAsync(ApprovedActivityReturn activityReturn)
         {
             // Arrange
-            activityServiceMock.Setup(x => x.GetPendingActivitiesAsync(5, 2))
-               .ReturnsAsync(pendingActivityEnvelope);
+            _activityServiceMock.Setup(x => x.GetActivityAsync(It.IsAny<int>()))
+               .ReturnsAsync(activityReturn);
 
             // Act
-            var res = sut.GetPendingActivities(limit, offset);
+            var res = await _sut.GetActivity(It.IsAny<int>()) as OkObjectResult;
 
             // Assert
-
-            res.Should().BeOfType<Task<ActionResult<PendingActivityEnvelope>>>();
+            res.Value.Should().Be(activityReturn);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void GetPendingActivitiesForLoggedInUser_Successfull(
-            [Frozen] Mock<IActivityService> activityServiceMock,
-            PendingActivityForUserEnvelope pendingActivityForUserEnvelope,
-            [Greedy] ActivityController sut,
-            int offset,
-            int limit)
+        public async Task GetActivitiesFromOtherUsers_SuccessfullAsync(ApprovedActivityEnvelope activityReturnEnvelope)
         {
             // Arrange
-            activityServiceMock.Setup(x => x.GetOwnerPendingActivitiesAsync(limit, offset))
-               .ReturnsAsync(pendingActivityForUserEnvelope);
+            _activityServiceMock.Setup(x => x.GetActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>()))
+               .ReturnsAsync(activityReturnEnvelope);
 
             // Act
-            var res = sut.GetPendingActivitiesForLoggedInUser(limit, offset);
+            var res = await _sut.GetActivitiesFromOtherUsers(It.IsAny<int>(), It.IsAny<int>()) as OkObjectResult;
 
             // Assert
-
-            res.Should().BeOfType<Task<ActionResult<PendingActivityForUserEnvelope>>>();
+            res.Value.Should().Be(activityReturnEnvelope);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void ResolvePendingActivitiy_Successfull(
-            [Frozen] Mock<IActivityService> activityServiceMock,
-            PendingActivityApproval activityApproval,
-            [Greedy] ActivityController sut)
+        public async Task ApprovePendingActivity_SuccessfullAsync(ApprovedActivityReturn activity)
         {
             // Arrange
-            activityServiceMock.Setup(x => x.ReslovePendingActivityAsync(1, activityApproval))
-               .ReturnsAsync(true);
+            _activityServiceMock.Setup(x => x.ApprovePendingActivity(It.IsAny<int>()))
+               .ReturnsAsync(activity);
 
             // Act
-            var res = sut.ResolvePendingActivity(1, activityApproval);
+            var res = await _sut.ApprovePendingActivity(It.IsAny<int>()) as CreatedAtRouteResult;
 
             // Assert
-            res.Should().BeOfType<Task<ActionResult<bool>>>();
+            res.Value.Should().Be(activity);
         }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void GetApprovedActivitiesExcludeUser_Successfull(
-            [Frozen] Mock<IActivityService> activityServiceMock,
-            ApprovedActivityEnvelope activityEnvelope,
-            int id,
-            int offset,
-            int limit,
-            [Greedy] ActivityController sut)
-        {
-            // Arrange
-            activityServiceMock.Setup(x => x.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset))
-               .ReturnsAsync(activityEnvelope);
-
-            // Act
-            var res = sut.GetApprovedActivitiesExcludeUser(id, limit, offset);
-
-            // Assert
-            res.Should().BeOfType<Task<ActionResult<ApprovedActivityEnvelope>>>();
-        }
-
-
     }
 }

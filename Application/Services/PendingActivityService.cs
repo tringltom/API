@@ -63,19 +63,7 @@ namespace Application.Services
             if (pendingActivity.User.Id != userId)
                 return new BadRequest("Niste kreirali ovu aktivnost!");
 
-            var pendingActivityToReturn = _mapper.Map<ActivityCreate>(pendingActivity);
-
-            //var test = pendingActivity.PendingActivityMedias.Select(x =>
-            //{
-            //    using (var client = new WebClient())
-            //    {
-            //        client.DownloadFile(x.Url, "a.mpeg");
-            //    }
-            //});
-
-
-
-            return pendingActivityToReturn;
+            return _mapper.Map<ActivityCreate>(pendingActivity);
         }
 
         public async Task<Either<RestError, PendingActivityReturn>> UpdatePendingActivityAsync(int id, ActivityCreate updatedActivityCreate)
@@ -101,7 +89,12 @@ namespace Application.Services
             pendingActivity.EndDate = updatedActivityCreate.EndDate;
             pendingActivity.Location = updatedActivityCreate.Location;
 
-            pendingActivity.PendingActivityMedias = null;
+
+            pendingActivity.PendingActivityMedias
+                .ToList()
+                .ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));
+
+            pendingActivity.PendingActivityMedias.Clear();
 
             foreach (var image in updatedActivityCreate?.Images ?? new IFormFile[0])
             {

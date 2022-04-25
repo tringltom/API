@@ -4,72 +4,86 @@ using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using AutoFixture.NUnit3;
+using AutoFixture;
 using FixtureShared;
 using FluentAssertions;
+using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
 
 namespace API.Tests.Controllers
 {
-    internal class FavoriteControllerTests
+    public class FavoriteControllerTests
     {
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void CreateFavoriteActivity_Successfull(
-            [Frozen] Mock<IFavoritesService> favoriteServiceMock,
-            FavoriteActivityBase activity,
-            [Greedy] FavoriteController sut)
+        private Mock<IFavoritesService> _favoriteServiceMock;
+        private FavoriteController _sut;
+
+        [SetUp]
+        public void SetUp()
         {
-            // Arrange
-            favoriteServiceMock.Setup(x => x.ResolveFavoriteActivityAsync(activity))
-               .Returns(Task.CompletedTask);
-
-            // Act
-            var res = sut.ResolveFavoriteActivity(activity);
-
-            // Assert
-            res.Result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+            _favoriteServiceMock = new Mock<IFavoritesService>();
+            _sut = new FavoriteController(_favoriteServiceMock.Object);
         }
 
         [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResolveFavoriteActivity_Successfull(
-            [Frozen] Mock<IFavoritesService> favoriteActivityService,
-            FavoriteActivityBase activity,
-            [Greedy] FavoriteController sut)
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task GetFavoriteActivity_SuccessfullAsync(UserFavoriteActivityReturn favoriteActivity)
         {
             // Arrange
-            favoriteActivityService.Setup(x => x.ResolveFavoriteActivityAsync(activity))
-               .Returns(Task.CompletedTask);
+            _favoriteServiceMock.Setup(x => x.GetFavoriteActivityAsync(It.IsAny<int>()))
+               .ReturnsAsync(favoriteActivity);
 
             // Act
-            var res = sut.ResolveFavoriteActivity(activity);
+            var res = await _sut.GetFavoriteActivity(It.IsAny<int>()) as OkObjectResult;
 
             // Assert
-            res.Result.Should().BeOfType<OkObjectResult>();
-            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+            res.Value.Should().Be(favoriteActivity);
         }
 
         [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetFavoriteActivitiesForUser_Successfull(
-            [Frozen] Mock<IFavoritesService> favoriteActivityService,
-            List<FavoriteActivityIdReturn> favoriteActivities,
-            int id,
-            [Greedy] FavoriteController sut)
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task GetOwnerFavoriteActivityIds_SuccessfullAsync(List<FavoriteActivityIdReturn> favoriteActivityIds)
         {
             // Arrange
-            favoriteActivityService.Setup(x => x.GetAllFavoritesForUserAsync(id))
-               .ReturnsAsync(favoriteActivities);
+            _favoriteServiceMock.Setup(x => x.GetAllOwnerFavoriteIds())
+               .ReturnsAsync(favoriteActivityIds);
 
             // Act
-            var res = sut.GetFavoriteActivitiesForUser(id);
+            var res = await _sut.GetOwnerFavoriteActivityIds() as OkObjectResult;
 
             // Assert
-            res.Result.Should().Equal(favoriteActivities);
+            res.Value.Should().Be(favoriteActivityIds);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task RemoveFavouriteActivity_SuccessfullAsync()
+        {
+            // Arrange
+            _favoriteServiceMock.Setup(x => x.RemoveFavoriteActivityAsync(It.IsAny<int>()))
+               .ReturnsAsync(Unit.Default);
+
+            // Act
+            var res = await _sut.RemoveFavouriteActivity(It.IsAny<int>()) as NoContentResult;
+
+            // Assert
+            res.StatusCode.Should().Equals(HttpStatusCode.NoContent);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task CreateFavoriteActivity_SuccessfullAsync(UserFavoriteActivityReturn favoriteActivity)
+        {
+            // Arrange
+            _favoriteServiceMock.Setup(x => x.AddFavoriteActivityAsync(It.IsAny<int>()))
+               .ReturnsAsync(favoriteActivity);
+
+            // Act
+            var res = await _sut.CreateFavoriteActivity(It.IsAny<int>()) as CreatedAtRouteResult;
+
+            // Assert
+            res.Value.Should().Be(favoriteActivity);
         }
     }
 }
