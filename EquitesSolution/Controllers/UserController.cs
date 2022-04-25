@@ -1,11 +1,4 @@
-﻿using System.Threading.Tasks;
-using API.Validations;
-using Application.Models;
-using Application.Models.User;
-using Application.ServiceInterfaces;
-using Microsoft.AspNetCore.Mvc;
-
-namespace API.Controllers
+﻿namespace API.Controllers
 {
 
     [Route("users")]
