@@ -1,4 +1,17 @@
-﻿namespace API.Tests.Controllers
+﻿using System.Net;
+using System.Threading.Tasks;
+using API.Controllers;
+using Application.Models;
+using Application.Models.User;
+using Application.ServiceInterfaces;
+using FixtureShared;
+using FluentAssertions;
+using LanguageExt;
+using Microsoft.AspNetCore.Mvc;
+using Moq;
+using NUnit.Framework;
+
+namespace API.Tests.Controllers
 {
     public class UserControllerTests
     {
