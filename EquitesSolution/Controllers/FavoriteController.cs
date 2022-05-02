@@ -27,7 +27,7 @@ namespace API.Controllers
         [HttpGet("me/ids")]
         public async Task<IActionResult> GetOwnerFavoriteActivityIds()
         {
-            return Ok(await _favoriteService.GetAllOwnerFavoriteIds());
+            return Ok(await _favoriteService.GetAllOwnerFavoriteIdsAsync());
         }
 
         [HttpDelete("{id}")]

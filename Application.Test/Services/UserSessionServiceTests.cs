@@ -5,14 +5,16 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
 using Application.ManagerInterfaces;
+using Application.Models.Activity;
 using Application.Models.User;
 using Application.Services;
 using AutoFixture;
-using AutoFixture.NUnit3;
+using AutoMapper;
 using DAL;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using LanguageExt;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using NUnit.Framework;
@@ -23,155 +25,229 @@ namespace Application.Tests.Services
     {
 
         private IFixture _fixture;
+        private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IUnitOfWork> _uowMock;
+        private Mock<IMapper> _mapperMock;
+        private Mock<IActivityCounterManager> _activityCounterManagerMock;
+        private Mock<ITokenManager> _tokenManagerMock;
+        private Mock<IUserManager> _userManagerMock;
+        private Mock<IFacebookAccessor> _facebookAccessorMock;
+        private UserSessionService _sut;
 
         [SetUp]
         public void SetUp()
         {
             _fixture = new FixtureDirector().WithOmitRecursion();
+            _userManagerMock = new Mock<IUserManager>();
+            _activityCounterManagerMock = new Mock<IActivityCounterManager>();
+            _tokenManagerMock = new Mock<ITokenManager>();
+            _userAccessorMock = new Mock<IUserAccessor>();
+            _mapperMock = new Mock<IMapper>();
+            _uowMock = new Mock<IUnitOfWork>();
+            _facebookAccessorMock = new Mock<IFacebookAccessor>();
+            _sut = new UserSessionService(_userManagerMock.Object, _activityCounterManagerMock.Object, _tokenManagerMock.Object, _facebookAccessorMock.Object, _userAccessorMock.Object, _mapperMock.Object, _uowMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetCurrentlyLoggedInUserAsync_Successfull([Frozen] Mock<IUserManager> userManagerMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
+        public async Task GetCurrentlyLoggedInUser_SuccessfullAsync(
             User currentUser,
-            string token,
-            UserSessionService sut)
+            UserBaseResponse userBaseResponse,
+            List<ActivityCount> activityCounts,
+            string token)
         {
             //Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
-                .Returns(currentUser.UserName);
+            userBaseResponse.Token = token;
+            userBaseResponse.ActivityCounts = activityCounts;
 
-            userManagerMock.Setup(x => x.FindUserByNameAsync(currentUser.UserName))
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(currentUser.Id);
+
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(currentUser.Id))
                 .ReturnsAsync(currentUser);
 
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName))
+            _mapperMock.Setup(x => x.Map<UserBaseResponse>(currentUser))
+                .Returns(userBaseResponse);
+
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName))
                 .Returns(token);
 
-            UserBaseResponse result = null;
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
+            _activityCounterManagerMock.Setup(x => x.GetActivityCountsAsync(currentUser))
+                .ReturnsAsync(activityCounts);
 
             //Act
             var refreshToken = _fixture.Create<string>();
-            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
+            var res = await _sut.GetCurrentlyLoggedInUserAsync(It.IsAny<string>(), refreshToken);
 
             //Assert
-            methodInTest.Should().NotThrow<Exception>();
-            result.Should().NotBeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userManagerMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Once);
+            res.Match(
+                userResponse => userResponse.Should().BeEquivalentTo(userBaseResponse),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(currentUser.Id), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Once);
+            _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(currentUser), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetCurrentlyLoggedInUserAsync_UsernameNotFound([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            User currentUser, string token, UserSessionService sut)
+        public async Task GetCurrentlyLoggedInUser_StayLoggedInAsync(
+            UserBaseResponse userBaseResponse,
+            List<ActivityCount> activityCounts,
+            RefreshToken oldRefreshToken,
+            string token)
         {
             //Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
-                .Returns(currentUser.UserName);
+            var refreshToken = _fixture.Create<string>();
+            var userId = 0;
 
-            userRepoMock.Setup(x => x.FindUserByNameAsync(It.IsAny<string>()))
-                .ReturnsAsync((User)null);
+            userBaseResponse.Token = token;
+            userBaseResponse.ActivityCounts = activityCounts;
 
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(It.IsAny<int>(), It.IsAny<string>()))
+            oldRefreshToken.Revoked = null;
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.RefreshTokens.GetOldRefreshTokenAsync(refreshToken))
+                .ReturnsAsync(oldRefreshToken);
+
+            _mapperMock.Setup(x => x.Map<UserBaseResponse>(oldRefreshToken.User))
+                .Returns(userBaseResponse);
+
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(oldRefreshToken.User.Id, oldRefreshToken.User.UserName))
                 .Returns(token);
 
-            UserBaseResponse result = null;
+            _activityCounterManagerMock.Setup(x => x.GetActivityCountsAsync(oldRefreshToken.User))
+                .ReturnsAsync(activityCounts);
 
             //Act
-            var refreshToken = _fixture.Create<string>();
-            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
+            var res = await _sut.GetCurrentlyLoggedInUserAsync("true", refreshToken);
 
             //Assert
-            methodInTest.Should().Throw<RestError>();
-            result.Should().BeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(It.IsAny<string>()), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Never);
+            res.Match(
+                userResponse => userResponse.Should().BeEquivalentTo(userBaseResponse),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(oldRefreshToken.User.Id), Times.Never);
+            _uowMock.Verify(x => x.RefreshTokens.GetOldRefreshTokenAsync(refreshToken), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(oldRefreshToken.User.Id, oldRefreshToken.User.UserName), Times.Once);
+            _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(oldRefreshToken.User), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetCurrentlyLoggedInUserAsync_UserWithCurrentUsernameNotFound([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            User currentUser, string token, UserSessionService sut)
+        public async Task GetCurrentlyLoggedInUser_UserNotFoundAsync(string token, int userId)
         {
             //Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
-                .Returns(currentUser.UserName);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
 
-            userRepoMock.Setup(x => x.FindUserByNameAsync(currentUser.UserName))
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(userId))
                 .ReturnsAsync((User)null);
 
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName))
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(It.IsAny<int>(), It.IsAny<string>()))
                 .Returns(token);
-
-            UserBaseResponse result = null;
 
             //Act
             var refreshToken = _fixture.Create<string>();
-            Func<Task> methodInTest = async () => result = await sut.GetCurrentlyLoggedInUserAsync(false, refreshToken);
+            var res = await _sut.GetCurrentlyLoggedInUserAsync("false", refreshToken);
 
             //Assert
-            methodInTest.Should().Throw<RestError>();
-            result.Should().BeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(userId), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(It.IsAny<int>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LoginAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
+        public async Task GetCurrentlyLoggedInUser_UserNotAuthorizedAsync(RefreshToken oldRefreshToken,
+            User currentUser)
+        {
+            //Arrange
+            var userId = 0;
+            var refreshToken = _fixture.Create<string>();
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.RefreshTokens.GetOldRefreshTokenAsync(refreshToken))
+                .ReturnsAsync(oldRefreshToken);
+
+            //Act
+            var res = await _sut.GetCurrentlyLoggedInUserAsync("true", refreshToken);
+
+            //Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotAuthorized>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.RefreshTokens.GetOldRefreshTokenAsync(refreshToken), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByNameAsync(currentUser.UserName), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(currentUser.Id, currentUser.UserName), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task Login_SuccessfulAsync(string jwtToken,
             string refreshToken,
             UserLogin userLogin,
-            UserSessionService sut)
+            List<ActivityCount> activityCounts,
+            UserBaseResponse userBaseResponse)
         {
             // Arrange
+            userBaseResponse.Token = jwtToken;
+            userBaseResponse.ActivityCounts = activityCounts;
+            userBaseResponse.RefreshToken = refreshToken;
+
             _fixture.Customize<User>(c => c.With(
                 u => u.EmailConfirmed, true));
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
+            _userManagerMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
+            _userManagerMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
-
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-
-            uowMock.Setup(x => x.CompleteAsync())
-               .ReturnsAsync(true);
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(refreshToken);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
+            _mapperMock.Setup(x => x.Map<UserBaseResponse>(user))
+                .Returns(userBaseResponse);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(jwtToken);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
+            var res = await _sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
+            res.Match(
+                userResponse => userResponse.Should().BeEquivalentTo(userBaseResponse),
+                err => err.Should().BeNull()
+                );
+
+            _userManagerMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            _userManagerMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Once);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LoginAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            string refreshToken, UserLogin userLogin, UserSessionService sut)
+        public async Task Login_UserNotFoundAsync(string refreshToken, UserLogin userLogin)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -179,31 +255,37 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
+            _userManagerMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync((User)null);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
+            _userManagerMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(refreshToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
+            var res = await _sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _userManagerMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            _userManagerMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Never);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LoginAsync_UserEmailNotConfirmed([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            string refreshToken, UserLogin userLogin, UserSessionService sut)
+        public async Task Login_UserEmailNotConfirmedAsync(string refreshToken, UserLogin userLogin)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -211,31 +293,37 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
+            _userManagerMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
+            _userManagerMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Success);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(refreshToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
+            var res = await _sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _userManagerMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            _userManagerMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Never);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LoginAsync_SignInFailedGeneral([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            string refreshToken, UserLogin userLogin, UserSessionService sut)
+        public async Task Login_SignInFailedGeneralAsync(string refreshToken, UserLogin userLogin)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -243,31 +331,37 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
+            _userManagerMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
+            _userManagerMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.Failed);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(refreshToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
+            var res = await _sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotAuthorized>()
+                );
+
+            _userManagerMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            _userManagerMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Never);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LoginAsync_SignInFailedUserLockedOut([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            string refreshToken, UserLogin userLogin, UserSessionService sut)
+        public async Task Login_SignInFailedUserLockedOutAsync(string refreshToken, UserLogin userLogin)
         {
             // Arrange
             _fixture.Customize<User>(c => c.With(
@@ -275,164 +369,113 @@ namespace Application.Tests.Services
 
             var user = _fixture.Create<User>();
 
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
+            _userManagerMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
                 .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
+            _userManagerMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
                 .ReturnsAsync(SignInResult.LockedOut);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(refreshToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
+            var res = await _sut.LoginAsync(userLogin);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotAuthorized>()
+                );
+
+            _userManagerMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
+            _userManagerMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Never);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LoginAsync_UpdateUserFailed([Frozen] Mock<IUserManager> userRepoMock, [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            string refreshToken, UserLogin userLogin, UserSessionService sut)
+        public async Task RefreshToken_SuccessfulAsync(User user, string newToken, string jwtToken, UserRefreshResponse userRefreshResponse)
         {
             // Arrange
-            _fixture.Customize<User>(c => c.With(
-                u => u.EmailConfirmed, true));
+            userRefreshResponse.RefreshToken = newToken;
+            userRefreshResponse.Token = jwtToken;
 
-            var user = _fixture.Create<User>();
-
-            userRepoMock.Setup(x => x.FindUserByEmailAsync(userLogin.Email))
-                .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password))
-                .ReturnsAsync(SignInResult.Success);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
-
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.LoginAsync(userLogin);
-
-            // Assert
-            methodInTest.Should().Throw<RestError>();
-            userRepoMock.Verify(x => x.FindUserByEmailAsync(userLogin.Email), Times.Once);
-            userRepoMock.Verify(x => x.SignInUserViaPasswordWithLockoutAsync(user, userLogin.Password), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RefreshTokenAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            User user, string newToken, UserSessionService sut)
-        {
-            // Arrange
             user.RefreshTokens = new List<RefreshToken>
             {
                 _fixture.Build<RefreshToken>().With(x => x.Expires, DateTimeOffset.UtcNow.AddDays(7))
                 .Without(x => x.Revoked).Create()
             };
 
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(user.Id))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-            UserRefreshResponse result = null;
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(newToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(jwtToken);
 
             // Act
-            Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(user.RefreshTokens.ElementAt(0).Token);
+            var res = await _sut.RefreshTokenAsync(user.RefreshTokens.ElementAt(0).Token);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            result.Should().NotBeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
+            res.Match(
+                refreshResponse => refreshResponse.Should().BeEquivalentTo(userRefreshResponse),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Once);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
 
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RefreshTokenAsync_NoTokenFound([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, string newToken, UserSessionService sut)
+        public async Task RefreshToken_UserNotFoundAsync(string oldToken, User user, string newToken)
         {
             // Arrange
-            var user = _fixture.Build<User>().With(x => x.RefreshTokens, new List<RefreshToken>()).Create();
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(user.Id))
+                .ReturnsAsync((User)null);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
-
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-            UserRefreshResponse result = null;
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(newToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
+            var res = await _sut.RefreshTokenAsync(oldToken);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            result.Should().NotBeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Once);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Never);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RefreshTokenAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, User user, string newToken, UserSessionService sut)
-        {
-            // Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync((User)null);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
-
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-            UserRefreshResponse result = null;
-
-            // Act
-            Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
-
-            // Assert
-            methodInTest.Should().Throw<RestError>();
-            result.Should().BeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RefreshTokenAsync_TokenInactive([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, User user, string newToken, UserSessionService sut)
+        public async Task RefreshTokenAsync_TokenInactive(string oldToken, User user, string newToken)
         {
             // Arrange
             user.RefreshTokens = new List<RefreshToken>
@@ -440,63 +483,37 @@ namespace Application.Tests.Services
                 _fixture.Build<RefreshToken>().With(x => x.Token, oldToken).With(x => x.Revoked, DateTimeOffset.UtcNow.AddDays(-1)).Create()
             };
 
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(user.Id))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-            UserRefreshResponse result = null;
+            _tokenManagerMock.Setup(x => x.CreateRefreshToken())
+                .Returns(newToken);
+            _tokenManagerMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName))
+                .Returns(_fixture.Create<string>());
 
             // Act
-            Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
+            var res = await _sut.RefreshTokenAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            result.Should().BeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Never);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotAuthorized>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
+            _tokenManagerMock.Verify(x => x.CreateRefreshToken(), Times.Never);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            _tokenManagerMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void RefreshTokenAsync_UserUpdateFailed([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<ITokenManager> jwtGeneratorMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            string oldToken, User user, string newToken, UserSessionService sut)
-        {
-            // Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
-
-            jwtGeneratorMock.Setup(x => x.CreateRefreshToken()).Returns(newToken);
-            jwtGeneratorMock.Setup(x => x.CreateJWTToken(user.Id, user.UserName)).Returns(_fixture.Create<string>());
-            UserRefreshResponse result = null;
-
-            // Act
-            Func<Task> methodInTest = async () => result = await sut.RefreshTokenAsync(oldToken);
-
-            // Assert
-            methodInTest.Should().Throw<RestError>();
-            result.Should().BeNull();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateRefreshToken(), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-            jwtGeneratorMock.Verify(x => x.CreateJWTToken(user.Id, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LogoutUserAsync_Successful([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            User user, UserSessionService sut)
+        public async Task LogoutUserAsync_Successful(User user)
         {
             // Arrange
             user.RefreshTokens = new List<RefreshToken>
@@ -505,113 +522,81 @@ namespace Application.Tests.Services
                 .Without(x => x.Revoked).Create()
             };
 
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(user.Id))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(user.RefreshTokens.ElementAt(0).Token);
+            var res = await _sut.LogoutUserAsync(user.RefreshTokens.ElementAt(0).Token);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
-        }
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public void LogoutUserAsync_NoTokenFound([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-           string oldToken, UserSessionService sut)
-        {
-            // Arrange
-            var user = _fixture.Build<User>().With(x => x.RefreshTokens, new List<RefreshToken>()).Create();
-
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LogoutUserAsync_UserNotFound([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-           string oldToken, User user, UserSessionService sut)
+        public async Task LogoutUser_UserNotFoundAsync(string oldToken, User user)
         {
             // Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync((User)null);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(user.Id))
+                .ReturnsAsync((User)null);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
+            var res = await _sut.LogoutUserAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LogoutUserAsync_TokenInactive([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-           string oldToken, User user, UserSessionService sut)
+        public async Task LogoutUser_TokenInactiveAsync(string oldToken, User user)
         {
             // Arrange
             user.RefreshTokens = new List<RefreshToken>
             {
                 _fixture.Build<RefreshToken>().With(x => x.Token, oldToken).With(x => x.Revoked, DateTime.Today.AddDays(-1)).Create()
             };
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(true);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+            _userManagerMock.Setup(x => x.FindUserByIdAsync(user.Id))
+                .ReturnsAsync(user);
+            _userManagerMock.Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(true);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
+            var res = await _sut.LogoutUserAsync(oldToken);
 
             // Assert
-            methodInTest.Should().Throw<RestError>();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
-        }
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotAuthorized>()
+                );
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void LogoutUserAsync_UpdateUserFailed([Frozen] Mock<IUserManager> userRepoMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-           string oldToken, User user, UserSessionService sut)
-        {
-            // Arrange
-            userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken()).Returns(user.UserName);
-            userRepoMock.Setup(x => x.FindUserByNameAsync(user.UserName))
-                    .ReturnsAsync(user);
-            userRepoMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(false);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.LogoutUserAsync(oldToken);
-
-            // Assert
-            methodInTest.Should().Throw<RestError>();
-            userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            userRepoMock.Verify(x => x.FindUserByNameAsync(user.UserName), Times.Once);
-            userRepoMock.Verify(x => x.UpdateUserAsync(user), Times.Once);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _userManagerMock.Verify(x => x.FindUserByIdAsync(user.Id), Times.Once);
+            _userManagerMock.Verify(x => x.UpdateUserAsync(user), Times.Never);
         }
     }
 }

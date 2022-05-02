@@ -27,7 +27,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetRankedUsers_Successfull(UserRankedEnvelope userArenaEnvelope)
+        public async Task GetRankedUsers_SuccessfullAsync(UserRankedEnvelope userArenaEnvelope)
         {
             // Arrange
             _userServiceMock.Setup(x => x.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>()))
@@ -42,7 +42,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetImagesForApproval_Successfull(UserImageEnvelope userImageEnvelope)
+        public async Task GetImagesForApproval_SuccessfullAsync(UserImageEnvelope userImageEnvelope)
         {
             // Arrange
             _userServiceMock.Setup(x => x.GetImagesForApprovalAsync(It.IsAny<int>(), It.IsAny<int>()))
@@ -57,7 +57,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task UpdateAbout_Successfull(UserAbout userAbout)
+        public async Task UpdateAbout_SuccessfullAsync(UserAbout userAbout)
         {
             // Arrange
             _userServiceMock.Setup(x => x.UpdateAboutAsync(userAbout))
@@ -72,7 +72,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task UpdateImage_Successfull(UserImageUpdate userImageUpdate)
+        public async Task UpdateImage_SuccessfullAsync(UserImageUpdate userImageUpdate)
         {
             // Arrange
             _userServiceMock.Setup(x => x.UpdateImageAsync(userImageUpdate))
@@ -87,7 +87,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task ResolveImage_Successfull(PhotoApprove photoApprove)
+        public async Task ResolveImage_SuccessfullAsync(PhotoApprove photoApprove)
         {
             // Arrange
             _userServiceMock.Setup(x => x.ResolveImageAsync(It.IsAny<int>(), photoApprove.Approve))

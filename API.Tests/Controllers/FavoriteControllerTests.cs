@@ -46,7 +46,7 @@ namespace API.Tests.Controllers
         public async Task GetOwnerFavoriteActivityIds_SuccessfullAsync(List<FavoriteActivityIdReturn> favoriteActivityIds)
         {
             // Arrange
-            _favoriteServiceMock.Setup(x => x.GetAllOwnerFavoriteIds())
+            _favoriteServiceMock.Setup(x => x.GetAllOwnerFavoriteIdsAsync())
                .ReturnsAsync(favoriteActivityIds);
 
             // Act

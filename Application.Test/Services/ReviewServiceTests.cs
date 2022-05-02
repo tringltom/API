@@ -1,16 +1,16 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoFixture;
-using AutoFixture.NUnit3;
 using AutoMapper;
 using DAL;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using LanguageExt;
 using Moq;
 using NUnit.Framework;
 
@@ -18,190 +18,238 @@ namespace Application.Tests.Services
 {
     public class ReviewServiceTests
     {
+        private Mock<IMapper> _mapperMock;
+        private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IUnitOfWork> _uowMock;
+        private ReviewService _sut;
+
         [SetUp]
         public void SetUp()
-        { }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ReviewActivityAsync_NoExistingReview_Successful(
-            ActivityReview activityReview,
-            ActivityReviewXp activityReviewXp,
-            UserReview review,
-            Activity activity,
-            int reviewerId,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            [Frozen] Mock<IMapper> mapperMock,
-            ReviewService sut)
         {
-            // Arrange
-            reviewerId += 1;
-
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(reviewerId);
-
-            uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
-                .ReturnsAsync(activityReviewXp);
-
-            uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
-                .ReturnsAsync((UserReview)null);
-
-            uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
-                .ReturnsAsync(activity);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            mapperMock
-               .Setup(x => x.Map<UserReview>(activityReview))
-               .Returns(review);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
-
-            // Assert
-            methodInTest.Should().NotThrow<RestError>();
-
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Once);
-            uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.Add(review), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _userAccessorMock = new Mock<IUserAccessor>();
+            _mapperMock = new Mock<IMapper>();
+            _uowMock = new Mock<IUnitOfWork>();
+            _sut = new ReviewService(_uowMock.Object, _userAccessorMock.Object, _mapperMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ReviewActivityAsync_ExistingReview_Successful(
+        public async Task GetOwnerReviews_SuccessfullAsync(int userId, IEnumerable<UserReview> userReviews, List<UserReviewedActivity> userReviewedActivities)
+        {
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.UserReviews.GetUserReviewsAsync(userId))
+                .ReturnsAsync(userReviews);
+
+            _mapperMock
+                .Setup(x => x.Map<List<UserReviewedActivity>>(userReviews))
+                .Returns(userReviewedActivities);
+
+            // Act
+            var res = await _sut.GetOwnerReviewsAsync();
+
+            // Assert
+            res.Should().BeEquivalentTo(userReviewedActivities);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserReviews.GetUserReviewsAsync(userId), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ReviewActivity_SuccessfulAsync(
+            ActivityReview activityReview,
+            ActivityReviewXp activityReviewXp,
+            UserReview review,
+            Activity activity,
+            Skill creatorSkill,
+            int reviewerId)
+        {
+            // Arrange
+            reviewerId += 1;
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(reviewerId);
+
+            _uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
+                .ReturnsAsync(activity);
+
+            _uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
+                .ReturnsAsync(activityReviewXp);
+
+            _uowMock.Setup(x => x.Skills.GetSkillAsync(activity.User.Id, activityReview.ActivityTypeId))
+                .ReturnsAsync(creatorSkill);
+
+            _uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
+                .ReturnsAsync((UserReview)null);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            _mapperMock
+               .Setup(x => x.Map<UserReview>(activityReview))
+               .Returns(review);
+
+            // Act
+            var res = await _sut.ReviewActivityAsync(activityReview);
+
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillAsync(activity.User.Id, activityReview.ActivityTypeId), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
+            _uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
+            _uowMock.Verify(x => x.UserReviews.Add(review), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ReviewActivity_ReviewerIsActivityCreatorAsync(
+            ActivityReview activityReview,
+            Activity activity,
+            UserReview review,
+            int reviewerId)
+        {
+            // Arrange
+            activity.User.Id = reviewerId;
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(reviewerId);
+
+            _uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
+                .ReturnsAsync(activity);
+
+            // Act
+            var res = await _sut.ReviewActivityAsync(activityReview);
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Never);
+            _uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Never);
+            _uowMock.Verify(x => x.UserReviews.Add(review), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ReviewActivity_ExistingReviewAsync(
             ActivityReview activityReview,
             ActivityReviewXp activityReviewXpToYield,
             ActivityReviewXp activityReviewXpYielded,
             UserReview review,
             UserReview userReview,
             Activity activity,
+            Skill creatorSkill,
             int xpToYield,
             int xpYielded,
-            int reviewerId,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            ReviewService sut)
+            int reviewerId)
         {
             // Arrange
             reviewerId += 1;
             xpToYield = xpYielded + 1;
 
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(reviewerId);
 
-            uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
+            _uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
                 .ReturnsAsync(activityReviewXpToYield);
             activityReviewXpToYield.Xp = xpToYield;
 
-            uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
+            _uowMock.Setup(x => x.Skills.GetSkillAsync(activity.User.Id, activityReview.ActivityTypeId))
+                .ReturnsAsync(creatorSkill);
+
+            _uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
+                    .ReturnsAsync(activity);
+
+            _uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
+                 .ReturnsAsync(userReview);
+
+            _uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId))
                 .ReturnsAsync(activityReviewXpYielded);
             activityReviewXpYielded.Xp = xpYielded;
 
-            uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
-                    .ReturnsAsync(activity);
-
-            uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
-                 .ReturnsAsync(userReview);
-
-            uowMock.Setup(x => x.CompleteAsync())
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
+            var res = await _sut.ReviewActivityAsync(activityReview);
 
             // Assert
-            methodInTest.Should().NotThrow<RestError>();
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
 
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
-            uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-
-            uowMock.Verify(x => x.UserReviews.Add(review), Times.Never);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
+            _uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillAsync(activity.User.Id, activityReview.ActivityTypeId), Times.Once);
+            _uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _uowMock.Verify(x => x.UserReviews.Add(review), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ReviewActivityAsync_ExistingReviewRewardTheSame_Successful(
+        public async Task ReviewActivity_ExistingReviewRewardTheSameAsync(
             ActivityReview activityReview,
-            ActivityReviewXp ActivityReviewXp,
+            ActivityReviewXp activityReviewXp,
             UserReview review,
             UserReview userReview,
             Activity activity,
+            Skill creatorSkill,
             int xp,
-            int reviewerId,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            ReviewService sut)
+            int reviewerId)
         {
             // Arrange
             reviewerId += 1;
 
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(reviewerId);
 
-            uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
-                .ReturnsAsync(ActivityReviewXp);
+            _uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId))
+                .ReturnsAsync(activityReviewXp);
 
-            uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId))
-                .ReturnsAsync(ActivityReviewXp);
+            _uowMock.Setup(x => x.Skills.GetSkillAsync(activity.User.Id, activityReview.ActivityTypeId))
+                .ReturnsAsync(creatorSkill);
 
-            uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
+            _uowMock.Setup(x => x.ActivityReviewXps.GetXpRewardAsync(userReview.Activity.ActivityTypeId, userReview.ReviewTypeId))
+                .ReturnsAsync(activityReviewXp);
+
+            _uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
                 .ReturnsAsync(activity);
 
-            uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
+            _uowMock.Setup(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId))
                 .ReturnsAsync(userReview);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
+            var res = await _sut.ReviewActivityAsync(activityReview);
 
             // Assert
-            methodInTest.Should().NotThrow<RestError>();
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
 
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
-            uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ReviewActivityAsync_ReviewerIsActivityCreator_Fail(
-            ActivityReview activityReview,
-            Activity activity,
-            UserReview review,
-            int reviewerId,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            ReviewService sut)
-        {
-            // Arrange
-            activity.User.Id = reviewerId;
-
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(reviewerId);
-
-            uowMock.Setup(x => x.Activities.GetAsync(activityReview.ActivityId))
-                .ReturnsAsync(activity);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.ReviewActivityAsync(activityReview);
-
-            // Assert
-            methodInTest.Should().Throw<RestError>();
-
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
-            uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Never);
-            uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Never);
-            uowMock.Verify(x => x.UserReviews.Add(review), Times.Never);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetXpRewardAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ReviewTypeId>()), Times.Exactly(2));
+            _uowMock.Verify(x => x.Activities.GetAsync(activityReview.ActivityId), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillAsync(activity.User.Id, activityReview.ActivityTypeId), Times.Once);
+            _uowMock.Verify(x => x.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
     }
 }

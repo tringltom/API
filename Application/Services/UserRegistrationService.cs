@@ -33,7 +33,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByEmailAsync(email);
 
             if (user == null)
-                return new BadRequest("Nije pronađen korisnik sa unetom email adresom");
+                return new NotFound("Nije pronađen korisnik sa unetom email adresom");
 
             var token = await GenerateUserTokenForEmailConfirmationAsync(user);
             var verifyUrl = GenerateVerifyEmailUrl(origin, token, email);
@@ -68,7 +68,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByEmailAsync(userEmailVerify.Email);
 
             if (user == null)
-                return new BadRequest("Nije pronađen korisnik sa unetom email adresom.");
+                return new NotFound("Nije pronađen korisnik sa unetom email adresom.");
 
             var decodedToken = _emailManager.DecodeVerificationToken(userEmailVerify.Token);
 

@@ -18,13 +18,13 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task RollTheDice_Successfull(
+        public async Task RollTheDice_SuccessfullAsync(
             [Frozen] Mock<IDiceService> diceServiceMock,
             DiceResult diceResult,
             [Greedy] DiceController sut)
         {
             // Arrange
-            diceServiceMock.Setup(x => x.GetDiceRollResult())
+            diceServiceMock.Setup(x => x.RollAsync())
                .ReturnsAsync(diceResult);
 
             // Act

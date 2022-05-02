@@ -60,7 +60,7 @@ namespace Application.Services
             }
 
             if (user == null)
-                return new BadRequest("Korisnik nije pronadjen");
+                return new NotFound("Korisnik nije pronadjen");
 
             var userResponse = _mapper.Map<UserBaseResponse>(user);
             userResponse.Token = _tokenManager.CreateJWTToken(user.Id, user.UserName);
@@ -74,7 +74,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByEmailAsync(userLogin.Email);
 
             if (user == null)
-                return new BadRequest("Nevalidan email ili nevalidna šifra");
+                return new NotFound("Nevalidan email ili nevalidna šifra");
 
             if (!user.EmailConfirmed)
                 return new BadRequest("Molimo potvrdite Vašu email adresu pre logovanja");
@@ -110,7 +110,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByIdAsync(userId);
 
             if (user == null)
-                return new BadRequest("Korisnik nije pronadjen");
+                return new NotFound("Korisnik nije pronadjen");
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 
@@ -137,7 +137,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByIdAsync(userId);
 
             if (user == null)
-                return new BadRequest($"Korisnik nije pronadjen");
+                return new NotFound($"Korisnik nije pronadjen");
 
             var oldToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken);
 

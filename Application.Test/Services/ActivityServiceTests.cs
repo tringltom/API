@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
-using Application.InfrastructureModels;
 using Application.Models.Activity;
 using Application.Services;
 using AutoFixture;
-using AutoFixture.NUnit3;
 using AutoMapper;
 using DAL;
 using Domain;
@@ -21,357 +19,142 @@ namespace Application.Tests.Services
 {
     public class ActivityServiceTests
     {
-        private IFixture _fixture;
+        private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IMapper> _mapperMock;
+        private Mock<IEmailManager> _emailManagerMock;
+        private Mock<IUnitOfWork> _uowMock;
+        private ActivityService _sut;
 
         [SetUp]
         public void SetUp()
         {
-            _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
+            _userAccessorMock = new Mock<IUserAccessor>();
+            _mapperMock = new Mock<IMapper>();
+            _emailManagerMock = new Mock<IEmailManager>();
+            _uowMock = new Mock<IUnitOfWork>();
+            _sut = new ActivityService(_userAccessorMock.Object, _mapperMock.Object, _emailManagerMock.Object, _uowMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task CreateActivityWithoutImageAsync_Successful(
-            [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            int userId,
-            User user,
-            PendingActivity activity,
-            List<SkillActivity> skillActivities,
-            ActivityService sut)
+        public async Task GetActivity_SuccessfullAsync(Activity activity, ApprovedActivityReturn approvedActivityReturn)
         {
-
             // Arrange
-            var activityCreate = _fixture
-                .Build<ActivityCreate>()
-                .Without(p => p.Images)
-                .Create();
+            _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(activity);
 
-            var skill = _fixture
-                .Build<Skill>()
-                .With(s => s.ActivityTypeId, activityCreate.Type)
-                .Create();
+            _mapperMock
+                .Setup(x => x.Map<ApprovedActivityReturn>(activity))
+                .Returns(approvedActivityReturn);
 
-            mapperMock
-                .Setup(x => x.Map<PendingActivity>(activityCreate))
-                .Returns(activity);
+            // Act
+            var res = await _sut.GetActivityAsync(It.IsAny<int>());
 
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+            // Assert
+            res.Should().BeEquivalentTo(approvedActivityReturn);
+            _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetActivitiesFromOtherUsers_SuccessfullAsync(int userId, IEnumerable<Activity> activities,
+            IEnumerable<ApprovedActivityReturn> activitiesGet, ApprovedActivityEnvelope activityEnvelope)
+        {
+            // Arrange
+
+            activityEnvelope.Activities = activitiesGet.ToList();
+            activityEnvelope.ActivityCount = activitiesGet.ToList().Count;
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                .Returns(userId);
 
-            uowMock.Setup(x => x.Users.GetAsync(userId))
-               .ReturnsAsync(user);
+            _uowMock.Setup(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>(), userId))
+               .ReturnsAsync(activities);
 
-            uowMock.Setup(x => x.Skills.GetSkillAsync(It.IsAny<int>(), activityCreate.Type))
-                .ReturnsAsync(skill);
+            _mapperMock
+                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities))
+                .Returns(activitiesGet);
 
-            uowMock.Setup(x => x.SkillActivities.GetAllAsync())
-                .ReturnsAsync(skillActivities);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
+            _uowMock
+                .Setup(x => x.Activities.CountOtherUsersActivitiesAsync(userId))
+                .ReturnsAsync(activitiesGet.Count);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
+            var res = await _sut.GetActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>());
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
+            res.Should().BeEquivalentTo(activityEnvelope);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>(), userId), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountOtherUsersActivitiesAsync(userId), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void CreateActivityWithImageAsync_Successful(
-            [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-            [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            int userId,
-            User user,
-            ActivityCreate activityCreate,
-            PhotoUploadResult photoUploadResult,
-            PendingActivity activity,
-            List<SkillActivity> skillActivities,
-            ActivityService sut)
+        public async Task ApprovePendingActivity_SuccessfullAsync(PendingActivity pendingActivity, Activity activity,
+            ApprovedActivityReturn approvedActivityReturn)
         {
-
             // Arrange
-            var skill = _fixture
-              .Build<Skill>()
-              .With(s => s.ActivityTypeId, activityCreate.Type)
-              .Create();
+            _uowMock.Setup(x => x.PendingActivities.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(pendingActivity);
 
-            mapperMock
-                .Setup(x => x.Map<PendingActivity>(It.IsAny<ActivityCreate>()))
-                .Returns(activity);
-
-            photoAccessorMock
-                .Setup(x => x.AddPhotoAsync(activityCreate.Images[0]))
-                .ReturnsAsync(photoUploadResult);
-
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-               .Returns(userId);
-
-            uowMock.Setup(x => x.Users.GetAsync(userId))
-               .ReturnsAsync(user);
-
-            uowMock.Setup(x => x.Skills.GetSkillAsync(It.IsAny<int>(), activityCreate.Type))
-                .ReturnsAsync(skill);
-
-            uowMock.Setup(x => x.SkillActivities.GetAllAsync())
-                .ReturnsAsync(skillActivities);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Once);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void CreatePendingActivity_ExceededCount(
-           [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-           [Frozen] Mock<IMapper> mapperMock,
-           [Frozen] Mock<IUnitOfWork> uowMock,
-           [Frozen] Mock<IUserAccessor> userAccessorMock,
-           int userId,
-           ActivityCreate activityCreate,
-           List<SkillActivity> skillActivities,
-           ActivityService sut,
-           User user)
-        {
-
-            // Arrange
-            var userWithNoMoreGoodDeedCount = _fixture
-               .Build<User>()
-               .With(ac => ac.ActivityCreationCounters,
-                    new List<ActivityCreationCounter>()
-                    {
-                        new ActivityCreationCounter
-                        {
-                            ActivityTypeId = ActivityTypeId.GoodDeed,
-                            DateCreated = DateTimeOffset.Now,
-                            User = user
-                        },
-                        new ActivityCreationCounter
-                        {
-                            ActivityTypeId = ActivityTypeId.GoodDeed,
-                            DateCreated = DateTimeOffset.Now,
-                            User = user
-                        },
-                    })
-               .Create();
-
-            var pendingActivity = _fixture
-            .Build<PendingActivity>()
-            .With(u => u.User, userWithNoMoreGoodDeedCount)
-            .Create();
-
-            var skill = _fixture
-                .Build<Skill>()
-                .With(s => s.ActivityTypeId, activityCreate.Type)
-                .With(s => s.Level, 0)
-                .Create();
-
-            var skillActivity = _fixture
-                .Build<SkillActivity>()
-                .With(s => s.Level, 0)
-                .With(s => s.Counter, 2)
-                .Create();
-
-            skillActivities.Add(skillActivity);
-
-            mapperMock
-             .Setup(x => x.Map<PendingActivity>(activityCreate))
-             .Returns(pendingActivity);
-
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-               .Returns(userId);
-
-            uowMock.Setup(x => x.Users.GetAsync(userId))
-               .ReturnsAsync(userWithNoMoreGoodDeedCount);
-
-            uowMock.Setup(x => x.Skills.GetSkillAsync(It.IsAny<int>(), activityCreate.Type))
-                .ReturnsAsync(skill);
-
-            uowMock.Setup(x => x.SkillActivities.GetAllAsync())
-                .ReturnsAsync(skillActivities);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.CreatePendingActivityAsync(activityCreate);
-
-            // Assert
-            methodInTest.Should().Throw<RestError>();
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(activityCreate.Images[0]), Times.Never);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetPendingActivitiesAsync_Successful(
-            [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            List<PendingActivity> pendingActivities,
-            List<PendingActivityReturn> pendingActivitiesGet,
-            int limit, int offset,
-            ActivityService sut)
-        {
-
-            // Arrange
-            var pendingActivityEnvelope = _fixture.Create<PendingActivityEnvelope>();
-            pendingActivityEnvelope.Activities = pendingActivitiesGet;
-            pendingActivityEnvelope.ActivityCount = pendingActivitiesGet.Count;
-
-            mapperMock
-                .Setup(x => x.Map<List<PendingActivityReturn>>(It.IsAny<PendingActivity>()))
-                .Returns(pendingActivitiesGet);
-
-            uowMock
-                .Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(limit, offset))
-                .ReturnsAsync(pendingActivities);
-
-            uowMock
-                .Setup(x => x.PendingActivities.CountAsync())
-                .ReturnsAsync(pendingActivities.Count);
-
-            // Act
-            Func<Task<PendingActivityEnvelope>> methodInTest = async () => await sut.GetPendingActivitiesAsync(limit, offset);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(limit, offset), Times.Once);
-            uowMock.Verify(x => x.PendingActivities.CountAsync(), Times.Once);
-
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetPendingActivitiesForLoggedInUserAsync_Successful(
-            [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            List<PendingActivity> pendingActivities,
-            List<PendingActivityForUserReturn> pendingActivitiesForUserGet,
-            int userId, int limit, int offset,
-            ActivityService sut)
-        {
-
-            // Arrange
-            var pendingActivityEnvelope = _fixture.Create<PendingActivityForUserEnvelope>();
-            pendingActivityEnvelope.Activities = pendingActivitiesForUserGet;
-            pendingActivityEnvelope.ActivityCount = pendingActivitiesForUserGet.Count;
-
-            mapperMock
-                .Setup(x => x.Map<List<PendingActivityForUserReturn>>(It.IsAny<PendingActivity>()))
-                .Returns(pendingActivitiesForUserGet);
-
-            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
-             .Returns(userId);
-
-            uowMock
-                .Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, limit, offset))
-                .ReturnsAsync(pendingActivities);
-
-            uowMock
-                .Setup(x => x.PendingActivities.CountPendingActivitiesAsync(userId))
-                .ReturnsAsync(pendingActivities.Count);
-
-            // Act
-            Func<Task<PendingActivityForUserEnvelope>> methodInTest = async () => await sut.GetOwnerPendingActivitiesAsync(limit, offset);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, limit, offset), Times.Once);
-            uowMock.Verify(x => x.PendingActivities.CountPendingActivitiesAsync(userId), Times.Once);
-
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ApprovePendingActivityAsync_Successful(
-            [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IEmailManager> emailManagerMock,
-            int pendingActivityId,
-            PendingActivity pendingActivity,
-            Activity activity,
-            ActivityService sut)
-        {
-
-            // Arrange
-            var approval = _fixture.Create<PendingActivityApproval>();
-            approval.Approve = true;
-
-            mapperMock
+            _mapperMock
                 .Setup(x => x.Map<Activity>(pendingActivity))
                 .Returns(activity);
 
-            uowMock
-                .Setup(x => x.PendingActivities.GetAsync(pendingActivityId))
-                .ReturnsAsync(pendingActivity);
+            _uowMock.Setup(x => x.Activities.Add(activity))
+               .Verifiable();
 
-            uowMock.Setup(x => x.CompleteAsync())
+            _uowMock.Setup(x => x.PendingActivities.Remove(pendingActivity))
+              .Verifiable();
+
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve));
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true))
+                .Verifiable();
 
+            _mapperMock
+               .Setup(x => x.Map<ApprovedActivityReturn>(activity))
+               .Returns(approvedActivityReturn);
             // Act
-            Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
+            var res = await _sut.ApprovePendingActivity(It.IsAny<int>());
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.PendingActivities.GetAsync(pendingActivityId), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve), Times.Once);
+            res.Match(
+                activityreturn => activityreturn.Should().BeEquivalentTo(approvedActivityReturn),
+                err => err.Should().BeNull()
+                );
+
+            _uowMock.Verify(x => x.PendingActivities.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Activities.Add(activity), Times.Once);
+            _uowMock.Verify(x => x.PendingActivities.Remove(pendingActivity), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void DisapprovePendingActivityAsync_Successful(
-            [Frozen] Mock<IMapper> mapperMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IEmailManager> emailManagerMock,
-            int pendingActivityId,
-            PendingActivity pendingActivity,
-            Activity activity,
-            ActivityService sut)
+        public async Task ApprovePendingActivity_ActivityNotFoundAsync(PendingActivity pendingActivity, Activity activity, BadRequest badRequest)
         {
-
             // Arrange
-            var approval = _fixture.Create<PendingActivityApproval>();
-            approval.Approve = false;
-
-            mapperMock
-                .Setup(x => x.Map<Activity>(pendingActivity))
-                .Returns(activity);
-
-            uowMock
-                .Setup(x => x.PendingActivities.GetAsync(pendingActivityId))
-                .ReturnsAsync(pendingActivity);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve));
-
+            _uowMock.Setup(x => x.PendingActivities.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync((PendingActivity)null);
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ReslovePendingActivityAsync(pendingActivityId, approval);
+            var res = await _sut.ApprovePendingActivity(It.IsAny<int>());
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            uowMock.Verify(x => x.PendingActivities.GetAsync(pendingActivityId), Times.Once);
-            emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, approval.Approve), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            res.Match(
+                activityreturn => activityreturn.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _uowMock.Verify(x => x.PendingActivities.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Activities.Add(activity), Times.Never);
+            _uowMock.Verify(x => x.PendingActivities.Remove(pendingActivity), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true), Times.Never);
         }
     }
 }

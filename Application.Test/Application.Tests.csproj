@@ -7,20 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Managers\ActivityCounterManagerTests.cs" />
-    <Compile Remove="Managers\EmailManagerTests.cs" />
-    <Compile Remove="Services\ActivityServiceTests.cs" />
-    <Compile Remove="Services\DiceServiceTests.cs" />
-    <Compile Remove="Services\FavoriteServiceTests.cs" />
-    <Compile Remove="Services\ReviewServiceTests.cs" />
-    <Compile Remove="Services\SkillServiceTests.cs" />
-    <Compile Remove="Services\UserRecoveryServiceTests.cs" />
-    <Compile Remove="Services\UserRegistrationServiceTests.cs" />
-    <Compile Remove="Services\UserSessionServiceTests.cs" />
-    <Compile Remove="Services\UsersServiceTests.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="3.3.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="3.3.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.3.1" />
@@ -43,11 +29,6 @@
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\SuperFixture\FixtureShared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Managers\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

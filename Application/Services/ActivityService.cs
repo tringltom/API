@@ -61,8 +61,8 @@ namespace Application.Services
             await _uow.CompleteAsync();
 
             await _emailManager.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true);
-            var activityReturn = _mapper.Map<ApprovedActivityReturn>(activity);
-            return activityReturn;
+
+            return _mapper.Map<ApprovedActivityReturn>(activity);
         }
     }
 }

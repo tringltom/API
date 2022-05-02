@@ -38,14 +38,13 @@ namespace Application.ServiceInterfaces
             //TO DO: improve by sending activitycreatorid in request
             var reviewerId = _userAccessor.GetUserIdFromAccessToken();
             var creator = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User;
-            var creatorId = creator.Id;
 
-            if (reviewerId == creatorId)
+            if (reviewerId == creator.Id)
                 return new BadRequest("Ne možete oceniti svoju aktivnost.");
 
             var xpRewardToYield = await _uow.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId);
 
-            var creatorSkill = await _uow.Skills.GetSkillAsync(creatorId, activityReview.ActivityTypeId);
+            var creatorSkill = await _uow.Skills.GetSkillAsync(creator.Id, activityReview.ActivityTypeId);
 
             var xpMultiplier = creatorSkill != null && creatorSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplierAsync(creatorSkill) : 1;
 

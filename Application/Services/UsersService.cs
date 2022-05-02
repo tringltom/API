@@ -73,9 +73,6 @@ namespace Application.Services
 
             var photoResult = userImage.Image != null ? await _photoAccessor.AddPhotoAsync(userImage.Image) : null;
 
-            if (photoResult == null)
-                return new InternalServerError("Neuspešna promena profilne slike, molimo vas pokušajte kasnije");
-
             if (!string.IsNullOrEmpty(user.ImagePublicId))
                 await _photoAccessor.DeletePhotoAsync(user.ImagePublicId);
 

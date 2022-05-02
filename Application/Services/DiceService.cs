@@ -21,7 +21,7 @@ namespace Application.Services
             _uow = uow;
         }
 
-        public async Task<Either<RestError, DiceResult>> GetDiceRollResult()
+        public async Task<Either<RestError, DiceResult>> RollAsync()
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);

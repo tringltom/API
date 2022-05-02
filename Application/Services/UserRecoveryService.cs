@@ -27,7 +27,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByEmailAsync(email);
 
             if (user == null)
-                return new BadRequest("Nije pronađen korisnik sa unetom email adresom");
+                return new NotFound("Nije pronađen korisnik sa unetom email adresom");
 
             var token = await _userManager.GenerateUserPasswordResetTokenAsync(user);
             token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
@@ -44,7 +44,7 @@ namespace Application.Services
             var user = await _userManager.FindUserByEmailAsync(userPasswordRecovery.Email);
 
             if (user == null)
-                return new BadRequest("Nije pronađen korisnik sa unetom email adresom");
+                return new NotFound("Nije pronađen korisnik sa unetom email adresom");
 
             var decodedToken = _emailManager.DecodeVerificationToken(userPasswordRecovery.Token);
 

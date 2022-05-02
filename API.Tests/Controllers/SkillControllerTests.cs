@@ -25,7 +25,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task GetSkillsDataAsync_Successfull(SkillData skillData)
+        public async Task GetSkillsDataAsync_SuccessfullAsync(SkillData skillData)
         {
             // Arrange
             _skillServiceMock.Setup(x => x.GetSkillsDataAsync(It.IsAny<int>()))
@@ -40,7 +40,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task UpdateSkillsDataAsync_Successfull(SkillData skillData, UserBaseResponse userBaseResponse)
+        public async Task UpdateSkillsDataAsync_SuccessfullAsync(SkillData skillData, UserBaseResponse userBaseResponse)
         {
             // Arrange
             _skillServiceMock.Setup(x => x.UpdateSkillsDataAsync(skillData))

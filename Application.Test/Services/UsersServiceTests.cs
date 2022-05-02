@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.InfrastructureModels;
 using Application.Models.User;
 using Application.Services;
 using AutoFixture;
-using AutoFixture.NUnit3;
 using AutoMapper;
 using DAL;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using LanguageExt;
 using Moq;
 using NUnit.Framework;
 
@@ -22,187 +22,73 @@ namespace Application.Tests.Services
     public class UsersServiceTests
     {
         private IFixture _fixture;
+        private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IMapper> _mapperMock;
+        private Mock<IEmailManager> _emailManagerMock;
+        private Mock<IUnitOfWork> _uowMock;
+        private Mock<IPhotoAccessor> _photoAccessorMock;
+        private UsersService _sut;
 
         [SetUp]
         public void SetUp()
         {
             _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
+            _uowMock = new Mock<IUnitOfWork>();
+            _mapperMock = new Mock<IMapper>();
+            _userAccessorMock = new Mock<IUserAccessor>();
+            _photoAccessorMock = new Mock<IPhotoAccessor>();
+            _emailManagerMock = new Mock<IEmailManager>();
+            _sut = new UsersService(_uowMock.Object, _mapperMock.Object, _userAccessorMock.Object, _photoAccessorMock.Object, _emailManagerMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetTopXpUsers_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IMapper> mapperMock,
-            int? limit, int? offset,
-            List<UserRankedGet> userArenaGet,
-            List<User> users, int usersCount,
-            UsersService sut)
+        public async Task GetRankedUsers_SuccessfullAsync(List<UserRankedGet> rankedUsers, List<User> users)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.GetRankedUsersAsync(limit, offset))
+            _uowMock.Setup(x => x.Users.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(users);
 
-            uowMock.Setup(x => x.Users.CountAsync())
-                .ReturnsAsync(usersCount);
+            _uowMock.Setup(x => x.Users.CountAsync())
+                .ReturnsAsync(users.Count);
 
-            mapperMock.Setup(x => x.Map<List<UserRankedGet>>(It.IsIn<User>(users))).Returns(userArenaGet);
+            _mapperMock.Setup(x => x.Map<IEnumerable<User>, IEnumerable<UserRankedGet>>(users))
+                .Returns(rankedUsers);
 
             var userArenaEnvelope = _fixture.Create<UserRankedEnvelope>();
-            userArenaEnvelope.Users = userArenaGet;
-            userArenaEnvelope.UserCount = usersCount;
+            userArenaEnvelope.Users = rankedUsers;
+            userArenaEnvelope.UserCount = rankedUsers.Count;
 
             // Act
-            Func<Task<UserRankedEnvelope>> methodInTest = async () => await sut.GetRankedUsersAsync(limit, offset);
+            var res = await _sut.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>());
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            methodInTest.Should().NotBeNull();
-            uowMock.Verify(x => x.Users.GetRankedUsersAsync(limit, offset), Times.Once);
-            uowMock.Verify(x => x.Users.CountAsync(), Times.Once);
+            res.Should().BeEquivalentTo(userArenaEnvelope);
+            _uowMock.Verify(x => x.Users.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Users.CountAsync(), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void UpdateLoggedUserAbout_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            UserAbout userAbout,
-            User user,
-            UsersService sut)
-        {
-            // Arrange
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(user.Id);
-
-            uowMock.Setup(x => x.Users.GetAsync(user.Id))
-                .ReturnsAsync(user);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.UpdateLoggedUserAboutAsync(userAbout);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            user.About.Should().Be(userAbout.About);
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.Users.GetAsync(user.Id), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void AddLoggedUserImage_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-           [Frozen] Mock<IUserAccessor> userAccessorMock,
-           [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-           UserImageUpdate userImageUpdate,
-           PhotoUploadResult photoUploadResult,
-           User user,
-           UsersService sut)
-        {
-            // Arrange
-            user.ImagePublicId = null;
-            user.ImageApproved = false;
-
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(user.Id);
-
-            uowMock.Setup(x => x.Users.GetAsync(user.Id))
-                .ReturnsAsync(user);
-
-            photoAccessorMock.Setup(x => x.AddPhotoAsync(userImageUpdate.Image))
-                .ReturnsAsync(photoUploadResult);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.UpdateLoggedUserImageAsync(userImageUpdate);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-
-            user.ImagePublicId.Should().Be(photoUploadResult.PublicId);
-            user.ImageUrl.Should().Be(photoUploadResult.Url);
-            user.ImageApproved.Should().Be(false);
-
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.Users.GetAsync(user.Id), Times.Once);
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(userImageUpdate.Image), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void UpdateLoggedUserImage_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-           [Frozen] Mock<IUserAccessor> userAccessorMock,
-           [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-           UserImageUpdate userImageUpdate,
-           PhotoUploadResult photoUploadResult,
-           User user,
-           UsersService sut)
-        {
-            // Arrange
-            var oldpublicId = user.ImagePublicId;
-            user.ImageApproved = false;
-
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(user.Id);
-
-            uowMock.Setup(x => x.Users.GetAsync(user.Id))
-                .ReturnsAsync(user);
-
-            photoAccessorMock.Setup(x => x.AddPhotoAsync(userImageUpdate.Image))
-                .ReturnsAsync(photoUploadResult);
-
-            photoAccessorMock.Setup(x => x.DeletePhotoAsync(oldpublicId))
-                .ReturnsAsync(true);
-
-            uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            // Act
-            Func<Task> methodInTest = async () => await sut.UpdateLoggedUserImageAsync(userImageUpdate);
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-
-            user.ImagePublicId.Should().Be(photoUploadResult.PublicId);
-            user.ImageUrl.Should().Be(photoUploadResult.Url);
-            user.ImageApproved.Should().Be(false);
-
-            userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(x => x.Users.GetAsync(user.Id), Times.Once);
-            photoAccessorMock.Verify(x => x.AddPhotoAsync(userImageUpdate.Image), Times.Once);
-            photoAccessorMock.Verify(x => x.DeletePhotoAsync(oldpublicId), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetImagesForApprovalAsync_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-             [Frozen] Mock<IMapper> mapperMock,
-             int? limit, int? offset,
+        public async Task GetImagesForApproval_SuccessfullAsync(
              IEnumerable<UserImageResponse> usersForImageApproval,
-             IEnumerable<User> users, int usersCount,
-             UsersService sut)
+             IEnumerable<User> users, int usersCount)
         {
             // Arrange
-            uowMock.Setup(x => x.Users.GetUsersForImageApprovalAsync(limit, offset))
+            _uowMock.Setup(x => x.Users.GetUsersForImageApprovalAsync(It.IsAny<int>(), It.IsAny<int>()))
                 .ReturnsAsync(users);
 
-            uowMock.Setup(x => x.Users.CountUsersForImageApprovalAsync())
+            _uowMock.Setup(x => x.Users.CountUsersForImageApprovalAsync())
                 .ReturnsAsync(usersCount);
 
-            mapperMock.Setup(x => x.Map<IEnumerable<User>, IEnumerable<UserImageResponse>>(users)).Returns(usersForImageApproval);
+            _mapperMock.Setup(x => x.Map<IEnumerable<User>, IEnumerable<UserImageResponse>>(users)).Returns(usersForImageApproval);
 
             var userImageEnvelope = _fixture.Create<UserImageEnvelope>();
             userImageEnvelope.Users = usersForImageApproval.ToList();
             userImageEnvelope.UserCount = usersCount;
 
             // Act
-            var result = await sut.GetImagesForApprovalAsync(limit, offset);
+            var result = await _sut.GetImagesForApprovalAsync(It.IsAny<int>(), It.IsAny<int>());
 
             // Assert
             result.Should().BeEquivalentTo(userImageEnvelope);
@@ -210,80 +96,217 @@ namespace Application.Tests.Services
             usersForImageApproval.Should().BeEquivalentTo(userImageEnvelope.Users);
             usersCount.Should().Be(userImageEnvelope.UserCount);
 
-            uowMock.Verify(x => x.Users.GetUsersForImageApprovalAsync(limit, offset), Times.Once);
-            uowMock.Verify(x => x.Users.CountUsersForImageApprovalAsync(), Times.Once);
+            _uowMock.Verify(x => x.Users.GetUsersForImageApprovalAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Users.CountUsersForImageApprovalAsync(), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ApproveUserImageAsync_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IEmailManager> emailManagerMock,
-            int userId,
-            User user,
-            UsersService sut)
+        public async Task UpdateAbout_SuccessfullAsync(UserAbout userAbout, User user)
+        {
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+
+            _uowMock.Setup(x => x.Users.GetAsync(user.Id))
+                .ReturnsAsync(user);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.UpdateAboutAsync(userAbout);
+
+            // Assert
+            res.Should().BeEquivalentTo(Unit.Default);
+            user.About.Should().Be(userAbout.About);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(user.Id), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task UpdateImage_SuccessfullAsync(
+           UserImageUpdate userImageUpdate,
+           PhotoUploadResult photoUploadResult,
+           User user)
+        {
+            // Arrange
+            user.ImagePublicId = null;
+            user.ImageApproved = false;
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+
+            _uowMock.Setup(x => x.Users.GetAsync(user.Id))
+                .ReturnsAsync(user);
+
+            _photoAccessorMock.Setup(x => x.AddPhotoAsync(userImageUpdate.Image))
+                .ReturnsAsync(photoUploadResult);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.UpdateImageAsync(userImageUpdate);
+
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            user.ImagePublicId.Should().Be(photoUploadResult.PublicId);
+            user.ImageUrl.Should().Be(photoUploadResult.Url);
+            user.ImageApproved.Should().Be(false);
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(user.Id), Times.Once);
+            _photoAccessorMock.Verify(x => x.AddPhotoAsync(userImageUpdate.Image), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task UpdateImage_OverrideExistingAsync(
+           UserImageUpdate userImageUpdate,
+           PhotoUploadResult photoUploadResult,
+           User user)
+        {
+            // Arrange
+            var oldpublicId = user.ImagePublicId;
+            user.ImageApproved = false;
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(user.Id);
+
+            _uowMock.Setup(x => x.Users.GetAsync(user.Id))
+                .ReturnsAsync(user);
+
+            _photoAccessorMock.Setup(x => x.AddPhotoAsync(userImageUpdate.Image))
+                .ReturnsAsync(photoUploadResult);
+
+            _photoAccessorMock.Setup(x => x.DeletePhotoAsync(oldpublicId))
+                .Verifiable();
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.UpdateImageAsync(userImageUpdate);
+
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            user.ImagePublicId.Should().Be(photoUploadResult.PublicId);
+            user.ImageUrl.Should().Be(photoUploadResult.Url);
+            user.ImageApproved.Should().Be(false);
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(user.Id), Times.Once);
+            _photoAccessorMock.Verify(x => x.AddPhotoAsync(userImageUpdate.Image), Times.Once);
+            _photoAccessorMock.Verify(x => x.DeletePhotoAsync(oldpublicId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ApproveUserImage_SuccessfullAsync(int userId, User user)
         {
             // Arrange
             var approve = true;
 
-            uowMock.Setup(x => x.Users.GetAsync(userId))
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
                 .ReturnsAsync(user);
 
-            uowMock.Setup(x => x.CompleteAsync())
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
+            _emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ResolveUserImageAsync(userId, approve);
+            var res = await _sut.ResolveImageAsync(userId, approve);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
 
             user.ImageApproved.Should().Be(approve);
 
-            uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void DisapproveUserImageAsync_Successfull([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IEmailManager> emailManagerMock,
-            [Frozen] Mock<IPhotoAccessor> photoAccessorMock,
-            int userId,
-            User user,
-            UsersService sut)
+        public async Task DisapproveUserImage_SuccessfullAsync(int userId, User user)
         {
             // Arrange
             var approve = false;
             var publicIdToRemove = user.ImagePublicId;
 
-            uowMock.Setup(x => x.Users.GetAsync(userId))
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
                 .ReturnsAsync(user);
 
-            uowMock.Setup(x => x.CompleteAsync())
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            photoAccessorMock.Setup(x => x.DeletePhotoAsync(publicIdToRemove))
-                .ReturnsAsync(true);
+            _photoAccessorMock.Setup(x => x.DeletePhotoAsync(publicIdToRemove))
+                .Verifiable();
 
-            emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
+            _emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
 
             // Act
-            Func<Task> methodInTest = async () => await sut.ResolveUserImageAsync(userId, approve);
+            var res = await _sut.ResolveImageAsync(userId, approve);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
 
             user.ImageApproved.Should().Be(approve);
             user.ImagePublicId.Should().BeNull();
             user.ImageUrl.Should().BeNull();
 
-            uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Once);
-            photoAccessorMock.Verify(x => x.DeletePhotoAsync(publicIdToRemove), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Once);
+            _photoAccessorMock.Verify(x => x.DeletePhotoAsync(publicIdToRemove), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ResolveUserImage_UserNotFoundAsync(int userId, User user, bool approve)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
+                .ReturnsAsync((User)null);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            _emailManagerMock.Setup(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve));
+
+            // Act
+            var res = await _sut.ResolveImageAsync(userId, approve);
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _emailManagerMock.Verify(x => x.SendProfileImageApprovalEmailAsync(user.Email, approve), Times.Never);
         }
     }
 }

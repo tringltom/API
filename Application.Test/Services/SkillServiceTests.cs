@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
@@ -42,9 +43,25 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetSkillsDataAsync_Successful(int userId, List<Skill> skills, User user, SkillData skillData, int potentialLevel)
+        public async Task GetSkillsData_SuccessfulAsync(int userId,
+            List<Skill> skills,
+            User user,
+            SkillData skillData,
+            int potentialLevel)
         {
             // Arrange
+            skillData.XpLevel = potentialLevel;
+            skillData.CurrentLevel = user.XpLevelId;
+            skillData.SkillLevels = Enum.GetValues(typeof(ActivityTypeId)).OfType<ActivityTypeId>()
+                    .GroupJoin(skills,
+                    atEnum => atEnum,
+                    sl => sl.ActivityTypeId,
+                    (type, levels) => new SkillLevel
+                    {
+                        Type = type,
+                        Level = levels.Select(l => l.Level).FirstOrDefault()
+                    }).ToList();
+
             _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
              .ReturnsAsync(skills);
 
@@ -55,10 +72,14 @@ namespace Application.Tests.Services
              .ReturnsAsync(potentialLevel);
 
             // Act
-            Func<Task> methodInTest = async () => await _sut.GetSkillsDataAsync(userId);
+            var res = await _sut.GetSkillsDataAsync(userId);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
+            res.Match(
+                skillDataReturn => skillDataReturn.Should().BeEquivalentTo(skillData),
+                err => err.Should().BeNull()
+                );
+
             _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
@@ -66,126 +87,38 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResetSkillsDataAsync_Invalid_Successful(int userId, User user, UserBaseResponse userResponse)
+        public async Task GetSkillsData_UserNotFoundAsync(int userId,
+            List<Skill> skills,
+            User user)
         {
             // Arrange
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-
             _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
-                .ReturnsAsync((List<Skill>)null);
+             .ReturnsAsync(skills);
 
             _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            _mapperMock
-                .Setup(x => x.Map<UserBaseResponse>(user))
-                .Returns(userResponse);
-
-            _activityCounterManagerMock.Setup(x => x.GetActivityCountsAsync(user))
-                .ReturnsAsync(userResponse.ActivityCounts);
+             .ReturnsAsync((User)null);
 
             // Act
-            Func<Task> methodInTest = async () => await _sut.ResetSkillsDataAsync();
+            var res = await _sut.GetSkillsDataAsync(userId);
 
             // Assert
-            methodInTest.Should().Throw<NotFound>();
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
-            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
-            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-            _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Never);
-        }
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResetSkillsDataAsync_Successful(int userId, List<Skill> skills, User user, UserBaseResponse userResponse)
-        {
-            // Arrange
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-
-            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
-                .ReturnsAsync(skills);
-
-            _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            _mapperMock
-                .Setup(x => x.Map<UserBaseResponse>(user))
-                .Returns(userResponse);
-
-            _activityCounterManagerMock.Setup(x => x.GetActivityCountsAsync(user))
-                .ReturnsAsync(userResponse.ActivityCounts);
-
-            // Act
-            Func<Task> methodInTest = async () => await _sut.ResetSkillsDataAsync();
-
-            // Assert
-            methodInTest.Should().NotThrow<Exception>();
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
             _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
-            _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Once);
+            _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Never);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void UpdateSkillsDataAsync_InvalidLevel_Successful(int userId, User user, SkillData skillData, UserBaseResponse userResponse, List<Skill> skills)
-        {
-            skillData.XpLevel = 1;
-            var potentialLevel = 3;
-
-            // Arrange
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-
-            _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-
-            _uowMock.Setup(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp))
-                .ReturnsAsync(potentialLevel);
-
-            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
-                .ReturnsAsync(skills);
-
-            _uowMock.Setup(x => x.SkillSpecials.GetSkillSpecialAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()))
-                .ReturnsAsync(user.SkillSpecial);
-
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-
-            _mapperMock
-                .Setup(x => x.Map<UserBaseResponse>(user))
-                .Returns(userResponse);
-
-            _activityCounterManagerMock.Setup(x => x.GetActivityCountsAsync(user))
-                .ReturnsAsync(userResponse.ActivityCounts);
-
-            // Act
-            Func<Task> methodInTest = async () => await _sut.UpdateSkillsDataAsync(skillData);
-
-            // Assert
-            methodInTest.Should().Throw<BadRequest>();
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
-            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
-            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecialAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()), Times.Never);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-            _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void UpdateSkillsDataAsync_Successful(int userId, User user, SkillData skillData, UserBaseResponse userResponse, List<Skill> skills)
+        public async Task UpdateSkillsData_SuccessfulAsync(int userId,
+            User user,
+            SkillData skillData,
+            UserBaseResponse userResponse,
+            List<Skill> skills)
         {
             // Arrange
             skillData.XpLevel = 1;
@@ -224,10 +157,14 @@ namespace Application.Tests.Services
                 .ReturnsAsync(userResponse.ActivityCounts);
 
             // Act
-            Func<Task> methodInTest = async () => await _sut.UpdateSkillsDataAsync(skillData);
+            var res = await _sut.UpdateSkillsDataAsync(skillData);
 
             // Assert
-            methodInTest.Should().NotThrow<Exception>();
+            res.Match(
+                userResponseReturn => userResponseReturn.Should().BeEquivalentTo(userResponse),
+                err => err.Should().BeNull()
+                );
+
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
@@ -235,6 +172,61 @@ namespace Application.Tests.Services
             _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecialAsync(skillInThirdTree.ActivityTypeId, null), Times.Once);
             _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
             _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task UpdateSkillsDataAsync_InvalidLevelAsync(int userId,
+            User user,
+            SkillData skillData,
+            UserBaseResponse userResponse,
+            List<Skill> skills)
+        {
+            skillData.XpLevel = 1;
+            var potentialLevel = 3;
+
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
+                .ReturnsAsync(user);
+
+            _uowMock.Setup(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp))
+                .ReturnsAsync(potentialLevel);
+
+            _uowMock.Setup(x => x.Skills.GetSkillsAsync(userId))
+                .ReturnsAsync(skills);
+
+            _uowMock.Setup(x => x.SkillSpecials.GetSkillSpecialAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()))
+                .ReturnsAsync(user.SkillSpecial);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            _mapperMock
+                .Setup(x => x.Map<UserBaseResponse>(user))
+                .Returns(userResponse);
+
+            _activityCounterManagerMock.Setup(x => x.GetActivityCountsAsync(user))
+                .ReturnsAsync(userResponse.ActivityCounts);
+
+            // Act
+            var res = await _sut.UpdateSkillsDataAsync(skillData);
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once());
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.XpLevels.GetPotentialLevelAsync(user.CurrentXp), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetSkillsAsync(userId), Times.Never);
+            _uowMock.Verify(x => x.SkillSpecials.GetSkillSpecialAsync(It.IsAny<ActivityTypeId>(), It.IsAny<ActivityTypeId>()), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _activityCounterManagerMock.Verify(x => x.GetActivityCountsAsync(user), Times.Never);
         }
     }
 }

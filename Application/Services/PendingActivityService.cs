@@ -60,7 +60,7 @@ namespace Application.Services
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var pendingActivity = await _uow.PendingActivities.GetAsync(id);
 
-            if (pendingActivity.User.Id != userId)
+            if (pendingActivity?.User?.Id != userId)
                 return new BadRequest("Niste kreirali ovu aktivnost!");
 
             return _mapper.Map<ActivityCreate>(pendingActivity);

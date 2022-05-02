@@ -122,12 +122,13 @@ namespace API.Controllers
         public async Task<IActionResult> Register(UserRegister userToRegister, string prefix)
         {
 
-            var result = await _userRegistrationService.RegisterAsync(userToRegister, prefix ?? Request.Headers["origin"]);
+            //var result = await _userRegistrationService.RegisterAsync(userToRegister, prefix ?? Request.Headers["origin"]);
 
-            return result.Match(
-               user => CreatedAtRoute(nameof(Login), new { user = user.Id }, user),
-               err => err.Response()
-               );
+            //return result.Match(
+            //   user => CreatedAtRoute(nameof(Login), new { user = user.Id }, user),
+            //   err => err.Response()
+            //   );
+            return Ok();
         }
 
         [AllowAnonymous]

@@ -26,12 +26,11 @@ namespace Application.ServiceInterfaces
         public async Task<UserFavoriteActivityReturn> GetFavoriteActivityAsync(int id)
         {
             var favoredActivity = await _uow.UserFavorites.GetAsync(id);
-            var activityReturn = _mapper.Map<UserFavoriteActivityReturn>(favoredActivity);
-            return activityReturn;
+            return _mapper.Map<UserFavoriteActivityReturn>(favoredActivity);
         }
 
 
-        public async Task<IList<FavoriteActivityIdReturn>> GetAllOwnerFavoriteIds()
+        public async Task<IList<FavoriteActivityIdReturn>> GetAllOwnerFavoriteIdsAsync()
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
