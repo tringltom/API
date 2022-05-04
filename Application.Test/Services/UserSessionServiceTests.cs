@@ -107,6 +107,7 @@ namespace Application.Tests.Services
             userBaseResponse.ActivityCounts = activityCounts;
 
             oldRefreshToken.Revoked = null;
+            oldRefreshToken.Expires = DateTimeOffset.UtcNow.AddDays(7);
 
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);

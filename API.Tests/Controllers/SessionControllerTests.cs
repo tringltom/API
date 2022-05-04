@@ -165,19 +165,19 @@ namespace API.Tests.Controllers
             res.StatusCode.Should().Equals(HttpStatusCode.OK);
         }
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task Register_SuccessfullAsync(UserRegister userRegister, UserBaseResponse userBaseResponse)
-        {
-            // Arrange
-            _userRegistrationServiceMock.Setup(x => x.RegisterAsync(userRegister, It.IsAny<string>()))
-               .ReturnsAsync(userBaseResponse);
+        //[Test]
+        //[Fixture(FixtureType.WithAutoMoq)]
+        //public async Task Register_SuccessfullAsync(UserRegister userRegister, UserBaseResponse userBaseResponse)
+        //{
+        //    // Arrange
+        //    _userRegistrationServiceMock.Setup(x => x.RegisterAsync(userRegister, It.IsAny<string>()))
+        //       .ReturnsAsync(userBaseResponse);
 
-            // Act
-            var res = await _sut.Register(userRegister, It.IsAny<string>()) as CreatedAtRouteResult;
+        //    // Act
+        //    var res = await _sut.Register(userRegister, It.IsAny<string>()) as CreatedAtRouteResult;
 
-            // Assert
-            res.Value.Should().Be(userBaseResponse);
-        }
+        //    // Assert
+        //    res.Value.Should().Be(userBaseResponse);
+        //}
     }
 }
