@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.Models;
-using Application.Models.User;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,22 +16,23 @@ namespace API.Controllers
             _skillService = skillService;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<SkillData> GetSkillsDataAsync(int userId)
+        [HttpGet("user/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> GetSkillsData(int id)
         {
-            return await _skillService.GetSkillsDataAsync(userId);
+            var result = await _skillService.GetSkillsDataAsync(id);
+            return result.Match(
+                skillData => Ok(skillData),
+                err => err.Response());
         }
 
-        [HttpPut("reset")]
-        public async Task<ActionResult<UserBaseResponse>> ResetSkillsDataAsync()
+        [HttpPut("user/me")]
+        public async Task<IActionResult> UpdateSkillsData(SkillData skillData)
         {
-            return await _skillService.ResetSkillsDataAsync();
-        }
-
-        [HttpPut("update")]
-        public async Task<ActionResult<UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
-        {
-            return await _skillService.UpdateSkillsDataAsync(skillData);
+            var result = await _skillService.UpdateSkillsDataAsync(skillData);
+            return result.Match(
+                user => Ok(user),
+                err => err.Response());
         }
     }
 }

@@ -1,12 +1,11 @@
-﻿using System.Net;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.ManagerInterfaces;
 using Application.Models.User;
 using Application.ServiceInterfaces;
-using Domain;
+using LanguageExt;
 using Microsoft.AspNetCore.WebUtilities;
 
 namespace Application.Services
@@ -14,68 +13,47 @@ namespace Application.Services
     public class UserRecoveryService : IUserRecoveryService
     {
 
-        private readonly IUserManager _userRepository;
+        private readonly IUserManager _userManager;
         private readonly IEmailManager _emailManager;
 
-        public UserRecoveryService(IUserManager userRepository, IEmailManager emailManager)
+        public UserRecoveryService(IUserManager userManager, IEmailManager emailManager)
         {
-            _userRepository = userRepository;
+            _userManager = userManager;
             _emailManager = emailManager;
         }
 
-        public async Task RecoverUserPasswordViaEmailAsync(string email, string origin)
+        public async Task<Either<RestError, Unit>> RecoverUserPasswordViaEmailAsync(string email, string origin)
         {
-            var user = await _userRepository.FindUserByEmailAsync(email);
+            var user = await _userManager.FindUserByEmailAsync(email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
+                return new NotFound("Nije pronađen korisnik sa unetom email adresom");
 
-            var token = await GenerateUserTokenForPasswordResetAsync(user);
-            var verifyUrl = GenerateVerifyPasswordRecoveryUrl(origin, token, email);
+            var token = await _userManager.GenerateUserPasswordResetTokenAsync(user);
+            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+
+            var verifyUrl = $"{origin}/users/verifyPasswordRecovery?token={token}&email={email}";
 
             await _emailManager.SendPasswordRecoveryEmailAsync(verifyUrl, user.Email);
+
+            return Unit.Default;
         }
 
-        public async Task ConfirmUserPasswordRecoveryAsync(UserPasswordRecoveryVerification userPasswordRecovery)
+        public async Task<Either<RestError, Unit>> ConfirmUserPasswordRecoveryAsync(UserPasswordRecoveryVerification userPasswordRecovery)
         {
-            var user = await _userRepository.FindUserByEmailAsync(userPasswordRecovery.Email);
+            var user = await _userManager.FindUserByEmailAsync(userPasswordRecovery.Email);
 
             if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
+                return new NotFound("Nije pronađen korisnik sa unetom email adresom");
 
             var decodedToken = _emailManager.DecodeVerificationToken(userPasswordRecovery.Token);
 
-            var passwordRecoveryResult = await _userRepository.RecoverUserPasswordAsync(user, decodedToken, userPasswordRecovery.NewPassword);
+            var passwordRecoveryResult = await _userManager.RecoverUserPasswordAsync(user, decodedToken, userPasswordRecovery.NewPassword);
 
             if (!passwordRecoveryResult.Succeeded)
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešna izmena šifre." });
+                return new InternalServerError("Neuspešna izmena šifre.");
+
+            return Unit.Default;
         }
-
-        public async Task ChangeUserPasswordAsync(UserPasswordChange userPassChange)
-        {
-            var user = await _userRepository.FindUserByEmailAsync(userPassChange.Email);
-
-            if (user == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { Email = "Nije pronađen korisnik sa unetom email adresom." });
-
-            var changePassword = await _userRepository.ChangeUserPasswordAsync(user, userPassChange.OldPassword, userPassChange.NewPassword);
-
-            if (!changePassword.Succeeded)
-                throw new RestException(HttpStatusCode.InternalServerError, new { Greska = "Neuspešna izmena šifre." });
-        }
-
-        private async Task<string> GenerateUserTokenForPasswordResetAsync(User user)
-        {
-            var token = await _userRepository.GenerateUserPasswordResetTokenAsync(user);
-            token = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
-
-            return token;
-        }
-
-        private string GenerateVerifyPasswordRecoveryUrl(string origin, string token, string email)
-        {
-            return $"{origin}/users/verifyPasswordRecovery?token={token}&email={email}";
-        }
-
     }
 }

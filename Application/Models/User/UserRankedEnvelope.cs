@@ -2,9 +2,9 @@
 
 namespace Application.Models.User
 {
-    public class UserRangingEnvelope
+    public class UserRankedEnvelope
     {
-        public List<UserRangingGet> Users { get; set; }
+        public List<UserRankedGet> Users { get; set; }
         public int UserCount { get; set; }
     }
 }

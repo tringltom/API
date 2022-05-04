@@ -1,6 +1,6 @@
 ﻿namespace Application.Models.Activity
 {
-    public class FavoriteActivityReturn
+    public class FavoriteActivityIdReturn
     {
         public int ActivityId { get; set; }
     }

@@ -6,7 +6,7 @@ namespace DAL.RepositoryInterfaces
 {
     public interface IUserReviewRepository : IBaseRepository<UserReview>
     {
-        Task<UserReview> GetUserReview(int activityId, int userId);
-        Task<IEnumerable<UserReview>> GetUserReviews(int userId);
+        Task<UserReview> GetUserReviewAsync(int activityId, int userId);
+        Task<IEnumerable<UserReview>> GetUserReviewsAsync(int userId);
     }
 }

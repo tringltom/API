@@ -33,7 +33,7 @@ namespace Application.Managers
                 .Select(ac => new { Type = ac.Key, UsedCount = ac.Count() })
                 .ToList();
 
-            var skills = await _uow.Skills.GetSkills(user.Id);
+            var skills = await _uow.Skills.GetSkillsAsync(user.Id);
             var skillActivities = await _uow.SkillActivities.GetAllAsync();
 
             var activitySkillBonuses = Enum.GetValues(typeof(ActivityTypeId)).OfType<ActivityTypeId>()

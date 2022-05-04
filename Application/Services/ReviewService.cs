@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
@@ -8,6 +7,7 @@ using Application.Models.Activity;
 using AutoMapper;
 using DAL;
 using Domain;
+using LanguageExt;
 
 namespace Application.ServiceInterfaces
 {
@@ -25,30 +25,32 @@ namespace Application.ServiceInterfaces
             _mapper = mapper;
         }
 
-        public async Task<IList<UserReviewedActivity>> GetAllReviews(int userId)
+        public async Task<IList<UserReviewedActivity>> GetOwnerReviewsAsync()
         {
-            var userReviews = await _uow.UserReviews.GetUserReviews(userId);
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var userReviews = await _uow.UserReviews.GetUserReviewsAsync(userId);
 
             return _mapper.Map<List<UserReviewedActivity>>(userReviews);
         }
 
-        public async Task ReviewActivityAsync(ActivityReview activityReview)
+        public async Task<Either<RestError, Unit>> ReviewActivityAsync(ActivityReview activityReview)
         {
+            //TO DO: improve by sending activitycreatorid in request
             var reviewerId = _userAccessor.GetUserIdFromAccessToken();
-            var activityCreatorId = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User.Id;
+            var creator = (await _uow.Activities.GetAsync(activityReview.ActivityId)).User;
 
-            if (reviewerId == activityCreatorId)
-                throw new RestException(HttpStatusCode.BadRequest, new { ActivityReview = "Greška, ne možete oceniti svoju aktivnost." });
+            if (reviewerId == creator.Id)
+                return new BadRequest("Ne možete oceniti svoju aktivnost.");
 
             var xpRewardToYield = await _uow.ActivityReviewXps.GetXpRewardAsync(activityReview.ActivityTypeId, activityReview.ReviewTypeId);
 
-            var userSkill = await _uow.Skills.GetSkill(activityCreatorId, activityReview.ActivityTypeId);
+            var creatorSkill = await _uow.Skills.GetSkillAsync(creator.Id, activityReview.ActivityTypeId);
 
-            var xpMultiplier = userSkill != null && userSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplier(userSkill) : 1;
+            var xpMultiplier = creatorSkill != null && creatorSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplierAsync(creatorSkill) : 1;
 
             var xpRewardValue = xpRewardToYield.Xp * xpMultiplier;
 
-            var existingReview = await _uow.UserReviews.GetUserReview(activityReview.ActivityId, reviewerId);
+            var existingReview = await _uow.UserReviews.GetUserReviewAsync(activityReview.ActivityId, reviewerId);
 
             if (existingReview == null)
             {
@@ -56,35 +58,26 @@ namespace Application.ServiceInterfaces
                 review.UserId = reviewerId;
                 _uow.UserReviews.Add(review);
 
-                var user = await _uow.Users.GetAsync(activityCreatorId);
-                user.CurrentXp += xpRewardValue;
+                creator.CurrentXp += xpRewardValue;
 
                 await _uow.CompleteAsync();
 
-                return;
+                return Unit.Default;
             }
 
             var existingXpReward = await _uow.ActivityReviewXps.GetXpRewardAsync(existingReview.Activity.ActivityTypeId, existingReview.ReviewTypeId);
             var existingXpRewardValue = existingXpReward.Xp * xpMultiplier;
 
             if (existingXpRewardValue == xpRewardValue)
-            {
-                return;
-            }
+                return Unit.Default;
 
             existingReview.ReviewTypeId = activityReview.ReviewTypeId;
 
-            var difference = CalculateAmountToChange(xpRewardValue, existingXpRewardValue);
-
-            var userToUpdate = await _uow.Users.GetAsync(activityCreatorId);
-            userToUpdate.CurrentXp += difference;
+            var difference = xpRewardValue > existingXpRewardValue ? Math.Abs(xpRewardValue - existingXpRewardValue) : -Math.Abs(xpRewardValue - existingXpRewardValue);
+            creator.CurrentXp += difference;
 
             await _uow.CompleteAsync();
-        }
-
-        private int CalculateAmountToChange(int newValue, int oldValue)
-        {
-            return newValue > oldValue ? Math.Abs(newValue - oldValue) : -Math.Abs(newValue - oldValue);
+            return Unit.Default;
         }
     }
 }

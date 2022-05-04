@@ -10,7 +10,7 @@ namespace DAL.Repositories
         public SkillXpBonusRepository(DataContext dbContext) : base(dbContext)
         {
         }
-        public async Task<int> GetSkillMultiplier(Skill skill)
+        public async Task<int> GetSkillMultiplierAsync(Skill skill)
         {
             var skillXpBonus = await GetAsync(sm => sm.Level == skill.Level - 3);
             return skillXpBonus?.Multiplier ?? 1;

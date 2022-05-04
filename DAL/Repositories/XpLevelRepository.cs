@@ -12,7 +12,7 @@ namespace DAL.Repositories
         {
         }
 
-        public async Task<int> GetPotentialLevel(int xpValue)
+        public async Task<int> GetPotentialLevelAsync(int xpValue)
         {
             var xpLevels = await GetAllAsync();
             return xpLevels.FirstOrDefault(xp => xp.Xp > xpValue)?.Id - 1 ?? xpLevels.Last().Id;

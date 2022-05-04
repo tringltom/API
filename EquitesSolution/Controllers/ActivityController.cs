@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Application.Models.Activity;
+using API.Validations;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,39 +15,30 @@ namespace API.Controllers
             _activityService = activityService;
         }
 
-        [HttpPost("create")]
-        public async Task<ActionResult> CreatePendingActivity([FromForm] ActivityCreate activityCreate)
+        [HttpGet("{id}", Name = nameof(GetActivity))]
+        [IdValidation]
+        public async Task<IActionResult> GetActivity(int id)
         {
-            await _activityService.CreatePendingActivityAsync(activityCreate);
-
-            return Ok("Uspešno kreiranje, molimo Vas da sačekate odobrenje");
+            return Ok(await _activityService.GetActivityAsync(id));
         }
 
-        // TODO - Add checking if user is Admin
-        [HttpGet("getPending")]
-        public async Task<ActionResult<PendingActivityEnvelope>> GetPendingActivities(int? limit, int? offset)
+        [HttpGet("others")]
+        public async Task<IActionResult> GetActivitiesFromOtherUsers(int? limit, int? offset)
         {
-            return await _activityService.GetPendingActivitiesAsync(limit, offset);
+            return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset));
         }
 
-        [HttpGet("getUserPending")]
-        public async Task<ActionResult<PendingActivityForUserEnvelope>> GetPendingActivitiesForLoggedInUser(int? limit, int? offset)
+        // TODO - Add checking if user is Admin/Approver
+        [HttpPost("pending-activity/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> ApprovePendingActivity(int id)
         {
-            return await _activityService.GetPendingActivitiesForLoggedInUserAsync(limit, offset);
-        }
+            var result = await _activityService.ApprovePendingActivity(id);
 
-        // TODO - Add checking if user is Admin
-        [HttpPost("resolve/{id}")]
-        public async Task<ActionResult<bool>> ResolvePendingActivity(int id, PendingActivityApproval approval)
-        {
-            return await _activityService.ReslovePendingActivityAsync(id, approval);
+            return result.Match(
+                activity => CreatedAtRoute(nameof(GetActivity), new { id = activity.Id }, activity),
+                err => err.Response()
+                );
         }
-
-        [HttpGet("approvedActivitiesExcludeUser/{id}")]
-        public async Task<ActionResult<ApprovedActivityEnvelope>> GetApprovedActivitiesExcludeUser(int id, int? limit, int? offset)
-        {
-            return await _activityService.GetApprovedActivitiesFromOtherUsersAsync(id, limit, offset);
-        }
-
     }
 }

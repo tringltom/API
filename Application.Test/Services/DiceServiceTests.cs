@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
 using Application.Services;
 using AutoFixture;
-using AutoFixture.NUnit3;
 using DAL;
 using Domain;
 using FixtureShared;
@@ -15,20 +16,22 @@ namespace Application.Tests.Services
     public class DiceServiceTests
     {
         private IFixture _fixture;
+        private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IUnitOfWork> _uowMock;
+        private DiceService _sut;
 
         [SetUp]
         public void SetUp()
         {
             _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
+            _userAccessorMock = new Mock<IUserAccessor>();
+            _uowMock = new Mock<IUnitOfWork>();
+            _sut = new DiceService(_userAccessorMock.Object, _uowMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetDiceRollResultAsync_Successful(
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            [Frozen] Mock<IUnitOfWork> uowMock,
-            int userId,
-            DiceService sut)
+        public async Task Roll_SuccessfulAsync()
         {
 
             // Arrange
@@ -37,29 +40,32 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddDays(-2))
               .Create();
 
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(eligableUser.Id);
 
-            uowMock.Setup(x => x.Users.GetAsync(userId))
+            _uowMock.Setup(x => x.Users.GetAsync(eligableUser.Id))
                 .ReturnsAsync(eligableUser);
 
-            uowMock.Setup(x => x.CompleteAsync())
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
             // Act
-            var diceResult = sut.GetDiceRollResult().Result;
+            var res = await _sut.RollAsync();
 
             // Assert
-            diceResult.Result.Should().BePositive();
+            res.Match(
+                diceResult => diceResult.Result.Should().BePositive(),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(eligableUser.Id), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void GetDiceRollResultAsync_Unsuccessful(
-        [Frozen] Mock<IUserAccessor> userAccessorMock,
-        [Frozen] Mock<IUnitOfWork> uowMock,
-        int userId,
-        DiceService sut)
+        public async Task Roll_RollCountExceedAsync()
         {
 
             // Arrange
@@ -68,20 +74,27 @@ namespace Application.Tests.Services
               .With(u => u.LastRollDate, DateTimeOffset.Now.AddMinutes(-20))
               .Create();
 
-            userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(nonEligableUser.Id);
 
-            uowMock.Setup(x => x.Users.GetAsync(userId))
+            _uowMock.Setup(x => x.Users.GetAsync(nonEligableUser.Id))
                 .ReturnsAsync(nonEligableUser);
 
-            uowMock.Setup(x => x.CompleteAsync())
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
             // Act
-            var diceResult = sut.GetDiceRollResult().Result;
+            var res = await _sut.RollAsync();
 
             // Assert
-            diceResult.Result.Should().Be(0);
+            res.Match(
+                diceResult => diceResult.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.Users.GetAsync(nonEligableUser.Id), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
     }
 }
