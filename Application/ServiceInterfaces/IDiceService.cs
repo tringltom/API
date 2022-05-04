@@ -1,10 +1,12 @@
 ﻿using System.Threading.Tasks;
+using Application.Errors;
 using Application.Models;
+using LanguageExt;
 
 namespace Application.ServiceInterfaces
 {
     public interface IDiceService
     {
-        Task<DiceResult> GetDiceRollResult();
+        Task<Either<RestError, DiceResult>> RollAsync();
     }
 }

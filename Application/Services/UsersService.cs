@@ -9,6 +9,7 @@ using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
 using Domain;
+using LanguageExt;
 
 namespace Application.Services
 {
@@ -29,44 +30,48 @@ namespace Application.Services
             _emailManager = emailManager;
         }
 
-        public async Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset)
+        public async Task<UserRankedEnvelope> GetRankedUsersAsync(int? limit, int? offset)
         {
-            var topXpUsers = await _uow.Users.GetRangingUsers(limit, offset);
+            var rankedUsers = await _uow.Users.GetRankedUsersAsync(limit, offset);
 
-            var userRangingEnvelope = new UserRangingEnvelope
+            var userRangingEnvelope = new UserRankedEnvelope
             {
-                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserRangingGet>>(topXpUsers).ToList(),
+                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserRankedGet>>(rankedUsers).ToList(),
                 UserCount = await _uow.Users.CountAsync(),
             };
 
             return userRangingEnvelope;
         }
 
-        public async Task UpdateLoggedUserAboutAsync(UserAbout userAbout)
+        public async Task<UserImageEnvelope> GetImagesForApprovalAsync(int? limit, int? offset)
         {
-            var userId = _userAccessor.GetUserIdFromAccessToken();
-            var user = await _uow.Users.GetAsync(userId);
+            var usersForImageApproval = await _uow.Users.GetUsersForImageApprovalAsync(limit, offset);
 
-            if (user == null)
-                throw new NotFound("Nepostojeci korisnik");
+            var userImageEnvelope = new UserImageEnvelope
+            {
+                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserImageResponse>>(usersForImageApproval).ToList(),
+                UserCount = await _uow.Users.CountUsersForImageApprovalAsync(),
+            };
 
-            user.About = userAbout.About;
-
-            await _uow.CompleteAsync();
+            return userImageEnvelope;
         }
 
-        public async Task UpdateLoggedUserImageAsync(UserImageUpdate userImage)
+        public async Task<Unit> UpdateAboutAsync(UserAbout userAbout)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);
 
-            if (user == null)
-                throw new NotFound("Nepostojeci korisnik");
+            user.About = userAbout.About;
+            await _uow.CompleteAsync();
+            return Unit.Default;
+        }
+
+        public async Task<Either<RestError, Unit>> UpdateImageAsync(UserImageUpdate userImage)
+        {
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var user = await _uow.Users.GetAsync(userId);
 
             var photoResult = userImage.Image != null ? await _photoAccessor.AddPhotoAsync(userImage.Image) : null;
-
-            if (photoResult == null)
-                throw new NotFound("Neuspešna promena profilne slike, molimo vas pokušajte kasnije");
 
             if (!string.IsNullOrEmpty(user.ImagePublicId))
                 await _photoAccessor.DeletePhotoAsync(user.ImagePublicId);
@@ -76,27 +81,15 @@ namespace Application.Services
             user.ImageApproved = false;
 
             await _uow.CompleteAsync();
+            return Unit.Default;
         }
 
-        public async Task<UserImageEnvelope> GetImagesForApprovalAsync(int? limit, int? offset)
-        {
-            var usersForImageApproval = await _uow.Users.GetUsersForImageApproval(limit, offset);
-
-            var userImageEnvelope = new UserImageEnvelope
-            {
-                Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserImageResponse>>(usersForImageApproval).ToList(),
-                UserCount = await _uow.Users.CountUsersForImageApproval(),
-            };
-
-            return userImageEnvelope;
-        }
-
-        public async Task<bool> ResolveUserImageAsync(int userId, bool approve)
+        public async Task<Either<RestError, Unit>> ResolveImageAsync(int userId, bool approve)
         {
             var user = await _uow.Users.GetAsync(userId);
 
             if (user == null)
-                throw new NotFound("Nepostojeci korisnik");
+                return new NotFound("Nepostojeci korisnik");
 
             user.ImageApproved = approve;
 
@@ -107,15 +100,10 @@ namespace Application.Services
                 user.ImageUrl = null;
             }
 
-            var result = await _uow.CompleteAsync();
+            await _uow.CompleteAsync();
+            await _emailManager.SendProfileImageApprovalEmailAsync(user.Email, approve);
 
-            if (result)
-            {
-                await _emailManager.SendProfileImageApprovalEmailAsync(user.Email, approve);
-                return true;
-            }
-
-            return false;
+            return Unit.Default;
         }
     }
 }

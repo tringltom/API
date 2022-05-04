@@ -4,56 +4,56 @@ using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using AutoFixture.NUnit3;
 using FixtureShared;
 using FluentAssertions;
+using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;
 
 namespace API.Tests.Controllers
 {
-    internal class ReviewControllerTests
+    public class ReviewControllerTests
     {
+        private Mock<IReviewService> _reviewServiceMock;
+        private ReviewController _sut;
+
         [SetUp]
-        public void SetUp() { }
+        public void SetUp()
+        {
+            _reviewServiceMock = new Mock<IReviewService>();
+            _sut = new ReviewController(_reviewServiceMock.Object);
+        }
 
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void ReviewActivity_Successfull([Frozen] Mock<IReviewService> reviewManagerMock,
-            ActivityReview activityReview,
-            [Greedy] ReviewController sut)
+        public async Task GetPendingActivities_SuccessfullAsync(List<UserReviewedActivity> userReviewedActivities)
         {
             // Arrange
-            reviewManagerMock.Setup(x => x.ReviewActivityAsync(activityReview))
-                .Returns(Task.CompletedTask);
+            _reviewServiceMock.Setup(x => x.GetOwnerReviewsAsync())
+               .ReturnsAsync(userReviewedActivities);
 
             // Act
-            var res = sut.ReviewActivity(activityReview);
+            var res = await _sut.GetOwnerReviews() as OkObjectResult;
 
             // Assert
-            res.Result.Should().BeOfType<OkObjectResult>();
-            reviewManagerMock.Verify(x => x.ReviewActivityAsync(activityReview), Times.Once);
-            ((OkObjectResult)res.Result).StatusCode.Should().Equals((int)HttpStatusCode.OK);
+            res.Value.Should().Be(userReviewedActivities);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public void GetReviewsForUser_Successfull([Frozen] Mock<IReviewService> reviewServiceMock,
-            int userId, List<UserReviewedActivity> acitvitiesReviewed,
-            [Greedy] ReviewController sut)
+        public async Task ReviewActivity_SuccessfullAsync(ActivityReview activityReview)
         {
             // Arrange
-            reviewServiceMock.Setup(x => x.GetAllReviews(userId))
-                .ReturnsAsync(acitvitiesReviewed);
+            _reviewServiceMock.Setup(x => x.ReviewActivityAsync(activityReview))
+               .ReturnsAsync(Unit.Default);
 
             // Act
-            var res = sut.GetReviewsForUser(userId);
+            var res = await _sut.ReviewActivity(activityReview) as OkResult;
 
             // Assert
-            res.Result.Should().Equal(acitvitiesReviewed);
-            reviewServiceMock.Verify(x => x.GetAllReviews(userId), Times.Once);
+            res.StatusCode.Should().Equals(HttpStatusCode.OK);
         }
     }
 }

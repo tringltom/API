@@ -1,14 +1,16 @@
 ﻿using System.Threading.Tasks;
+using Application.Errors;
 using Application.Models.User;
+using LanguageExt;
 
 namespace Application.ServiceInterfaces
 {
     public interface IUsersService
     {
-        Task<UserRangingEnvelope> GetRangingUsers(int? limit, int? offset);
-        Task UpdateLoggedUserAboutAsync(UserAbout userAbout);
-        Task UpdateLoggedUserImageAsync(UserImageUpdate userImage);
+        Task<UserRankedEnvelope> GetRankedUsersAsync(int? limit, int? offset);
+        Task<Unit> UpdateAboutAsync(UserAbout userAbout);
+        Task<Either<RestError, Unit>> UpdateImageAsync(UserImageUpdate userImage);
         Task<UserImageEnvelope> GetImagesForApprovalAsync(int? limit, int? offset);
-        Task<bool> ResolveUserImageAsync(int userId, bool approve);
+        Task<Either<RestError, Unit>> ResolveImageAsync(int userId, bool approve);
     }
 }

@@ -11,7 +11,7 @@ namespace DAL.Repositories
         {
         }
 
-        public async Task<SkillSpecial> GetSkillSpecial(ActivityTypeId? firstActivityTypeId, ActivityTypeId? secondActivityTypeId)
+        public async Task<SkillSpecial> GetSkillSpecialAsync(ActivityTypeId? firstActivityTypeId, ActivityTypeId? secondActivityTypeId)
         {
             return await GetAsync(ss => ss.ActivityTypeOneId == firstActivityTypeId && ss.ActivityTypeTwoId == secondActivityTypeId);
         }

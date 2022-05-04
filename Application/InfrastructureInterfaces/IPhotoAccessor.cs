@@ -7,6 +7,6 @@ namespace Application.InfrastructureInterfaces
     public interface IPhotoAccessor
     {
         Task<PhotoUploadResult> AddPhotoAsync(IFormFile file);
-        Task<bool> DeletePhotoAsync(string publicId);
+        Task DeletePhotoAsync(string publicId);
     }
 }

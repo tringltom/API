@@ -5,6 +5,6 @@ namespace DAL.RepositoryInterfaces
 {
     public interface ISkillXpBonusRepository : IBaseRepository<SkillXpBonus>
     {
-        Task<int> GetSkillMultiplier(Skill skill);
+        Task<int> GetSkillMultiplierAsync(Skill skill);
     }
 }

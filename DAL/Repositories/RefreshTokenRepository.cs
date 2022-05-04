@@ -9,6 +9,6 @@ namespace DAL.Repositories
     {
         public RefreshTokenRepository(DataContext dbContext) : base(dbContext) { }
 
-        public async Task<RefreshToken> GetOldRefreshToken(string refreshToken) => await GetAsync(rt => rt.Token == refreshToken);
+        public async Task<RefreshToken> GetOldRefreshTokenAsync(string refreshToken) => await GetAsync(rt => rt.Token == refreshToken);
     }
 }

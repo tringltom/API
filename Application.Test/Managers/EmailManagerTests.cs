@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Application.Errors;
 using AutoFixture;
 using Domain;
 using FixtureShared;
@@ -30,7 +29,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<Exception>();
         }
 
         [Test]
@@ -44,7 +43,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<Exception>();
         }
 
         [Test]
@@ -58,7 +57,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<Exception>();
         }
 
         [Test]
@@ -72,7 +71,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<Exception>();
         }
 
         [Test]
@@ -86,7 +85,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendActivityApprovalEmailAsync(activity.Title, activity.User.Email, true);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<Exception>();
         }
 
         [Test]
@@ -98,7 +97,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendProfileImageApprovalEmailAsync(userEmail, true);
 
             // Assert
-            methodInTest.Should().Throw<RestException>();
+            methodInTest.Should().Throw<Exception>();
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoFixture;
 using Domain;
 using FixtureShared;
+using FluentAssertions;
 using Infrastructure.Security;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -34,7 +35,7 @@ namespace Application.Tests.Security
             var result = sut.CreateJWTToken(user.Id, user.UserName);
 
             // Assert
-            Assert.IsNotNull(result);
+            result.Should().NotBeNull();
         }
 
         [Test]
@@ -47,7 +48,7 @@ namespace Application.Tests.Security
             var tokenResult = sut.CreateRefreshToken();
 
             // Assert
-            Assert.IsFalse(string.IsNullOrWhiteSpace(tokenResult));
+            tokenResult.Should().NotBeNull();
         }
     }
 }

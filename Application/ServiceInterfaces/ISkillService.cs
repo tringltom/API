@@ -1,13 +1,14 @@
 ﻿using System.Threading.Tasks;
+using Application.Errors;
 using Application.Models;
 using Application.Models.User;
+using LanguageExt;
 
 namespace Application.ServiceInterfaces
 {
     public interface ISkillService
     {
-        Task<SkillData> GetSkillsDataAsync(int userId);
-        Task<UserBaseResponse> ResetSkillsDataAsync();
-        Task<UserBaseResponse> UpdateSkillsDataAsync(SkillData skillData);
+        Task<Either<RestError, SkillData>> GetSkillsDataAsync(int userId);
+        Task<Either<RestError, UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData);
     }
 }

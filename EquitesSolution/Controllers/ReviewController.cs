@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -17,19 +15,18 @@ namespace API.Controllers
             _reviewService = reviewManager;
         }
 
-        [HttpPost("reviewActivity")]
-        public async Task<ActionResult> ReviewActivity(ActivityReview activityReview)
+        [HttpGet("me")]
+        public async Task<IActionResult> GetOwnerReviews()
         {
-            await _reviewService.ReviewActivityAsync(activityReview);
-
-            return Ok("Uspešno ste ocenili aktivnost");
+            return Ok(await _reviewService.GetOwnerReviewsAsync());
         }
 
-        [HttpGet("getReviewsForUser")]
-        [AllowAnonymous]
-        public async Task<IList<UserReviewedActivity>> GetReviewsForUser([FromQuery] int userId)
+        [HttpPut()]
+        public async Task<IActionResult> ReviewActivity(ActivityReview activityReview)
         {
-            return await _reviewService.GetAllReviews(userId);
+            var result = await _reviewService.ReviewActivityAsync(activityReview);
+
+            return result.Match(u => Ok(), err => err.Response());
         }
     }
 }

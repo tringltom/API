@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Application.Models.Activity;
+﻿using System.Threading.Tasks;
+using API.Validations;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,18 +16,42 @@ namespace API.Controllers
             _favoriteService = favoriteService;
         }
 
-        [HttpPost("resolveFavorite")]
-        public async Task<ActionResult> ResolveFavoriteActivity([FromBody] FavoriteActivityBase favoriteActivityCreate)
+        [HttpGet("{id}", Name = nameof(GetFavoriteActivity))]
+        [IdValidation]
+        public async Task<IActionResult> GetFavoriteActivity(int id)
         {
-            await _favoriteService.ResolveFavoriteActivityAsync(favoriteActivityCreate);
-
-            return Ok("Uspešno ste dodali omiljenu aktivnost");
+            return Ok(await _favoriteService.GetFavoriteActivityAsync(id));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IList<FavoriteActivityReturn>> GetFavoriteActivitiesForUser(int id)
+
+        [HttpGet("me/ids")]
+        public async Task<IActionResult> GetOwnerFavoriteActivityIds()
         {
-            return await _favoriteService.GetAllFavoritesForUserAsync(id);
+            return Ok(await _favoriteService.GetAllOwnerFavoriteIdsAsync());
+        }
+
+        [HttpDelete("{id}")]
+        [IdValidation]
+        public async Task<IActionResult> RemoveFavouriteActivity(int id)
+        {
+            var result = await _favoriteService.RemoveFavoriteActivityAsync(id);
+
+            return result.Match(
+               u => NoContent(),
+               err => err.Response()
+               );
+        }
+
+        [HttpPost("{id}")]
+        [IdValidation]
+        public async Task<IActionResult> CreateFavoriteActivity(int id)
+        {
+            var result = await _favoriteService.AddFavoriteActivityAsync(id);
+
+            return result.Match(
+               activity => CreatedAtRoute(nameof(GetFavoriteActivity), new { id = activity.Id }, activity),
+               err => err.Response()
+               );
         }
     }
 }

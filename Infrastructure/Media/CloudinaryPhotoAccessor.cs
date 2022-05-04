@@ -30,15 +30,13 @@ namespace Infrastructure.Media
 
             if (file.Length > 0)
             {
-                using (var stream = file.OpenReadStream())
+                using var stream = file.OpenReadStream();
+                var uploadParams = new ImageUploadParams
                 {
-                    var uploadParams = new ImageUploadParams
-                    {
-                        File = new FileDescription(file.FileName, stream),
-                        Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
-                    };
-                    uploadResult = await _cloudinary.UploadAsync(uploadParams);
-                }
+                    File = new FileDescription(file.FileName, stream),
+                    Transformation = new Transformation().Height(1000).Width(1000).Crop("fill")
+                };
+                uploadResult = await _cloudinary.UploadAsync(uploadParams);
             }
 
             if (uploadResult.Error != null)
@@ -51,13 +49,14 @@ namespace Infrastructure.Media
             };
         }
 
-        public async Task<bool> DeletePhotoAsync(string publicId)
+        public async Task DeletePhotoAsync(string publicId)
         {
             var deleteParams = new DeletionParams(publicId);
 
             var result = await _cloudinary.DestroyAsync(deleteParams);
 
-            return result.Result == "ok";
+            if (result.Error != null)
+                throw new Exception(result.Error.Message);
         }
     }
 }

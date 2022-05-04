@@ -1,15 +1,16 @@
-﻿using System;
-using System.Net;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
-using AutoFixture.NUnit3;
+using AutoFixture;
+using AutoMapper;
 using DAL;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using LanguageExt;
 using Moq;
 using NUnit.Framework;
 
@@ -17,130 +18,197 @@ namespace Application.Tests.Services
 {
     public class FavoriteServiceTests
     {
+        private IFixture _fixture;
+        private Mock<IMapper> _mapperMock;
+        private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IUnitOfWork> _uowMock;
+        private FavoritesService _sut;
+
         [SetUp]
         public void SetUp()
         {
-
+            _fixture = new FixtureDirector().WithAutoMoqAndOmitRecursion();
+            _userAccessorMock = new Mock<IUserAccessor>();
+            _mapperMock = new Mock<IMapper>();
+            _uowMock = new Mock<IUnitOfWork>();
+            _sut = new FavoritesService(_mapperMock.Object, _userAccessorMock.Object, _uowMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResolveFavoriteAsync_CreateSuccessfull([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            FavoriteActivityBase activity,
-            int userId, FavoritesService sut)
+        public async Task GetFavoriteActivity_SuccessfullAsync(UserFavoriteActivity userFavoriteActivity,
+            UserFavoriteActivityReturn userFavoriteActivityReturn)
         {
+            // Arrange
+            _uowMock.Setup(x => x.UserFavorites.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(userFavoriteActivity);
 
-            //Arrange
+            _mapperMock
+                .Setup(x => x.Map<UserFavoriteActivityReturn>(userFavoriteActivity))
+                .Returns(userFavoriteActivityReturn);
 
-            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
+            // Act
+            var res = await _sut.GetFavoriteActivityAsync(It.IsAny<int>());
 
-            activity.Favorite = true;
+            // Assert
+            res.Should().BeEquivalentTo(userFavoriteActivityReturn);
+            _uowMock.Verify(x => x.UserFavorites.GetAsync(It.IsAny<int>()), Times.Once);
+        }
 
-            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetAllOwnerFavoriteIds_SuccessfullAsync(int userId,
+            IEnumerable<UserFavoriteActivity> userFavoriteActivities,
+            List<FavoriteActivityIdReturn> favoriteIds)
+        {
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
 
-            uowMock.Setup(frm => frm.CompleteAsync())
-                .ReturnsAsync(true);
+            _uowMock.Setup(x => x.UserFavorites.GetFavoriteActivitiesAsync(userId))
+                .ReturnsAsync(userFavoriteActivities);
 
-            //Act
-            Func<Task> methodInTest = async () => await sut.ResolveFavoriteActivityAsync(activity);
+            _mapperMock
+                .Setup(x => x.Map<List<FavoriteActivityIdReturn>>(userFavoriteActivities))
+                .Returns(favoriteIds);
 
-            //Assert
-            methodInTest.Should().NotThrow<Exception>();
-            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(frm => frm.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Once);
-            uowMock.Verify(frm => frm.UserFavorites.Remove(It.IsAny<UserFavoriteActivity>()), Times.Never);
+            // Act
+            var res = await _sut.GetAllOwnerFavoriteIdsAsync();
+
+            // Assert
+            res.Should().BeEquivalentTo(favoriteIds);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.GetFavoriteActivitiesAsync(userId), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResolveFavoriteAsync_AddFailed([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            FavoriteActivityBase activity,
-            int userId, FavoritesService sut)
+        public async Task RemoveFavoriteActivity_SuccessfullAsync(int activityId,
+            int userId,
+            UserFavoriteActivity userFavoriteActivity)
         {
-
-            //Arrange
-
-            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
-
-            activity.Favorite = true;
-
-            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
 
-            uowMock.Setup(frm => frm.CompleteAsync())
-                .Throws(new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." }));
+            _uowMock.Setup(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId))
+                .ReturnsAsync(userFavoriteActivity);
 
-            //Act
-            Func<Task> methodInTest = async () => await sut.ResolveFavoriteActivityAsync(activity);
+            _uowMock.Setup(x => x.UserFavorites.Remove(userFavoriteActivity))
+                .Verifiable();
 
-            //Assert
-            methodInTest.Should().Throw<RestException>();
-            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(frm => frm.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Once);
-            uowMock.Verify(frm => frm.UserFavorites.Remove(It.IsAny<UserFavoriteActivity>()), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResolveFavoriteAsync_RemoveSuccessfull([Frozen] Mock<IUnitOfWork> uowMock,
-            [Frozen] Mock<IUserAccessor> userAccessorMock,
-            FavoriteActivityBase activity,
-            int userId, FavoritesService sut)
-        {
-
-            //Arrange
-
-            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
-
-            activity.Favorite = false;
-
-            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
-               .Returns(userId);
-
-            uowMock.Setup(frm => frm.CompleteAsync())
+            _uowMock.Setup(x => x.CompleteAsync())
                 .ReturnsAsync(true);
 
-            //Act
-            Func<Task> methodInTest = async () => await sut.ResolveFavoriteActivityAsync(activity);
+            // Act
+            var res = await _sut.RemoveFavoriteActivityAsync(activityId);
 
-            //Assert
-            methodInTest.Should().NotThrow<Exception>();
-            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(frm => frm.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Never);
-            uowMock.Verify(frm => frm.UserFavorites.Remove(It.IsAny<UserFavoriteActivity>()), Times.Once);
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.Remove(userFavoriteActivity), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void ResolveFavoriteAsync_RemoveFailed([Frozen] Mock<IUnitOfWork> uowMock,
-           [Frozen] Mock<IUserAccessor> userAccessorMock,
-           FavoriteActivityBase activity,
-           int userId, FavoritesService sut)
+        public async Task RemoveFavoriteActivity_FavoriteActivityNotFoundAsync(int activityId,
+            int userId,
+            UserFavoriteActivity userFavoriteActivity)
         {
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
 
-            //Arrange
+            _uowMock.Setup(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId))
+                .ReturnsAsync((UserFavoriteActivity)null);
 
-            var favoriteActivity = new UserFavoriteActivity() { ActivityId = activity.ActivityId, UserId = userId };
+            // Act
+            var res = await _sut.RemoveFavoriteActivityAsync(It.IsAny<int>());
 
-            activity.Favorite = false;
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
 
-            userAccessorMock.Setup(urm => urm.GetUserIdFromAccessToken())
-              .Returns(userId);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId), Times.Never);
+            _uowMock.Verify(x => x.UserFavorites.Remove(userFavoriteActivity), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+        }
 
-            uowMock.Setup(frm => frm.CompleteAsync())
-                .Throws(new RestException(HttpStatusCode.BadRequest, new { FavoriteActivity = "Greška, korisnik i/ili aktivnost su nepostojeći." }));
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task AddFavoriteActivityAsync_SuccessfullAsync(int activityId,
+            int userId,
+            UserFavoriteActivityReturn userFavoriteActivityReturn)
+        {
+            // Arrange
+            userFavoriteActivityReturn.ActivityId = activityId;
+            userFavoriteActivityReturn.UserId = userId;
 
-            //Act
-            Func<Task> methodInTest = async () => await sut.ResolveFavoriteActivityAsync(activity);
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
 
-            //Assert
-            methodInTest.Should().Throw<RestException>();
-            userAccessorMock.Verify(urm => urm.GetUserIdFromAccessToken(), Times.Once);
-            uowMock.Verify(frm => frm.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Never);
-            uowMock.Verify(frm => frm.UserFavorites.Remove(It.IsAny<UserFavoriteActivity>()), Times.Once);
+            _uowMock.Setup(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId))
+                .ReturnsAsync((UserFavoriteActivity)null);
+
+            _uowMock.Setup(x => x.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()))
+                .Verifiable();
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            _mapperMock.Setup(x => x.Map<UserFavoriteActivityReturn>(It.IsAny<UserFavoriteActivity>()))
+                .Returns(userFavoriteActivityReturn);
+
+            // Act
+            var res = await _sut.AddFavoriteActivityAsync(activityId);
+
+            // Assert
+            res.Match(
+                favoriteActivityreturn => favoriteActivityreturn.Should().BeEquivalentTo(userFavoriteActivityReturn),
+                err => err.Should().BeNull()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.Add(It.IsAny<UserFavoriteActivity>()), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task AddFavoriteActivityAsync_ActivityAlreadyFavoriteAsync(int activityId,
+            int userId,
+            UserFavoriteActivity userFavoriteActivity)
+        {
+            // Arrange
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId))
+                .ReturnsAsync(userFavoriteActivity);
+
+            // Act
+            var res = await _sut.AddFavoriteActivityAsync(activityId);
+
+            // Assert
+            res.Match(
+                favoriteActivityreturn => favoriteActivityreturn.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.GetFavoriteActivityAsync(userId, activityId), Times.Once);
+            _uowMock.Verify(x => x.UserFavorites.Add(userFavoriteActivity), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
     }
 }

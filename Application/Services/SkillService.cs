@@ -10,6 +10,7 @@ using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
 using Domain;
+using LanguageExt;
 
 namespace Application.Services
 {
@@ -28,10 +29,13 @@ namespace Application.Services
             _activityCounterManager = activityCounterManager;
         }
 
-        public async Task<SkillData> GetSkillsDataAsync(int userId)
+        public async Task<Either<RestError, SkillData>> GetSkillsDataAsync(int userId)
         {
-            var skills = await _uow.Skills.GetSkills(userId);
+            var skills = await _uow.Skills.GetSkillsAsync(userId);
             var user = await _uow.Users.GetAsync(userId);
+
+            if (user == null)
+                return new NotFound("Nepostojeci korisnik");
 
             return new SkillData
             {
@@ -45,48 +49,20 @@ namespace Application.Services
                         Type = type,
                         Level = levels.Select(l => l.Level).FirstOrDefault()
                     }).ToList(),
-                XpLevel = await _uow.XpLevels.GetPotentialLevel(user.CurrentXp),
+                XpLevel = await _uow.XpLevels.GetPotentialLevelAsync(user.CurrentXp),
             };
         }
 
-        public async Task<UserBaseResponse> ResetSkillsDataAsync()
-        {
-            var userId = _userAccessor.GetUserIdFromAccessToken();
-            var skills = await _uow.Skills.GetSkills(userId);
-
-            if (skills == null || skills.Sum(s => s?.Level) == 0)
-                throw new NotFound("Nemate odabrane veštine");
-
-            var user = await _uow.Users.GetAsync(userId);
-
-            if (user.SkillSpecial != null)
-                user.SkillSpecial = null;
-
-            foreach (var skill in skills)
-            {
-                skill.Level = 0;
-            }
-
-            user.XpLevelId = 1;
-
-            await _uow.CompleteAsync();
-
-            var userResponse = _mapper.Map<UserBaseResponse>(user);
-            userResponse.ActivityCounts = await _activityCounterManager.GetActivityCountsAsync(user);
-
-            return userResponse;
-        }
-
-        public async Task<UserBaseResponse> UpdateSkillsDataAsync(SkillData skillData)
+        public async Task<Either<RestError, UserBaseResponse>> UpdateSkillsDataAsync(SkillData skillData)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var user = await _uow.Users.GetAsync(userId);
-            var potentialLevel = await _uow.XpLevels.GetPotentialLevel(user.CurrentXp);
+            var potentialLevel = await _uow.XpLevels.GetPotentialLevelAsync(user.CurrentXp);
 
             if (skillData.XpLevel != potentialLevel)
-                throw new BadRequest("Niste odgovarajući nivo!");
+                return new BadRequest("Niste odgovarajući nivo!");
 
-            var skills = await _uow.Skills.GetSkills(userId);
+            var skills = await _uow.Skills.GetSkillsAsync(userId);
 
             foreach (var skillLevel in skillData.SkillLevels)
             {
@@ -99,7 +75,7 @@ namespace Application.Services
             user.XpLevelId = skills.Sum(s => s.Level) + 1;
 
             var specialAbilities = skills.Where(s => s.IsInThirdTree());
-            user.SkillSpecial = await _uow.SkillSpecials.GetSkillSpecial(specialAbilities.ElementAtOrDefault(0)?.ActivityTypeId, specialAbilities.ElementAtOrDefault(1)?.ActivityTypeId);
+            user.SkillSpecial = await _uow.SkillSpecials.GetSkillSpecialAsync(specialAbilities.ElementAtOrDefault(0)?.ActivityTypeId, specialAbilities.ElementAtOrDefault(1)?.ActivityTypeId);
 
             await _uow.CompleteAsync();
 

@@ -6,7 +6,7 @@ namespace DAL.RepositoryInterfaces
 {
     public interface ISkillRepository : IBaseRepository<Skill>
     {
-        Task<IEnumerable<Skill>> GetSkills(int userId);
-        Task<Skill> GetSkill(int userId, ActivityTypeId activityTypeId);
+        Task<IEnumerable<Skill>> GetSkillsAsync(int userId);
+        Task<Skill> GetSkillAsync(int userId, ActivityTypeId activityTypeId);
     }
 }
