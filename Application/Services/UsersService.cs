@@ -8,6 +8,7 @@ using Application.Models.User;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using LanguageExt;
 
@@ -30,9 +31,9 @@ namespace Application.Services
             _emailManager = emailManager;
         }
 
-        public async Task<UserRankedEnvelope> GetRankedUsersAsync(int? limit, int? offset)
+        public async Task<UserRankedEnvelope> GetRankedUsersAsync(UserQuery userQuery)
         {
-            var rankedUsers = await _uow.Users.GetRankedUsersAsync(limit, offset);
+            var rankedUsers = await _uow.Users.GetRankedUsersAsync(userQuery);
 
             var userRangingEnvelope = new UserRankedEnvelope
             {
@@ -43,9 +44,9 @@ namespace Application.Services
             return userRangingEnvelope;
         }
 
-        public async Task<UserImageEnvelope> GetImagesForApprovalAsync(int? limit, int? offset)
+        public async Task<UserImageEnvelope> GetImagesForApprovalAsync(QueryObject queryObject)
         {
-            var usersForImageApproval = await _uow.Users.GetUsersForImageApprovalAsync(limit, offset);
+            var usersForImageApproval = await _uow.Users.GetUsersForImageApprovalAsync(queryObject);
 
             var userImageEnvelope = new UserImageEnvelope
             {

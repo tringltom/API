@@ -4,6 +4,7 @@ using API.Controllers;
 using Application.Models;
 using Application.Models.User;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
 using LanguageExt;
@@ -30,11 +31,11 @@ namespace API.Tests.Controllers
         public async Task GetRankedUsers_SuccessfullAsync(UserRankedEnvelope userArenaEnvelope)
         {
             // Arrange
-            _userServiceMock.Setup(x => x.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _userServiceMock.Setup(x => x.GetRankedUsersAsync(It.IsAny<UserQuery>()))
                 .ReturnsAsync(userArenaEnvelope);
 
             // Act
-            var res = await _sut.GetRankedUsers(It.IsAny<int>(), It.IsAny<int>()) as OkObjectResult;
+            var res = await _sut.GetRankedUsers(It.IsAny<UserQuery>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(userArenaEnvelope);
@@ -45,11 +46,11 @@ namespace API.Tests.Controllers
         public async Task GetImagesForApproval_SuccessfullAsync(UserImageEnvelope userImageEnvelope)
         {
             // Arrange
-            _userServiceMock.Setup(x => x.GetImagesForApprovalAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _userServiceMock.Setup(x => x.GetImagesForApprovalAsync(It.IsAny<QueryObject>()))
                 .ReturnsAsync(userImageEnvelope);
 
             // Act
-            var res = await _sut.GetImagesForApproval(It.IsAny<int>(), It.IsAny<int>()) as OkObjectResult;
+            var res = await _sut.GetImagesForApproval(It.IsAny<QueryObject>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(userImageEnvelope);
