@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using API.Validations;
+using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,6 +27,17 @@ namespace API.Controllers
         public async Task<IActionResult> GetActivitiesFromOtherUsers(int? limit, int? offset)
         {
             return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset));
+        }
+
+        [HttpPatch("{id}/answer")]
+        public async Task<IActionResult> AnswerToPuzzle(int id, PuzzleAnswer puzzleAnswer)
+        {
+            var result = await _activityService.AnswerToPuzzleAsync(id, puzzleAnswer);
+
+            return result.Match(
+               xpReward => Ok(xpReward),
+               err => err.Response()
+               );
         }
 
         // TODO - Add checking if user is Admin/Approver

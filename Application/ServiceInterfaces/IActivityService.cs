@@ -9,6 +9,7 @@ namespace Application.ServiceInterfaces
     {
         Task<ApprovedActivityReturn> GetActivityAsync(int id);
         Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(int? limit, int? offset);
+        Task<Either<RestError, int>> AnswerToPuzzleAsync(int id, PuzzleAnswer puzzleAnswer);
         Task<Either<RestError, ApprovedActivityReturn>> ApprovePendingActivity(int id);
     }
 }
