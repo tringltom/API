@@ -9,6 +9,7 @@ using Application.Models.Activity;
 using Application.Services;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
@@ -48,7 +49,7 @@ namespace Application.Tests.Services
             pendingActivityEnvelope.Activities = activitiesReturn.ToList();
             pendingActivityEnvelope.ActivityCount = activitiesReturn.ToList().Count;
 
-            _uowMock.Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _uowMock.Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(It.IsAny<QueryObject>()))
                .ReturnsAsync(activities);
 
             _mapperMock
@@ -60,11 +61,11 @@ namespace Application.Tests.Services
                 .ReturnsAsync(activitiesReturn.Count);
 
             // Act
-            var res = await _sut.GetPendingActivitiesAsync(It.IsAny<int>(), It.IsAny<int>());
+            var res = await _sut.GetPendingActivitiesAsync(It.IsAny<QueryObject>());
 
             // Assert
             res.Should().BeEquivalentTo(pendingActivityEnvelope);
-            _uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(It.IsAny<QueryObject>()), Times.Once);
             _uowMock.Verify(x => x.PendingActivities.CountAsync(), Times.Once);
         }
 
@@ -82,7 +83,7 @@ namespace Application.Tests.Services
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
 
-            _uowMock.Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, It.IsAny<int>(), It.IsAny<int>()))
+            _uowMock.Setup(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, It.IsAny<ActivityQuery>()))
                .ReturnsAsync(activities);
 
             _mapperMock
@@ -94,12 +95,12 @@ namespace Application.Tests.Services
                 .ReturnsAsync(pendingActivityForUserReturn.Count);
 
             // Act
-            var res = await _sut.GetOwnerPendingActivitiesAsync(It.IsAny<int>(), It.IsAny<int>());
+            var res = await _sut.GetOwnerPendingActivitiesAsync(It.IsAny<ActivityQuery>());
 
             // Assert
             res.Should().BeEquivalentTo(pendingActivityForUserEnvelope);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            _uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, It.IsAny<ActivityQuery>()), Times.Once);
             _uowMock.Verify(x => x.PendingActivities.CountPendingActivitiesAsync(userId), Times.Once);
         }
 

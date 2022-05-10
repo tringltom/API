@@ -9,6 +9,7 @@ using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
@@ -32,9 +33,9 @@ namespace Application.Services
             _uow = uow;
         }
 
-        public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(int? limit, int? offset)
+        public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(QueryObject queryObject)
         {
-            var pendingActivities = await _uow.PendingActivities.GetLatestPendingActivitiesAsync(limit, offset);
+            var pendingActivities = await _uow.PendingActivities.GetLatestPendingActivitiesAsync(queryObject);
 
             return new PendingActivityEnvelope
             {
@@ -43,10 +44,10 @@ namespace Application.Services
             };
         }
 
-        public async Task<PendingActivityForUserEnvelope> GetOwnerPendingActivitiesAsync(int? limit, int? offset)
+        public async Task<PendingActivityForUserEnvelope> GetOwnerPendingActivitiesAsync(ActivityQuery activityQuery)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
-            var pendingActivities = await _uow.PendingActivities.GetLatestPendingActivitiesAsync(userId, limit, offset);
+            var pendingActivities = await _uow.PendingActivities.GetLatestPendingActivitiesAsync(userId, activityQuery);
 
             return new PendingActivityForUserEnvelope
             {

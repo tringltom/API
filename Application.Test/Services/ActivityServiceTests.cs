@@ -9,6 +9,7 @@ using Application.Services;
 using AutoFixture;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
@@ -68,7 +69,7 @@ namespace Application.Tests.Services
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                .Returns(userId);
 
-            _uowMock.Setup(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>(), userId))
+            _uowMock.Setup(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<ActivityQuery>(), userId))
                .ReturnsAsync(activities);
 
             _mapperMock
@@ -80,12 +81,12 @@ namespace Application.Tests.Services
                 .ReturnsAsync(activitiesGet.Count);
 
             // Act
-            var res = await _sut.GetActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>());
+            var res = await _sut.GetActivitiesFromOtherUsersAsync(It.IsAny<ActivityQuery>());
 
             // Assert
             res.Should().BeEquivalentTo(activityEnvelope);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            _uowMock.Verify(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>(), userId), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<ActivityQuery>(), userId), Times.Once);
             _uowMock.Verify(x => x.Activities.CountOtherUsersActivitiesAsync(userId), Times.Once);
         }
 

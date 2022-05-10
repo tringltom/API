@@ -2,6 +2,7 @@
 using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -24,9 +25,9 @@ namespace API.Controllers
         }
 
         [HttpGet("others")]
-        public async Task<IActionResult> GetActivitiesFromOtherUsers(int? limit, int? offset)
+        public async Task<IActionResult> GetActivitiesFromOtherUsers([FromQuery] ActivityQuery activityQuery)
         {
-            return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset));
+            return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(activityQuery));
         }
 
         [HttpPatch("{id}/answer")]
