@@ -1,4 +1,10 @@
-﻿namespace Application.ServiceInterfaces
+﻿using System.Threading.Tasks;
+using Application.Errors;
+using Application.Models.Activity;
+using DAL.Query;
+using LanguageExt;
+
+namespace Application.ServiceInterfaces
 {
     public interface IActivityService
     {
