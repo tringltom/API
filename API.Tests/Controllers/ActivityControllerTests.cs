@@ -56,6 +56,21 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
+        public async Task AnswerToPuzzle_SuccessfullAsync(PuzzleAnswer puzzleAnswer, int xpReward)
+        {
+            // Arrange
+            _activityServiceMock.Setup(x => x.AnswerToPuzzleAsync(It.IsAny<int>(), puzzleAnswer))
+               .ReturnsAsync(xpReward);
+
+            // Act
+            var res = await _sut.AnswerToPuzzle(It.IsAny<int>(), puzzleAnswer) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(xpReward);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
         public async Task ApprovePendingActivity_SuccessfullAsync(ApprovedActivityReturn activity)
         {
             // Arrange

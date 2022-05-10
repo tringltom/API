@@ -7,9 +7,7 @@ namespace DAL.Repositories
 {
     public class SkillSpecialRepostiory : BaseRepository<SkillSpecial>, ISkillSpecialRepository
     {
-        public SkillSpecialRepostiory(DataContext dbContext) : base(dbContext)
-        {
-        }
+        public SkillSpecialRepostiory(DataContext dbContext) : base(dbContext) { }
 
         public async Task<SkillSpecial> GetSkillSpecialAsync(ActivityTypeId? firstActivityTypeId, ActivityTypeId? secondActivityTypeId)
         {

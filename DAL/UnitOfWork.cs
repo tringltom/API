@@ -25,6 +25,7 @@ namespace DAL
             SkillSpecials = new SkillSpecialRepostiory(dbContext);
             SkillXpBonuses = new SkillXpBonusRepository(dbContext);
             SkillActivities = new SkillActivityRepository(dbContext);
+            UserPuzzleAnswers = new UserPuzzleAnswerRepository(dbContext);
         }
 
         public IUserRepository Users { get; private set; }
@@ -40,6 +41,7 @@ namespace DAL
         public ISkillSpecialRepository SkillSpecials { get; private set; }
         public ISkillXpBonusRepository SkillXpBonuses { get; private set; }
         public ISkillActivityRepository SkillActivities { get; private set; }
+        public IUserPuzzleAnswerRepostiory UserPuzzleAnswers { get; set; }
 
         public async Task<bool> CompleteAsync() => await _dbContext.SaveChangesAsync() > 0;
         public void Dispose() => _dbContext.Dispose();

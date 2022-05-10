@@ -18,6 +18,7 @@ namespace DAL
         ISkillSpecialRepository SkillSpecials { get; }
         ISkillXpBonusRepository SkillXpBonuses { get; }
         ISkillActivityRepository SkillActivities { get; }
+        IUserPuzzleAnswerRepostiory UserPuzzleAnswers { get; }
         Task<bool> CompleteAsync();
     }
 }
