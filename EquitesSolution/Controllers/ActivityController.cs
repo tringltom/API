@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Validations;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -23,9 +24,9 @@ namespace API.Controllers
         }
 
         [HttpGet("others")]
-        public async Task<IActionResult> GetActivitiesFromOtherUsers(int? limit, int? offset)
+        public async Task<IActionResult> GetActivitiesFromOtherUsers([FromQuery] ActivityQuery activityQuery)
         {
-            return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(limit, offset));
+            return Ok(await _activityService.GetActivitiesFromOtherUsersAsync(activityQuery));
         }
 
         // TODO - Add checking if user is Admin/Approver

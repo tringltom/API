@@ -3,6 +3,7 @@ using API.Validations;
 using Application.Models;
 using Application.Models.User;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -19,16 +20,16 @@ namespace API.Controllers
         }
 
         [HttpGet("")]
-        public async Task<IActionResult> GetRankedUsers(int? limit, int? offset)
+        public async Task<IActionResult> GetRankedUsers([FromQuery] UserQuery userQuery)
         {
-            return Ok(await _usersService.GetRankedUsersAsync(limit, offset));
+            return Ok(await _usersService.GetRankedUsersAsync(userQuery));
         }
 
         // TODO - Add checking if user is Admin
         [HttpGet("pending-images")]
-        public async Task<IActionResult> GetImagesForApproval(int? limit, int? offset)
+        public async Task<IActionResult> GetImagesForApproval([FromQuery] QueryObject queryObject)
         {
-            return Ok(await _usersService.GetImagesForApprovalAsync(limit, offset));
+            return Ok(await _usersService.GetImagesForApprovalAsync(queryObject));
         }
 
         [HttpPatch("me/about")]

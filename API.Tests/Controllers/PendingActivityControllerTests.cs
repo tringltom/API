@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
 using LanguageExt;
@@ -29,11 +30,11 @@ namespace API.Tests.Controllers
         public async Task GetPendingActivities_SuccessfullAsync(PendingActivityEnvelope pendingActivityEnvelope)
         {
             // Arrange
-            _pendingActivityServiceMock.Setup(x => x.GetPendingActivitiesAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _pendingActivityServiceMock.Setup(x => x.GetPendingActivitiesAsync(It.IsAny<QueryObject>()))
                .ReturnsAsync(pendingActivityEnvelope);
 
             // Act
-            var res = await _sut.GetPendingActivities(It.IsAny<int>(), It.IsAny<int>()) as OkObjectResult;
+            var res = await _sut.GetPendingActivities(It.IsAny<QueryObject>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(pendingActivityEnvelope);
@@ -44,11 +45,11 @@ namespace API.Tests.Controllers
         public async Task GetOwnerPendingActivities_SuccessfullAsync(PendingActivityForUserEnvelope pendingActivityForUserEnvelope)
         {
             // Arrange
-            _pendingActivityServiceMock.Setup(x => x.GetOwnerPendingActivitiesAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _pendingActivityServiceMock.Setup(x => x.GetOwnerPendingActivitiesAsync(It.IsAny<ActivityQuery>()))
                .ReturnsAsync(pendingActivityForUserEnvelope);
 
             // Act
-            var res = await _sut.GetOwnerPendingActivities(It.IsAny<int>(), It.IsAny<int>()) as OkObjectResult;
+            var res = await _sut.GetOwnerPendingActivities(It.IsAny<ActivityQuery>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(pendingActivityForUserEnvelope);

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DAL.Query;
 using DAL.RepositoryInterfaces;
 using Domain;
 using Persistence;
@@ -10,9 +11,14 @@ namespace DAL.Repositories
     {
         public ActivityRepository(DataContext context) : base(context) { }
 
-        public async Task<IEnumerable<Activity>> GetOrderedActivitiesFromOtherUsersAsync(int? limit, int? offset, int userId)
+        public async Task<IEnumerable<Activity>> GetOrderedActivitiesFromOtherUsersAsync(ActivityQuery activityQuery, int userId)
         {
-            return await FindAsync(limit, offset, a => a.User.Id != userId, a => a.Id);
+            return await FindAsync(activityQuery.Limit,
+                activityQuery.Offset,
+                a => a.User.Id != userId
+                    && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
+                    && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)),
+                a => a.Id);
         }
 
         public async Task<int> CountOtherUsersActivitiesAsync(int userId)

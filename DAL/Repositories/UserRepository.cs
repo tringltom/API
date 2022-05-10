@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DAL.Query;
 using DAL.RepositoryInterfaces;
 using Domain;
 using Persistence;
@@ -12,11 +13,17 @@ namespace DAL.Repositories
 
         public async Task<bool> ExistsWithEmailAsyncAsync(string email) => await AnyAsync(u => u.Email == email);
         public async Task<bool> ExistsWithUsernameAsync(string username) => await AnyAsync(u => u.UserName == username);
-        public async Task<IEnumerable<User>> GetRankedUsersAsync(int? limit, int? offset) => await FindAsync(limit, offset, u => true, u => u.CurrentXp);
-        public async Task<IEnumerable<User>> GetUsersForImageApprovalAsync(int? limit, int? offset)
+        public async Task<IEnumerable<User>> GetRankedUsersAsync(UserQuery userQuery)
         {
-            return await FindAsync(limit,
-                offset,
+            return await FindAsync(userQuery.Limit,
+                userQuery.Offset,
+                u => string.IsNullOrEmpty(userQuery.UserName) || u.UserName.Contains(userQuery.UserName),
+                u => u.CurrentXp);
+        }
+        public async Task<IEnumerable<User>> GetUsersForImageApprovalAsync(QueryObject queryObject)
+        {
+            return await FindAsync(queryObject.Limit,
+                queryObject.Offset,
                 u => !u.ImageApproved && !string.IsNullOrEmpty(u.ImagePublicId),
                 u => u.Id);
         }

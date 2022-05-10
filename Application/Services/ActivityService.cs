@@ -8,6 +8,7 @@ using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using LanguageExt;
 
@@ -34,11 +35,11 @@ namespace Application.Services
             return _mapper.Map<ApprovedActivityReturn>(activity);
         }
 
-        public async Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(int? limit, int? offset)
+        public async Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
-            var activities = await _uow.Activities.GetOrderedActivitiesFromOtherUsersAsync(limit, offset, userId);
+            var activities = await _uow.Activities.GetOrderedActivitiesFromOtherUsersAsync(activityQuery, userId);
 
             return new ApprovedActivityEnvelope
             {

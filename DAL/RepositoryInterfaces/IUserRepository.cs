@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DAL.Query;
 using Domain;
 
 namespace DAL.RepositoryInterfaces
@@ -8,8 +9,8 @@ namespace DAL.RepositoryInterfaces
     {
         Task<bool> ExistsWithEmailAsyncAsync(string email);
         Task<bool> ExistsWithUsernameAsync(string username);
-        Task<IEnumerable<User>> GetRankedUsersAsync(int? limit, int? offset);
-        Task<IEnumerable<User>> GetUsersForImageApprovalAsync(int? limit, int? offset);
+        Task<IEnumerable<User>> GetRankedUsersAsync(UserQuery userQuery);
+        Task<IEnumerable<User>> GetUsersForImageApprovalAsync(QueryObject queryObject);
         Task<int> CountUsersForImageApprovalAsync();
     }
 }

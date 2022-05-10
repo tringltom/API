@@ -10,6 +10,7 @@ using Application.Services;
 using AutoFixture;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
@@ -46,7 +47,7 @@ namespace Application.Tests.Services
         public async Task GetRankedUsers_SuccessfullAsync(List<UserRankedGet> rankedUsers, List<User> users)
         {
             // Arrange
-            _uowMock.Setup(x => x.Users.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _uowMock.Setup(x => x.Users.GetRankedUsersAsync(It.IsAny<UserQuery>()))
                 .ReturnsAsync(users);
 
             _uowMock.Setup(x => x.Users.CountAsync())
@@ -60,11 +61,11 @@ namespace Application.Tests.Services
             userArenaEnvelope.UserCount = rankedUsers.Count;
 
             // Act
-            var res = await _sut.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>());
+            var res = await _sut.GetRankedUsersAsync(It.IsAny<UserQuery>());
 
             // Assert
             res.Should().BeEquivalentTo(userArenaEnvelope);
-            _uowMock.Verify(x => x.Users.GetRankedUsersAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Users.GetRankedUsersAsync(It.IsAny<UserQuery>()), Times.Once);
             _uowMock.Verify(x => x.Users.CountAsync(), Times.Once);
         }
 
@@ -75,7 +76,7 @@ namespace Application.Tests.Services
              IEnumerable<User> users, int usersCount)
         {
             // Arrange
-            _uowMock.Setup(x => x.Users.GetUsersForImageApprovalAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _uowMock.Setup(x => x.Users.GetUsersForImageApprovalAsync(It.IsAny<QueryObject>()))
                 .ReturnsAsync(users);
 
             _uowMock.Setup(x => x.Users.CountUsersForImageApprovalAsync())
@@ -88,7 +89,7 @@ namespace Application.Tests.Services
             userImageEnvelope.UserCount = usersCount;
 
             // Act
-            var result = await _sut.GetImagesForApprovalAsync(It.IsAny<int>(), It.IsAny<int>());
+            var result = await _sut.GetImagesForApprovalAsync(It.IsAny<QueryObject>());
 
             // Assert
             result.Should().BeEquivalentTo(userImageEnvelope);
@@ -96,7 +97,7 @@ namespace Application.Tests.Services
             usersForImageApproval.Should().BeEquivalentTo(userImageEnvelope.Users);
             usersCount.Should().Be(userImageEnvelope.UserCount);
 
-            _uowMock.Verify(x => x.Users.GetUsersForImageApprovalAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Users.GetUsersForImageApprovalAsync(It.IsAny<QueryObject>()), Times.Once);
             _uowMock.Verify(x => x.Users.CountUsersForImageApprovalAsync(), Times.Once);
         }
 

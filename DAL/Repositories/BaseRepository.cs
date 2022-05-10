@@ -30,8 +30,8 @@ namespace DAL.Repositories
             return await _dbSet
                 .Where(wherePredicate)
                 .OrderByDescending(orderPredicate)
-                .Skip(offset ?? 0)
-                .Take(limit ?? 3)
+                .Skip((int)offset)
+                .Take((int)limit)
                 .ToListAsync();
         }
 
