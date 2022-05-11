@@ -20,6 +20,11 @@ namespace DAL.Repositories
                 u => string.IsNullOrEmpty(userQuery.UserName) || u.UserName.Contains(userQuery.UserName),
                 u => u.CurrentXp);
         }
+        public async Task<int> CountRankedUsersAsync(UserQuery userQuery)
+        {
+            return await CountAsync(u => string.IsNullOrEmpty(userQuery.UserName) || u.UserName.Contains(userQuery.UserName));
+
+        }
         public async Task<IEnumerable<User>> GetUsersForImageApprovalAsync(QueryObject queryObject)
         {
             return await FindAsync(queryObject.Limit,

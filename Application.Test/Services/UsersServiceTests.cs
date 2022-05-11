@@ -50,7 +50,7 @@ namespace Application.Tests.Services
             _uowMock.Setup(x => x.Users.GetRankedUsersAsync(It.IsAny<UserQuery>()))
                 .ReturnsAsync(users);
 
-            _uowMock.Setup(x => x.Users.CountAsync())
+            _uowMock.Setup(x => x.Users.CountRankedUsersAsync(It.IsAny<UserQuery>()))
                 .ReturnsAsync(users.Count);
 
             _mapperMock.Setup(x => x.Map<IEnumerable<User>, IEnumerable<UserRankedGet>>(users))
@@ -66,7 +66,7 @@ namespace Application.Tests.Services
             // Assert
             res.Should().BeEquivalentTo(userArenaEnvelope);
             _uowMock.Verify(x => x.Users.GetRankedUsersAsync(It.IsAny<UserQuery>()), Times.Once);
-            _uowMock.Verify(x => x.Users.CountAsync(), Times.Once);
+            _uowMock.Verify(x => x.Users.CountRankedUsersAsync(It.IsAny<UserQuery>()), Times.Once);
         }
 
         [Test]

@@ -38,7 +38,7 @@ namespace Application.Services
             var userRangingEnvelope = new UserRankedEnvelope
             {
                 Users = _mapper.Map<IEnumerable<User>, IEnumerable<UserRankedGet>>(rankedUsers).ToList(),
-                UserCount = await _uow.Users.CountAsync(),
+                UserCount = await _uow.Users.CountRankedUsersAsync(userQuery),
             };
 
             return userRangingEnvelope;
