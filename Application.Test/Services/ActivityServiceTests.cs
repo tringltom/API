@@ -6,7 +6,6 @@ using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.Services;
-using AutoFixture;
 using AutoMapper;
 using DAL;
 using DAL.Query;
