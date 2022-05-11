@@ -3,6 +3,7 @@ using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoFixture;
+using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
@@ -43,14 +44,29 @@ namespace API.Tests.Controllers
         public async Task GetActivitiesFromOtherUsers_SuccessfullAsync(ApprovedActivityEnvelope activityReturnEnvelope)
         {
             // Arrange
-            _activityServiceMock.Setup(x => x.GetActivitiesFromOtherUsersAsync(It.IsAny<int>(), It.IsAny<int>()))
+            _activityServiceMock.Setup(x => x.GetActivitiesFromOtherUsersAsync(It.IsAny<ActivityQuery>()))
                .ReturnsAsync(activityReturnEnvelope);
 
             // Act
-            var res = await _sut.GetActivitiesFromOtherUsers(It.IsAny<int>(), It.IsAny<int>()) as OkObjectResult;
+            var res = await _sut.GetActivitiesFromOtherUsers(It.IsAny<ActivityQuery>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(activityReturnEnvelope);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task AnswerToPuzzle_SuccessfullAsync(PuzzleAnswer puzzleAnswer, int xpReward)
+        {
+            // Arrange
+            _activityServiceMock.Setup(x => x.AnswerToPuzzleAsync(It.IsAny<int>(), puzzleAnswer))
+               .ReturnsAsync(xpReward);
+
+            // Act
+            var res = await _sut.AnswerToPuzzle(It.IsAny<int>(), puzzleAnswer) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(xpReward);
         }
 
         [Test]

@@ -2,6 +2,7 @@
 using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -18,15 +19,15 @@ namespace API.Controllers
 
         // TODO - Add checking if user is Admin
         [HttpGet()]
-        public async Task<IActionResult> GetPendingActivities(int? limit, int? offset)
+        public async Task<IActionResult> GetPendingActivities([FromQuery] QueryObject queryObject)
         {
-            return Ok(await _pendingActivityService.GetPendingActivitiesAsync(limit, offset));
+            return Ok(await _pendingActivityService.GetPendingActivitiesAsync(queryObject));
         }
 
         [HttpGet("me", Name = nameof(GetOwnerPendingActivities))]
-        public async Task<IActionResult> GetOwnerPendingActivities(int? limit, int? offset)
+        public async Task<IActionResult> GetOwnerPendingActivities([FromQuery] ActivityQuery activityQuery)
         {
-            return Ok(await _pendingActivityService.GetOwnerPendingActivitiesAsync(limit, offset));
+            return Ok(await _pendingActivityService.GetOwnerPendingActivitiesAsync(activityQuery));
         }
 
         [HttpGet("me/{id}")]

@@ -27,6 +27,7 @@ namespace Persistence
         public virtual DbSet<SkillActivity> SkillActivities { get; set; }
         public virtual DbSet<SkillXpBonus> SkillXpBonuses { get; set; }
         public virtual DbSet<SkillSpecial> SkillSpecials { get; set; }
+        public virtual DbSet<UserPuzzleAnswer> UserPuzzleAnswers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
