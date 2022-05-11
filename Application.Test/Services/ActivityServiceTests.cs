@@ -77,7 +77,7 @@ namespace Application.Tests.Services
                 .Returns(activitiesGet);
 
             _uowMock
-                .Setup(x => x.Activities.CountOtherUsersActivitiesAsync(userId))
+                .Setup(x => x.Activities.CountOtherUsersActivitiesAsync(userId, It.IsAny<ActivityQuery>()))
                 .ReturnsAsync(activitiesGet.Count);
 
             // Act
@@ -87,7 +87,7 @@ namespace Application.Tests.Services
             res.Should().BeEquivalentTo(activityEnvelope);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             _uowMock.Verify(x => x.Activities.GetOrderedActivitiesFromOtherUsersAsync(It.IsAny<ActivityQuery>(), userId), Times.Once);
-            _uowMock.Verify(x => x.Activities.CountOtherUsersActivitiesAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountOtherUsersActivitiesAsync(userId, It.IsAny<ActivityQuery>()), Times.Once);
         }
 
         [Test]

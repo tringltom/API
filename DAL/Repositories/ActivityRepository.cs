@@ -21,9 +21,12 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
-        public async Task<int> CountOtherUsersActivitiesAsync(int userId)
+        public async Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery)
         {
-            return await CountAsync(a => a.User.Id != userId);
+            return await CountAsync(a =>
+                a.User.Id != userId
+                && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
+                && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)));
         }
     }
 }

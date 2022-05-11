@@ -45,7 +45,7 @@ namespace Application.Services
             return new ApprovedActivityEnvelope
             {
                 Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
-                ActivityCount = await _uow.Activities.CountOtherUsersActivitiesAsync(userId)
+                ActivityCount = await _uow.Activities.CountOtherUsersActivitiesAsync(userId, activityQuery)
             };
         }
 

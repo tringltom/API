@@ -91,7 +91,7 @@ namespace Application.Tests.Services
                 .Returns(pendingActivityForUserReturn);
 
             _uowMock
-                .Setup(x => x.PendingActivities.CountPendingActivitiesAsync(userId))
+                .Setup(x => x.PendingActivities.CountPendingActivitiesAsync(userId, It.IsAny<ActivityQuery>()))
                 .ReturnsAsync(pendingActivityForUserReturn.Count);
 
             // Act
@@ -101,7 +101,7 @@ namespace Application.Tests.Services
             res.Should().BeEquivalentTo(pendingActivityForUserEnvelope);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             _uowMock.Verify(x => x.PendingActivities.GetLatestPendingActivitiesAsync(userId, It.IsAny<ActivityQuery>()), Times.Once);
-            _uowMock.Verify(x => x.PendingActivities.CountPendingActivitiesAsync(userId), Times.Once);
+            _uowMock.Verify(x => x.PendingActivities.CountPendingActivitiesAsync(userId, It.IsAny<ActivityQuery>()), Times.Once);
         }
 
         [Test]

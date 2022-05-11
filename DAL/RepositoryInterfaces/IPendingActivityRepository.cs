@@ -9,6 +9,6 @@ namespace DAL.RepositoryInterfaces
     {
         Task<IEnumerable<PendingActivity>> GetLatestPendingActivitiesAsync(QueryObject queryObject);
         Task<IEnumerable<PendingActivity>> GetLatestPendingActivitiesAsync(int userId, ActivityQuery activityQuery);
-        Task<int> CountPendingActivitiesAsync(int userId);
+        Task<int> CountPendingActivitiesAsync(int userId, ActivityQuery activityQuery);
     }
 }
