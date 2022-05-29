@@ -20,6 +20,7 @@ namespace Domain
         public DateTimeOffset? EndDate { get; set; }
         public DateTimeOffset DateApproved { get; set; }
         public virtual ICollection<ActivityMedia> ActivityMedias { get; set; }
-
+        public virtual ICollection<UserAttendance> UserAttendances { get; set; }
+        public virtual ICollection<HappeningMedia> HappeningMedias { get; set; }
     }
 }

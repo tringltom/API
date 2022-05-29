@@ -26,7 +26,10 @@ namespace API.Controllers
         {
             var result = await _reviewService.ReviewActivityAsync(activityReview);
 
-            return result.Match(u => Ok(), err => err.Response());
+            return result.Match(
+                u => Ok(),
+                err => err.Response()
+                );
         }
     }
 }

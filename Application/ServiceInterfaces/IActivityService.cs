@@ -11,6 +11,11 @@ namespace Application.ServiceInterfaces
         Task<ApprovedActivityReturn> GetActivityAsync(int id);
         Task<Either<RestError, int>> AnswerToPuzzleAsync(int id, PuzzleAnswer puzzleAnswer);
         Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery);
+        Task<HappeningEnvelope> GetHappeningsForApprovalAsync(QueryObject queryObject);
         Task<Either<RestError, ApprovedActivityReturn>> ApprovePendingActivity(int id);
+        Task<Either<RestError, Unit>> AttendToHappeningAsync(int id, bool attend);
+        Task<Either<RestError, Unit>> ConfirmAttendenceToHappeningAsync(int id);
+        Task<Either<RestError, Unit>> CompleteHappeningAsync(int id, HappeningUpdate happeningUpdate);
+        Task<Either<RestError, Unit>> ApproveHappeningCompletitionAsync(int id, bool approve);
     }
 }

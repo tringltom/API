@@ -37,7 +37,17 @@ namespace Application.Mappings
             CreateMap<Activity, ApprovedActivityReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
-                .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias));
+                .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias))
+                .ForMember(d => d.NumberOfAttendees, o => o.MapFrom(s => s.UserAttendances != null ? s.UserAttendances.Count : 0))
+                .ForMember(d => d.IsUserAttending, o => o.MapFrom<AtendeeResolver>())
+                .ForMember(d => d.IsHeld, o => o.MapFrom(s => s.EndDate < DateTimeOffset.Now))
+                .ForMember(d => d.IsHost, o => o.MapFrom<HostResolver>());
+
+            CreateMap<Activity, HappeningReturn>()
+               .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
+               .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
+               .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias))
+               .ForMember(d => d.HappeningPhotos, o => o.MapFrom(s => s.HappeningMedias));
 
             CreateMap<PendingActivityMedia, ActivityMedia>()
                 .ForMember(d => d.Activity, o => o.MapFrom(s => s.ActivityPending))
@@ -47,6 +57,9 @@ namespace Application.Mappings
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
 
             CreateMap<PendingActivityMedia, Photo>()
+                .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
+
+            CreateMap<HappeningMedia, Photo>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
 
             CreateMap<ActivityReview, UserReview>();
