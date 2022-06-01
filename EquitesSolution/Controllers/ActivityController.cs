@@ -37,7 +37,26 @@ namespace API.Controllers
             return Ok(await _activityService.GetHappeningsForApprovalAsync(queryObject));
         }
 
-        [HttpPatch("{id}/answer")]
+        [HttpGet("me/{id}/challenge-answers")]
+        [IdValidation]
+        public async Task<IActionResult> GetOwnerChallengeAnswers(int id, [FromQuery] QueryObject queryObject)
+        {
+            var result = await _activityService.GetOwnerChallengeAnswersAsync(id, queryObject);
+
+            return result.Match(
+                challengeAnswers => Ok(challengeAnswers),
+                err => err.Response()
+                );
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpGet("pending-challenges")]
+        public async Task<IActionResult> GetChallengesForApproval([FromQuery] QueryObject queryObject)
+        {
+            return Ok(await _activityService.GetChallengesForApprovalAsync(queryObject));
+        }
+
+        [HttpPatch("{id}/puzzle-answer")]
         [IdValidation]
         public async Task<IActionResult> AnswerToPuzzle(int id, PuzzleAnswer puzzleAnswer)
         {
@@ -62,11 +81,36 @@ namespace API.Controllers
                );
         }
 
+        [HttpPatch("{id}/challenge-confirmation")]
+        [IdValidation]
+        public async Task<IActionResult> ConfirmChallengeAnswer(int id)
+        {
+            var result = await _activityService.ConfirmChallengeAnswerAsync(id);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
         [HttpPatch("{id}/happening-completion-approval")]
         [IdValidation]
         public async Task<IActionResult> ApproveHappeningCompletition(int id, HappeningApprove happeningApprove)
         {
             var result = await _activityService.ApproveHappeningCompletitionAsync(id, happeningApprove.Approve);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPatch("{id}/challenge-answer-disapproval")]
+        [IdValidation]
+        public async Task<IActionResult> DisapproveChallengeAnswer(int id)
+        {
+            var result = await _activityService.DisapproveChallengeAnswerAsync(id);
 
             return result.Match(
                u => Ok(),
@@ -116,6 +160,31 @@ namespace API.Controllers
         public async Task<IActionResult> CompleteHappening(int id, [FromForm] HappeningUpdate happeningUpdate)
         {
             var result = await _activityService.CompleteHappeningAsync(id, happeningUpdate);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
+        [HttpPost("{id}/challenge-answer")]
+        [IdValidation]
+        public async Task<IActionResult> AnswerToChallenge(int id, ChallengeAnswer challengeAnswer)
+        {
+            var result = await _activityService.AnswerToChallengeAsync(id, challengeAnswer);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPost("{id}/challenge-answer-approval")]
+        [IdValidation]
+        public async Task<IActionResult> ApproveChallengeAnswer(int id)
+        {
+            var result = await _activityService.ApproveChallengeAnswerAsync(id);
 
             return result.Match(
                u => Ok(),

@@ -62,6 +62,33 @@ namespace Application.Services
             };
         }
 
+        public async Task<Either<RestError, ChallengeEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject)
+        {
+            var activity = await _uow.Activities.GetAsync(id);
+
+            if (activity == null)
+                return new NotFound("Aktivnost nije pronadjena");
+
+            if (activity.ActivityTypeId != ActivityTypeId.Challenge)
+                return new BadRequest("Aktivnost nije izazov");
+
+            if (activity.XpReward != null)
+                return new BadRequest("Izazov je rešen");
+
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+
+            if (activity.User.Id != userId)
+                return new BadRequest("Niste kreirali ovaj izazov");
+
+            var userChallengeAnswers = await _uow.UserChallengeAnswers.GetUserChallengeAnswersAsync(id, queryObject);
+
+            return new ChallengeEnvelope
+            {
+                Challenges = _mapper.Map<IEnumerable<UserChallengeAnswer>, IEnumerable<ChallengeReturn>>(userChallengeAnswers).ToList(),
+                ChallengesCount = await _uow.UserChallengeAnswers.CountChallengeAnswersAsync(id)
+            };
+        }
+
         public async Task<Either<RestError, int>> AnswerToPuzzleAsync(int id, PuzzleAnswer puzzleAnswer)
         {
             var activity = await _uow.Activities.GetAsync(id);
@@ -278,6 +305,56 @@ namespace Application.Services
             await _uow.CompleteAsync();
 
             await _emailManager.SendActivityApprovalEmailAsync(activity.Title, activity.User.Email, true);
+
+            return Unit.Default;
+        }
+
+        public async Task<Either<RestError, Unit>> AnswerToChallengeAsync(int id, ChallengeAnswer challengeAnswer)
+        {
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+            var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetUserChallengeAnswerAsync(userId, id);
+
+            if (existingAnswerToChallenge != null)
+                return new BadRequest("Već ste odgovorili na izazov");
+
+            var userChallengeAnswer = new UserChallengeAnswer { UserId = userId, ActivityId = id, Description = challengeAnswer.Description };
+
+            foreach (var image in challengeAnswer.Images)
+            {
+                var photoResult = image != null ? await _photoAccessor.AddPhotoAsync(image) : null;
+                if (photoResult != null)
+                    userChallengeAnswer.ChallengeMedias.Add(new ChallengeMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
+            }
+
+            _uow.UserChallengeAnswers.Add(userChallengeAnswer);
+            await _uow.CompleteAsync();
+
+            return Unit.Default;
+        }
+
+        public async Task<Either<RestError, Unit>> ConfirmChallengeAnswerAsync(int challengeAnswerId)
+        {
+            var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetAsync(challengeAnswerId);
+
+            if (existingAnswerToChallenge == null)
+                return new NotFound("Nepostojeći odgovor");
+
+            if (existingAnswerToChallenge.Confirmed)
+                return new NotFound("Ovaj odgovor ste već odabrali");
+
+            var userId = _userAccessor.GetUserIdFromAccessToken();
+
+            if (userId != existingAnswerToChallenge.Activity.User.Id)
+                return new BadRequest("Ne možete odabrati odgovor za izazov koji niste kreirali");
+
+            var confirmedAnswer = await _uow.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingAnswerToChallenge.ActivityId);
+
+            if (confirmedAnswer != null)
+                confirmedAnswer.Confirmed = false;
+
+            existingAnswerToChallenge.Confirmed = true;
+
+            await _uow.CompleteAsync();
 
             return Unit.Default;
         }

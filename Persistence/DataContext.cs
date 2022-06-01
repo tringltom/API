@@ -30,6 +30,8 @@ namespace Persistence
         public virtual DbSet<UserPuzzleAnswer> UserPuzzleAnswers { get; set; }
         public virtual DbSet<UserAttendance> UserAttendances { get; set; }
         public virtual DbSet<HappeningMedia> HappeningMedias { get; set; }
+        public virtual DbSet<ChallengeMedia> ChallengeMedias { get; set; }
+        public virtual DbSet<UserChallengeAnswer> UserChallengeAnswers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

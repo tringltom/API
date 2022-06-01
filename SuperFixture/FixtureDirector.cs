@@ -10,6 +10,7 @@ namespace FixtureShared
         {
             return (IFixture)typeof(FixtureDirector).GetMethod(fixtureType.ToString() ?? "Base").Invoke(this, null);
         }
+
         public IFixture WithAutoMoq()
         {
             return _fixtureBuilder.WithAutoMoq().Create();
@@ -29,6 +30,5 @@ namespace FixtureShared
         {
             return _fixtureBuilder.Create();
         }
-
     }
 }

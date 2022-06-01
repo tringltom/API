@@ -46,6 +46,7 @@ namespace DAL
         public IUserPuzzleAnswerRepostiory UserPuzzleAnswers { get; set; }
         public IUserAttendaceRepository UserAttendaces { get; set; }
         public IHappeningMediaRepository HappeningMedias { get; set; }
+        public IUserChallengeAnswerRepostiory UserChallengeAnswers { get; set; }
         public async Task<bool> CompleteAsync() => await _dbContext.SaveChangesAsync() > 0;
         public void Dispose() => _dbContext.Dispose();
     }

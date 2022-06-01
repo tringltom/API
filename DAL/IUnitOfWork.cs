@@ -21,6 +21,7 @@ namespace DAL
         IUserPuzzleAnswerRepostiory UserPuzzleAnswers { get; }
         IUserAttendaceRepository UserAttendaces { get; }
         IHappeningMediaRepository HappeningMedias { get; }
+        IUserChallengeAnswerRepostiory UserChallengeAnswers { get; }
         Task<bool> CompleteAsync();
     }
 }

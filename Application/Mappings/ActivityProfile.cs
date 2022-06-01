@@ -69,6 +69,9 @@ namespace Application.Mappings
             CreateMap<UserFavoriteActivity, FavoriteActivityIdReturn>();
 
             CreateMap<UserFavoriteActivity, UserFavoriteActivityReturn>();
+
+            CreateMap<UserChallengeAnswer, ChallengeReturn>()
+                .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName));
         }
     }
 }
