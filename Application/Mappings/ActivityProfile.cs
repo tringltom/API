@@ -70,7 +70,7 @@ namespace Application.Mappings
 
             CreateMap<UserFavoriteActivity, UserFavoriteActivityReturn>();
 
-            CreateMap<UserChallengeAnswer, ChallengeReturn>()
+            CreateMap<UserChallengeAnswer, ChallengeAnswerReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName));
         }
     }

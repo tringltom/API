@@ -62,7 +62,12 @@ namespace Application.Services
             };
         }
 
-        public async Task<Either<RestError, ChallengeEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject)
+        public async Task<ChallengeEnvelope> GetChallengesForApprovalAsync(QueryObject queryObject)
+        {
+            return new ChallengeEnvelope();
+        }
+
+        public async Task<Either<RestError, ChallengeAnswerEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject)
         {
             var activity = await _uow.Activities.GetAsync(id);
 
@@ -82,10 +87,10 @@ namespace Application.Services
 
             var userChallengeAnswers = await _uow.UserChallengeAnswers.GetUserChallengeAnswersAsync(id, queryObject);
 
-            return new ChallengeEnvelope
+            return new ChallengeAnswerEnvelope
             {
-                Challenges = _mapper.Map<IEnumerable<UserChallengeAnswer>, IEnumerable<ChallengeReturn>>(userChallengeAnswers).ToList(),
-                ChallengesCount = await _uow.UserChallengeAnswers.CountChallengeAnswersAsync(id)
+                ChallengeAnswers = _mapper.Map<IEnumerable<UserChallengeAnswer>, IEnumerable<ChallengeAnswerReturn>>(userChallengeAnswers).ToList(),
+                ChallengeAnswersCount = await _uow.UserChallengeAnswers.CountChallengeAnswersAsync(id)
             };
         }
 
@@ -357,6 +362,16 @@ namespace Application.Services
             await _uow.CompleteAsync();
 
             return Unit.Default;
+        }
+
+        public Task<Either<RestError, Unit>> DisapproveChallengeAnswerAsync(int activityId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Either<RestError, Unit>> ApproveChallengeAnswerAsync(int activityId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
