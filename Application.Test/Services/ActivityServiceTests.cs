@@ -1623,19 +1623,22 @@ namespace Application.Tests.Services
         {
             // Arrange
             _uowMock.Setup(x => x.Activities.GetActivitiesForUser(userQuery))
-                .Returns((Task<IEnumerable<Activity>>)activities);
+                .ReturnsAsync(activities);
 
             _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(userQuery.UserId))
-                .ReturnsAsync(activities.Count());
+              .ReturnsAsync(activityEnvelope.ActivityCount);
 
             _mapperMock
                 .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities))
                 .Returns(activitiesForEnvelope);
+
+            activityEnvelope.Activities = activitiesForEnvelope.ToList();
+
             // Act
-            var res = await _sut.GetApprovedActivitiesForUserAsync(It.IsAny<UserQuery>());
+            var res = await _sut.GetApprovedActivitiesForUserAsync(userQuery);
 
             // Assert
-            res.Should().BeEquivalentTo(activityEnvelope);
+            res.Match(r => r.Should().BeEquivalentTo(activityEnvelope), err => err.Should().BeNull());
             _uowMock.Verify(x => x.Activities.GetActivitiesForUser(userQuery), Times.Once);
             _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(userQuery.UserId), Times.Once);
         }
@@ -1654,8 +1657,10 @@ namespace Application.Tests.Services
             _mapperMock
                 .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities))
                 .Returns(activitiesForEnvelope);
+
             // Act
             var res = await _sut.GetApprovedActivitiesForUserAsync(userQuery);
+
             // Assert
             res.Match(
                 activitiesNotFound => activitiesNotFound.Should().BeNull(),
