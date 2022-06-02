@@ -37,7 +37,13 @@ namespace Application.Mappings
             CreateMap<Activity, ApprovedActivityReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
-                .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias));
+                .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias))
+                .ForMember(d => d.NumberOfFavorites, o => o.MapFrom(s => s.UserFavorites.Count()))
+                .ForMember(d => d.NumberOfAwesomeReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.Awesome).Count()))
+                .ForMember(d => d.NumberOfGoodReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.Good).Count()))
+                .ForMember(d => d.NumberOfNoneReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.None).Count()))
+                .ForMember(d => d.NumberOfPoorReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.Poor).Count()))
+                .ForMember(d => d.DateApproved, o => o.MapFrom(s => s.DateApproved));
 
             CreateMap<PendingActivityMedia, ActivityMedia>()
                 .ForMember(d => d.Activity, o => o.MapFrom(s => s.ActivityPending))

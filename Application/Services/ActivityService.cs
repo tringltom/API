@@ -109,5 +109,19 @@ namespace Application.Services
 
             return _mapper.Map<ApprovedActivityReturn>(activity);
         }
+
+        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesForUserAsync(UserQuery userQuery)
+        {
+            var activities = await _uow.Activities.GetActivitiesForUser(userQuery);
+
+            if (activities == null)
+                return new NotFound("Nema odobrenih aktivnosti za trenutno ulogovanog korisnika");
+
+            return new ApprovedActivityEnvelope
+            {
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountActivitiesFromUser(userQuery.UserId),
+            };
+        }
     }
 }

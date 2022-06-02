@@ -21,6 +21,19 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
+        public async Task<IEnumerable<Activity>> GetActivitiesForUser(UserQuery userQuery)
+        {
+            return await FindAsync(userQuery.Limit,
+                userQuery.Offset,
+                a => a.User.Id == userQuery.UserId && userQuery != null,
+                a => a.Id);
+        }
+
+        public async Task<int> CountActivitiesFromUser(int userId)
+        {
+            return await CountAsync(a => a.User.Id == userId);
+        }
+
         public async Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery)
         {
             return await CountAsync(a =>

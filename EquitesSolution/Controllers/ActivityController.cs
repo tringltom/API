@@ -53,5 +53,16 @@ namespace API.Controllers
                 err => err.Response()
                 );
         }
+
+        [HttpGet("approved-activities", Name = nameof(GetApprovedActivitiesForUser))]
+        public async Task<IActionResult> GetApprovedActivitiesForUser([FromQuery] UserQuery userQuery)
+        {
+            var result = await _activityService.GetApprovedActivitiesForUserAsync(userQuery);
+
+            return result.Match(
+                approvedActivitiesEnvelope => Ok(approvedActivitiesEnvelope),
+                err => err.Response()
+                );
+        }
     }
 }

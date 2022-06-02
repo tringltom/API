@@ -83,5 +83,20 @@ namespace API.Tests.Controllers
             // Assert
             res.Value.Should().Be(activity);
         }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(ApprovedActivityEnvelope approvedActivitiesEnvelope)
+        {
+            // Arrange
+            _activityServiceMock.Setup(x => x.GetApprovedActivitiesForUserAsync(It.IsAny<UserQuery>()))
+               .ReturnsAsync(approvedActivitiesEnvelope);
+
+            // Act
+            var res = await _sut.GetApprovedActivitiesForUser(It.IsAny<UserQuery>()) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(approvedActivitiesEnvelope);
+        }
     }
 }

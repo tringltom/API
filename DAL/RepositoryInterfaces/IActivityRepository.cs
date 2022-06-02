@@ -8,7 +8,8 @@ namespace DAL.RepositoryInterfaces
     public interface IActivityRepository : IBaseRepository<Activity>
     {
         Task<IEnumerable<Activity>> GetOrderedActivitiesFromOtherUsersAsync(ActivityQuery activityQuery, int userId);
-
+        Task<IEnumerable<Activity>> GetActivitiesForUser(UserQuery userQuery);
+        Task<int> CountActivitiesFromUser(int userId);
         Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery);
     }
 }

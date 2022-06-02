@@ -11,6 +11,7 @@ namespace Application.ServiceInterfaces
         Task<ApprovedActivityReturn> GetActivityAsync(int id);
         Task<Either<RestError, int>> AnswerToPuzzleAsync(int id, PuzzleAnswer puzzleAnswer);
         Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery);
+        Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesForUserAsync(UserQuery userQuery);
         Task<Either<RestError, ApprovedActivityReturn>> ApprovePendingActivity(int id);
     }
 }

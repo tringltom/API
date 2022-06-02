@@ -468,5 +468,54 @@ namespace Application.Tests.Services
             _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
             _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(pendingActivity.Title, pendingActivity.User.Email, true), Times.Never);
         }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(UserQuery userQuery, IEnumerable<Activity> activities,
+            IEnumerable<ApprovedActivityReturn> activitiesForEnvelope, ApprovedActivityEnvelope activityEnvelope)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.Activities.GetActivitiesForUser(userQuery))
+                .Returns((Task<IEnumerable<Activity>>)activities);
+
+            _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(userQuery.UserId))
+                .ReturnsAsync(activities.Count());
+
+            _mapperMock
+                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities))
+                .Returns(activitiesForEnvelope);
+            // Act
+            var res = await _sut.GetApprovedActivitiesForUserAsync(It.IsAny<UserQuery>());
+
+            // Assert
+            res.Should().BeEquivalentTo(activityEnvelope);
+            _uowMock.Verify(x => x.Activities.GetActivitiesForUser(userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(userQuery.UserId), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetApprovedActivitiesForUser_NoActivitiesFoundAsync(UserQuery userQuery, IEnumerable<Activity> activities, IEnumerable<ApprovedActivityReturn> activitiesForEnvelope)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.Activities.GetActivitiesForUser(userQuery))
+                .ReturnsAsync((IEnumerable<Activity>)null);
+
+            _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(userQuery.UserId))
+                .ReturnsAsync(activities.Count());
+
+            _mapperMock
+                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities))
+                .Returns(activitiesForEnvelope);
+            // Act
+            var res = await _sut.GetApprovedActivitiesForUserAsync(userQuery);
+            // Assert
+            res.Match(
+                activitiesNotFound => activitiesNotFound.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+            _uowMock.Verify(x => x.Activities.GetActivitiesForUser(userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(userQuery.UserId), Times.Never);
+        }
     }
 }
