@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220517215604_HappeningMedia")]
+    partial class HappeningMedia
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1389,7 +1391,7 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.UserFavoriteActivity", b =>
                 {
                     b.HasOne("Domain.Activity", "Activity")
-                        .WithMany("UserFavorites")
+                        .WithMany()
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1419,7 +1421,7 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.UserReview", b =>
                 {
                     b.HasOne("Domain.Activity", "Activity")
-                        .WithMany("UserReviews")
+                        .WithMany()
                         .HasForeignKey("ActivityId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

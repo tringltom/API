@@ -21,6 +21,15 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
+        public async Task<IEnumerable<Activity>> GetHappeningsForApprovalAsync(QueryObject queryObject)
+        {
+            return await FindAsync(queryObject.Limit,
+                queryObject.Offset,
+                a => a.ActivityTypeId == ActivityTypeId.Happening
+                    && a.HappeningMedias.Count > 0,
+                a => a.Id);
+        }
+
         public async Task<IEnumerable<Activity>> GetActivitiesForUser(UserQuery userQuery)
         {
             return await FindAsync(userQuery.Limit,
@@ -40,6 +49,13 @@ namespace DAL.Repositories
                 a.User.Id != userId
                 && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
                 && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)));
+        }
+
+        public async Task<int> CountHappeningsForApprovalAsync()
+        {
+            return await CountAsync(a =>
+                a.ActivityTypeId == ActivityTypeId.Happening
+                && a.HappeningMedias != null);
         }
     }
 }

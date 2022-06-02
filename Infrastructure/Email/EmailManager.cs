@@ -87,6 +87,7 @@ namespace Infrastructure.Email
 
             await SendEmail(userEmail, $"Ekviti - Obaveštenje u vezi aktivnosti: {activityTitle}", bodyBuilder);
         }
+
         public async Task SendProfileImageApprovalEmailAsync(string userEmail, bool approved)
         {
             var bodyBuilder = new BodyBuilder
@@ -96,6 +97,17 @@ namespace Infrastructure.Email
             };
 
             await SendEmail(userEmail, $"Ekviti - Obaveštenje u vezi profilne slike", bodyBuilder);
+        }
+
+        public async Task SendPuzzleAnsweredAsync(string puzzleTitle, string creatorEmail, string answererUsername)
+        {
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Vaša zagonetka pod nazivom {puzzleTitle} je rešena od strane korisnika pod nazivom {answererUsername}</p>",
+                TextBody = $"Vaša zagonetka pod nazivom {puzzleTitle} je rešena od strane korisnika pod nazivom {answererUsername}"
+            };
+
+            await SendEmail(creatorEmail, $"Ekviti - Obaveštenje u vezi zagonetke: {puzzleTitle}", bodyBuilder);
         }
 
         public string DecodeVerificationToken(string token)

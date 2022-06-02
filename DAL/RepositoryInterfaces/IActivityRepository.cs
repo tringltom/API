@@ -10,6 +10,8 @@ namespace DAL.RepositoryInterfaces
         Task<IEnumerable<Activity>> GetOrderedActivitiesFromOtherUsersAsync(ActivityQuery activityQuery, int userId);
         Task<IEnumerable<Activity>> GetActivitiesForUser(UserQuery userQuery);
         Task<int> CountActivitiesFromUser(int userId);
+        Task<IEnumerable<Activity>> GetHappeningsForApprovalAsync(QueryObject queryObject);
         Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery);
+        Task<int> CountHappeningsForApprovalAsync();
     }
 }

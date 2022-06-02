@@ -121,7 +121,6 @@ namespace API.Controllers
         [HttpPost("")]
         public async Task<IActionResult> Register(UserRegister userToRegister, string prefix)
         {
-
             //var result = await _userRegistrationService.RegisterAsync(userToRegister, prefix ?? Request.Headers["origin"]);
 
             //return result.Match(
