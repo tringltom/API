@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DAL.Query;
 using DAL.RepositoryInterfaces;
@@ -30,6 +31,16 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
+        public async Task<IEnumerable<Activity>> GetChallengesForApprovalAsync(QueryObject queryObject)
+        {
+            return await FindAsync(queryObject.Limit,
+                queryObject.Offset,
+                a => a.ActivityTypeId == ActivityTypeId.Challenge
+                    && a.XpReward == null
+                    && a.UserChallengeAnswers.Any(uc => uc.Confirmed),
+                a => a.Id);
+        }
+
         public async Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery)
         {
             return await CountAsync(a =>
@@ -43,6 +54,13 @@ namespace DAL.Repositories
             return await CountAsync(a =>
                 a.ActivityTypeId == ActivityTypeId.Happening
                 && a.HappeningMedias != null);
+        }
+
+        public async Task<int> CountChallengesForApprovalAsync()
+        {
+            return await CountAsync(a =>
+                a.ActivityTypeId == ActivityTypeId.Challenge
+                && a.UserChallengeAnswers.Any(uc => uc.Confirmed));
         }
     }
 }

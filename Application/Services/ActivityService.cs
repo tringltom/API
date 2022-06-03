@@ -64,7 +64,12 @@ namespace Application.Services
 
         public async Task<ChallengeEnvelope> GetChallengesForApprovalAsync(QueryObject queryObject)
         {
-            return new ChallengeEnvelope();
+            var challengesForApproval = await _uow.Activities.GetChallengesForApprovalAsync(queryObject);
+            return new ChallengeEnvelope
+            {
+                Challenges = _mapper.Map<IEnumerable<Activity>, IEnumerable<ChallengeReturn>>(challengesForApproval).ToList(),
+                ChallengesCount = await _uow.Activities.CountChallengesForApprovalAsync()
+            };
         }
 
         public async Task<Either<RestError, ChallengeAnswerEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject)
@@ -345,7 +350,7 @@ namespace Application.Services
                 return new NotFound("Nepostojeći odgovor");
 
             if (existingAnswerToChallenge.Confirmed)
-                return new NotFound("Ovaj odgovor ste već odabrali");
+                return new BadRequest("Ovaj odgovor ste već odabrali");
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
@@ -364,14 +369,73 @@ namespace Application.Services
             return Unit.Default;
         }
 
-        public Task<Either<RestError, Unit>> DisapproveChallengeAnswerAsync(int activityId)
+        public async Task<Either<RestError, Unit>> DisapproveChallengeAnswerAsync(int challengeAnswerId)
         {
-            throw new NotImplementedException();
+            var answerToChallenge = await _uow.UserChallengeAnswers.GetAsync(challengeAnswerId);
+
+            if (answerToChallenge == null)
+                return new NotFound("Nepostojeći odgovor");
+
+            answerToChallenge.Confirmed = false;
+
+            await _uow.CompleteAsync();
+
+            return Unit.Default;
         }
 
-        public Task<Either<RestError, Unit>> ApproveChallengeAnswerAsync(int activityId)
+        public async Task<Either<RestError, Unit>> ApproveChallengeAnswerAsync(int challengeAnswerId)
         {
-            throw new NotImplementedException();
+            var answerToChallenge = await _uow.UserChallengeAnswers.GetAsync(challengeAnswerId);
+
+            if (answerToChallenge == null)
+                return new NotFound("Nepostojeći odgovor");
+
+            if (!answerToChallenge.Confirmed)
+                return new BadRequest("Ovaj odgovor nije odabran");
+
+            if (answerToChallenge.Activity.XpReward != null)
+                return new BadRequest("Izazov je rešen");
+
+            foreach (var media in answerToChallenge.ChallengeMedias)
+            {
+                answerToChallenge.Activity.ActivityMedias.Add(new ActivityMedia { PublicId = media.PublicId, Url = media.Url });
+            }
+
+            answerToChallenge.Activity.Description += $" Odgovor dat od korisnika {answerToChallenge.User.UserName}"
+                + (string.IsNullOrEmpty(answerToChallenge.Description) ? $": {answerToChallenge.Description}" : "");
+
+            var userSkill = await _uow.Skills.GetChallengeSkillAsync(answerToChallenge.UserId);
+            var xpMultiplier = userSkill != null && userSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplierAsync(userSkill) : 1;
+
+            var challengeXps = await _uow.ActivityReviewXps.GetChallengeXpRewardAsync();
+
+            var reviewXp = 0;
+
+            foreach (var review in answerToChallenge.Activity.UserReviews)
+            {
+                reviewXp += challengeXps.SingleOrDefault(cx => cx.ReviewTypeId == review.ReviewTypeId).Xp;
+            }
+
+            answerToChallenge.Activity.XpReward = reviewXp;
+
+            var xpIncrease = reviewXp * xpMultiplier;
+
+            answerToChallenge.User.CurrentXp += xpIncrease;
+
+            var userChallangeAnswersForDeletion = await _uow.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(answerToChallenge.ActivityId);
+
+            foreach (var challangeAnswer in userChallangeAnswersForDeletion)
+            {
+                foreach (var photo in challangeAnswer.ChallengeMedias)
+                {
+                    await _photoAccessor.DeletePhotoAsync(photo.PublicId);
+                }
+            }
+
+            _uow.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion);
+            await _uow.CompleteAsync();
+
+            return Unit.Default;
         }
     }
 }

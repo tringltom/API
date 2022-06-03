@@ -9,6 +9,7 @@ namespace DAL.RepositoryInterfaces
     {
         Task<UserChallengeAnswer> GetUserChallengeAnswerAsync(int userId, int activityId);
         Task<IEnumerable<UserChallengeAnswer>> GetUserChallengeAnswersAsync(int activityId, QueryObject queryObject);
+        Task<IEnumerable<UserChallengeAnswer>> GetNotConfirmedUserChallengeAnswersAsync(int activityId);
         Task<UserChallengeAnswer> GetConfirmedUserChallengeAnswersAsync(int activityId);
         Task<int> CountChallengeAnswersAsync(int activityId);
     }

@@ -14,5 +14,6 @@ namespace DAL.Repositories
         public async Task<Skill> GetSkillAsync(int userId, ActivityTypeId activityTypeId) => await GetAsync(s => s.User.Id == userId && s.ActivityTypeId == activityTypeId);
         public async Task<Skill> GetPuzzleSkillAsync(int userId) => await GetAsync(s => s.User.Id == userId && s.ActivityTypeId == ActivityTypeId.Puzzle);
         public async Task<Skill> GetHappeningSkillAsync(int userId) => await GetAsync(s => s.User.Id == userId && s.ActivityTypeId == ActivityTypeId.Happening);
+        public async Task<Skill> GetChallengeSkillAsync(int userId) => await GetAsync(s => s.User.Id == userId && s.ActivityTypeId == ActivityTypeId.Challenge);
     }
 }

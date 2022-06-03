@@ -10,5 +10,6 @@ namespace DAL.RepositoryInterfaces
         Task<Skill> GetSkillAsync(int userId, ActivityTypeId activityTypeId);
         Task<Skill> GetPuzzleSkillAsync(int userId);
         Task<Skill> GetHappeningSkillAsync(int userId);
+        Task<Skill> GetChallengeSkillAsync(int userId);
     }
 }

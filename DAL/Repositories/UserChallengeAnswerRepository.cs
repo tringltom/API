@@ -24,6 +24,11 @@ namespace DAL.Repositories
                uc => uc.Id);
         }
 
+        public async Task<IEnumerable<UserChallengeAnswer>> GetNotConfirmedUserChallengeAnswersAsync(int activityId)
+        {
+            return await FindAsync(uc => uc.ActivityId == activityId && !uc.Confirmed);
+        }
+
         public async Task<UserChallengeAnswer> GetConfirmedUserChallengeAnswersAsync(int activityId)
         {
             return await GetAsync(uc => uc.ActivityId == activityId && uc.Confirmed);
