@@ -28,6 +28,7 @@ namespace DAL
             UserPuzzleAnswers = new UserPuzzleAnswerRepository(dbContext);
             UserAttendaces = new UserAttendaceRepository(dbContext);
             HappeningMedias = new HappeningMediaRepository(dbContext);
+            UserChallengeAnswers = new UserChallengeAnswerRepository(dbContext);
         }
 
         public IUserRepository Users { get; private set; }

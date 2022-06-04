@@ -12,6 +12,7 @@ using DAL;
 using DAL.Query;
 using Domain;
 using LanguageExt;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
 {
@@ -322,21 +323,35 @@ namespace Application.Services
         public async Task<Either<RestError, Unit>> AnswerToChallengeAsync(int id, ChallengeAnswer challengeAnswer)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
-            var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetUserChallengeAnswerAsync(userId, id);
-
-            if (existingAnswerToChallenge != null)
-                return new BadRequest("Već ste odgovorili na izazov");
 
             var userChallengeAnswer = new UserChallengeAnswer { UserId = userId, ActivityId = id, Description = challengeAnswer.Description };
 
-            foreach (var image in challengeAnswer.Images)
+            foreach (var image in challengeAnswer?.Images ?? new IFormFile[0])
             {
                 var photoResult = image != null ? await _photoAccessor.AddPhotoAsync(image) : null;
                 if (photoResult != null)
                     userChallengeAnswer.ChallengeMedias.Add(new ChallengeMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
             }
 
-            _uow.UserChallengeAnswers.Add(userChallengeAnswer);
+            var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetUserChallengeAnswerAsync(userId, id);
+
+            if (existingAnswerToChallenge != null)
+            {
+                existingAnswerToChallenge.Description = challengeAnswer.Description;
+
+                foreach (var image in existingAnswerToChallenge?.ChallengeMedias ?? new List<ChallengeMedia>())
+                {
+                    await _photoAccessor.DeletePhotoAsync(image.PublicId);
+                }
+
+                existingAnswerToChallenge.ChallengeMedias = userChallengeAnswer.ChallengeMedias;
+            }
+            else
+            {
+                _uow.UserChallengeAnswers.Add(userChallengeAnswer);
+            }
+
+
             await _uow.CompleteAsync();
 
             return Unit.Default;
