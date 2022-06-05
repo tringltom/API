@@ -37,8 +37,8 @@ namespace API.Controllers
             return Ok(await _activityService.GetHappeningsForApprovalAsync(queryObject));
         }
 
-        [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesForUser))]
-        public async Task<IActionResult> GetApprovedActivitiesForUser(int id, [FromQuery] UserQuery userQuery)
+        [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesCreatedByUser))]
+        public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] UserQuery userQuery)
         {
             var result = await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery);
 

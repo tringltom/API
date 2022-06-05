@@ -185,7 +185,7 @@ namespace API.Tests.Controllers
                .ReturnsAsync(approvedActivitiesEnvelope);
 
             // Act
-            var res = await _sut.GetApprovedActivitiesForUser(It.IsAny<int>(), It.IsAny<UserQuery>()) as OkObjectResult;
+            var res = await _sut.GetApprovedActivitiesCreatedByUser(It.IsAny<int>(), It.IsAny<UserQuery>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(approvedActivitiesEnvelope);
