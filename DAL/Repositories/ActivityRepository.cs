@@ -30,7 +30,7 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
-        public async Task<IEnumerable<Activity>> GetActivitiesForUser(int userId, UserQuery userQuery)
+        public async Task<IEnumerable<Activity>> GetActivitiesCreatedByUser(int userId, UserQuery userQuery)
         {
             return await FindAsync(userQuery.Limit,
                 userQuery.Offset,
@@ -38,10 +38,6 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
-        public async Task<int> CountActivitiesFromUser(int userId)
-        {
-            return await CountAsync(a => a.User.Id == userId);
-        }
 
         public async Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery)
         {
@@ -49,6 +45,10 @@ namespace DAL.Repositories
                 a.User.Id != userId
                 && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
                 && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)));
+        }
+        public async Task<int> CountActivitiesCreatedByUser(int userId)
+        {
+            return await CountAsync(a => a.User.Id == userId);
         }
 
         public async Task<int> CountHappeningsForApprovalAsync()

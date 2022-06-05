@@ -181,7 +181,7 @@ namespace API.Tests.Controllers
         public async Task GetApprovedActivitiesForUser_SuccessfullAsync(ApprovedActivityEnvelope approvedActivitiesEnvelope)
         {
             // Arrange
-            _activityServiceMock.Setup(x => x.GetApprovedActivitiesForUserAsync(It.IsAny<int>(), It.IsAny<UserQuery>()))
+            _activityServiceMock.Setup(x => x.GetApprovedActivitiesCreatedByUserAsync(It.IsAny<int>(), It.IsAny<UserQuery>()))
                .ReturnsAsync(approvedActivitiesEnvelope);
 
             // Act

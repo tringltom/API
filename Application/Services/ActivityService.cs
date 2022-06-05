@@ -62,17 +62,17 @@ namespace Application.Services
             };
         }
 
-        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesForUserAsync(int id, UserQuery userQuery)
+        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery)
         {
-            var activities = await _uow.Activities.GetActivitiesForUser(id, userQuery);
+            var activities = await _uow.Activities.GetActivitiesCreatedByUser(userId, userQuery);
 
             if (activities == null)
-                return new NotFound("Nema odobrenih aktivnosti za trenutno ulogovanog korisnika");
+                return new NotFound("Nema odobrenih aktivnosti");
 
             return new ApprovedActivityEnvelope
             {
                 Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
-                ActivityCount = await _uow.Activities.CountActivitiesFromUser(id),
+                ActivityCount = await _uow.Activities.CountActivitiesCreatedByUser(userId),
             };
         }
 
