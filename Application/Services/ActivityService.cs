@@ -38,15 +38,15 @@ namespace Application.Services
             return _mapper.Map<ApprovedActivityReturn>(activity);
         }
 
-        public async Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery)
+        public async Task<ActivitiesFromOtherUserEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
             var activities = await _uow.Activities.GetOrderedActivitiesFromOtherUsersAsync(activityQuery, userId);
 
-            return new ApprovedActivityEnvelope
+            return new ActivitiesFromOtherUserEnvelope
             {
-                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<OtherUserActivityReturn>>(activities).ToList(),
                 ActivityCount = await _uow.Activities.CountOtherUsersActivitiesAsync(userId, activityQuery)
             };
         }
@@ -59,6 +59,20 @@ namespace Application.Services
             {
                 Happenings = _mapper.Map<IEnumerable<Activity>, IEnumerable<HappeningReturn>>(happeningsForApproval).ToList(),
                 HappeningCount = await _uow.Activities.CountHappeningsForApprovalAsync()
+            };
+        }
+
+        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesForUserAsync(int id, UserQuery userQuery)
+        {
+            var activities = await _uow.Activities.GetActivitiesForUser(id, userQuery);
+
+            if (activities == null)
+                return new NotFound("Nema odobrenih aktivnosti za trenutno ulogovanog korisnika");
+
+            return new ApprovedActivityEnvelope
+            {
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountActivitiesFromUser(id),
             };
         }
 
@@ -280,20 +294,6 @@ namespace Application.Services
             await _emailManager.SendActivityApprovalEmailAsync(activity.Title, activity.User.Email, true);
 
             return Unit.Default;
-        }
-
-        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesForUserAsync(UserQuery userQuery)
-        {
-            var activities = await _uow.Activities.GetActivitiesForUser(userQuery);
-
-            if (activities == null)
-                return new NotFound("Nema odobrenih aktivnosti za trenutno ulogovanog korisnika");
-
-            return new ApprovedActivityEnvelope
-            {
-                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
-                ActivityCount = await _uow.Activities.CountActivitiesFromUser(userQuery.UserId),
-            };
         }
     }
 }

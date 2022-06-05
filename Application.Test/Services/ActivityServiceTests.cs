@@ -63,7 +63,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task GetActivitiesFromOtherUsers_SuccessfullAsync(int userId, IEnumerable<Activity> activities,
-            IEnumerable<ApprovedActivityReturn> activitiesGet, ApprovedActivityEnvelope activityEnvelope)
+            IEnumerable<OtherUserActivityReturn> activitiesGet, ActivitiesFromOtherUserEnvelope activityEnvelope)
         {
             // Arrange
 
@@ -77,7 +77,7 @@ namespace Application.Tests.Services
                .ReturnsAsync(activities);
 
             _mapperMock
-                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities))
+                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<OtherUserActivityReturn>>(activities))
                 .Returns(activitiesGet);
 
             _uowMock
@@ -1618,14 +1618,14 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(UserQuery userQuery, IEnumerable<Activity> activities,
+        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(int id, UserQuery userQuery, IEnumerable<Activity> activities,
             IEnumerable<ApprovedActivityReturn> activitiesForEnvelope, ApprovedActivityEnvelope activityEnvelope)
         {
             // Arrange
-            _uowMock.Setup(x => x.Activities.GetActivitiesForUser(userQuery))
+            _uowMock.Setup(x => x.Activities.GetActivitiesForUser(id, userQuery))
                 .ReturnsAsync(activities);
 
-            _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(userQuery.UserId))
+            _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(id))
               .ReturnsAsync(activityEnvelope.ActivityCount);
 
             _mapperMock
@@ -1635,23 +1635,23 @@ namespace Application.Tests.Services
             activityEnvelope.Activities = activitiesForEnvelope.ToList();
 
             // Act
-            var res = await _sut.GetApprovedActivitiesForUserAsync(userQuery);
+            var res = await _sut.GetApprovedActivitiesForUserAsync(id, userQuery);
 
             // Assert
             res.Match(r => r.Should().BeEquivalentTo(activityEnvelope), err => err.Should().BeNull());
-            _uowMock.Verify(x => x.Activities.GetActivitiesForUser(userQuery), Times.Once);
-            _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(userQuery.UserId), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetActivitiesForUser(id, userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(id), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetApprovedActivitiesForUser_NoActivitiesFoundAsync(UserQuery userQuery, IEnumerable<Activity> activities, IEnumerable<ApprovedActivityReturn> activitiesForEnvelope)
+        public async Task GetApprovedActivitiesForUser_NoActivitiesFoundAsync(int id, UserQuery userQuery, IEnumerable<Activity> activities, IEnumerable<ApprovedActivityReturn> activitiesForEnvelope)
         {
             // Arrange
-            _uowMock.Setup(x => x.Activities.GetActivitiesForUser(userQuery))
+            _uowMock.Setup(x => x.Activities.GetActivitiesForUser(id, userQuery))
                 .ReturnsAsync((IEnumerable<Activity>)null);
 
-            _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(userQuery.UserId))
+            _uowMock.Setup(x => x.Activities.CountActivitiesFromUser(id))
                 .ReturnsAsync(activities.Count());
 
             _mapperMock
@@ -1659,15 +1659,15 @@ namespace Application.Tests.Services
                 .Returns(activitiesForEnvelope);
 
             // Act
-            var res = await _sut.GetApprovedActivitiesForUserAsync(userQuery);
+            var res = await _sut.GetApprovedActivitiesForUserAsync(id, userQuery);
 
             // Assert
             res.Match(
                 activitiesNotFound => activitiesNotFound.Should().BeNull(),
                 err => err.Should().BeOfType<NotFound>()
                 );
-            _uowMock.Verify(x => x.Activities.GetActivitiesForUser(userQuery), Times.Once);
-            _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(userQuery.UserId), Times.Never);
+            _uowMock.Verify(x => x.Activities.GetActivitiesForUser(id, userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountActivitiesFromUser(id), Times.Never);
         }
     }
 }

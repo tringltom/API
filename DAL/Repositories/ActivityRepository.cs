@@ -30,11 +30,11 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
-        public async Task<IEnumerable<Activity>> GetActivitiesForUser(UserQuery userQuery)
+        public async Task<IEnumerable<Activity>> GetActivitiesForUser(int userId, UserQuery userQuery)
         {
             return await FindAsync(userQuery.Limit,
                 userQuery.Offset,
-                a => a.User.Id == userQuery.UserId && userQuery != null,
+                a => a.User.Id == userId && userQuery != null,
                 a => a.Id);
         }
 
