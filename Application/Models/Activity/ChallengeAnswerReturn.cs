@@ -8,6 +8,7 @@ namespace Application.Models.Activity
         public string UserName { get; set; }
         public string UserId { get; set; }
         public string Description { get; set; }
+        public bool Confirmed { get; set; }
         public ICollection<Photo> ChallengePhotos { get; set; }
     }
 }

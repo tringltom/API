@@ -29,6 +29,7 @@ namespace DAL
             UserAttendaces = new UserAttendaceRepository(dbContext);
             HappeningMedias = new HappeningMediaRepository(dbContext);
             UserChallengeAnswers = new UserChallengeAnswerRepository(dbContext);
+            ChallengeMedias = new ChallengeMediaRepository(dbContext);
         }
 
         public IUserRepository Users { get; private set; }
@@ -48,6 +49,7 @@ namespace DAL
         public IUserAttendaceRepository UserAttendaces { get; set; }
         public IHappeningMediaRepository HappeningMedias { get; set; }
         public IUserChallengeAnswerRepostiory UserChallengeAnswers { get; set; }
+        public IChallengeMediaRepository ChallengeMedias { get; set; }
         public async Task<bool> CompleteAsync() => await _dbContext.SaveChangesAsync() > 0;
         public void Dispose() => _dbContext.Dispose();
     }

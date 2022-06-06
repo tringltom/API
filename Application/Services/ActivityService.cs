@@ -69,13 +69,13 @@ namespace Application.Services
             return new ChallengeEnvelope
             {
                 Challenges = _mapper.Map<IEnumerable<Activity>, IEnumerable<ChallengeReturn>>(challengesForApproval).ToList(),
-                ChallengesCount = await _uow.Activities.CountChallengesForApprovalAsync()
+                ChallengeCount = await _uow.Activities.CountChallengesForApprovalAsync()
             };
         }
 
-        public async Task<Either<RestError, ChallengeAnswerEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject)
+        public async Task<Either<RestError, ChallengeAnswerEnvelope>> GetOwnerChallengeAnswersAsync(int activityId, QueryObject queryObject)
         {
-            var activity = await _uow.Activities.GetAsync(id);
+            var activity = await _uow.Activities.GetAsync(activityId);
 
             if (activity == null)
                 return new NotFound("Aktivnost nije pronadjena");
@@ -91,12 +91,12 @@ namespace Application.Services
             if (activity.User.Id != userId)
                 return new BadRequest("Niste kreirali ovaj izazov");
 
-            var userChallengeAnswers = await _uow.UserChallengeAnswers.GetUserChallengeAnswersAsync(id, queryObject);
+            var userChallengeAnswers = await _uow.UserChallengeAnswers.GetUserChallengeAnswersAsync(activityId, queryObject);
 
             return new ChallengeAnswerEnvelope
             {
                 ChallengeAnswers = _mapper.Map<IEnumerable<UserChallengeAnswer>, IEnumerable<ChallengeAnswerReturn>>(userChallengeAnswers).ToList(),
-                ChallengeAnswersCount = await _uow.UserChallengeAnswers.CountChallengeAnswersAsync(id)
+                ChallengeAnswersCount = await _uow.UserChallengeAnswers.CountChallengeAnswersAsync(activityId)
             };
         }
 
@@ -320,11 +320,21 @@ namespace Application.Services
             return Unit.Default;
         }
 
-        public async Task<Either<RestError, Unit>> AnswerToChallengeAsync(int id, ChallengeAnswer challengeAnswer)
+        public async Task<Either<RestError, Unit>> AnswerToChallengeAsync(int activityId, ChallengeAnswer challengeAnswer)
         {
+            var activity = await _uow.Activities.GetAsync(activityId);
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
-            var userChallengeAnswer = new UserChallengeAnswer { UserId = userId, ActivityId = id, Description = challengeAnswer.Description };
+            if (activity.User.Id == userId)
+                return new BadRequest("Ne možete odgovoriti na svoj izazov");
+
+            var userChallengeAnswer = new UserChallengeAnswer
+            {
+                UserId = userId,
+                ActivityId = activityId,
+                Description = challengeAnswer.Description,
+                ChallengeMedias = new List<ChallengeMedia>()
+            };
 
             foreach (var image in challengeAnswer?.Images ?? new IFormFile[0])
             {
@@ -333,24 +343,27 @@ namespace Application.Services
                     userChallengeAnswer.ChallengeMedias.Add(new ChallengeMedia() { PublicId = photoResult.PublicId, Url = photoResult.Url });
             }
 
-            var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetUserChallengeAnswerAsync(userId, id);
+            var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetUserChallengeAnswerAsync(userId, activityId);
 
             if (existingAnswerToChallenge != null)
             {
                 existingAnswerToChallenge.Description = challengeAnswer.Description;
+                var challengeMedias = await _uow.ChallengeMedias.GetChallengeMedias(existingAnswerToChallenge.Id);
 
-                foreach (var image in existingAnswerToChallenge?.ChallengeMedias ?? new List<ChallengeMedia>())
+                foreach (var image in challengeMedias ?? new List<ChallengeMedia>())
                 {
                     await _photoAccessor.DeletePhotoAsync(image.PublicId);
                 }
 
                 existingAnswerToChallenge.ChallengeMedias = userChallengeAnswer.ChallengeMedias;
+                _uow.ChallengeMedias.RemoveRange(challengeMedias);
             }
             else
             {
                 _uow.UserChallengeAnswers.Add(userChallengeAnswer);
+                var user = await _uow.Users.GetAsync(userId);
+                await _emailManager.SendChallengeAnsweredEmailAsync(activity.Title, activity.User.Email, user.UserName);
             }
-
 
             await _uow.CompleteAsync();
 
@@ -395,6 +408,8 @@ namespace Application.Services
 
             await _uow.CompleteAsync();
 
+            await _emailManager.SendActivityApprovalEmailAsync(answerToChallenge.Activity.Title, answerToChallenge.Activity.User.Email, true);
+
             return Unit.Default;
         }
 
@@ -416,8 +431,8 @@ namespace Application.Services
                 answerToChallenge.Activity.ActivityMedias.Add(new ActivityMedia { PublicId = media.PublicId, Url = media.Url });
             }
 
-            answerToChallenge.Activity.Description += $" Odgovor dat od korisnika {answerToChallenge.User.UserName}"
-                + (string.IsNullOrEmpty(answerToChallenge.Description) ? $": {answerToChallenge.Description}" : "");
+            answerToChallenge.Activity.Description += $"->Odgovor dat od korisnika {answerToChallenge.User.UserName}:"
+                + (!string.IsNullOrEmpty(answerToChallenge.Description) ? $": {answerToChallenge.Description}" : "");
 
             var userSkill = await _uow.Skills.GetChallengeSkillAsync(answerToChallenge.UserId);
             var xpMultiplier = userSkill != null && userSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplierAsync(userSkill) : 1;
@@ -449,6 +464,9 @@ namespace Application.Services
 
             _uow.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion);
             await _uow.CompleteAsync();
+
+            await _emailManager.SendActivityApprovalEmailAsync(answerToChallenge.Activity.Title, answerToChallenge.Activity.User.Email, true);
+            await _emailManager.SendChallengeAnswerAcceptedEmailAsync(answerToChallenge.Activity.Title, answerToChallenge.User.Email);
 
             return Unit.Default;
         }

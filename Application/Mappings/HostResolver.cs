@@ -17,7 +17,7 @@ namespace Application.Mappings
         public bool Resolve(Activity source, ApprovedActivityReturn destination, bool destMember, ResolutionContext context)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
-            return source.ActivityTypeId == ActivityTypeId.Happening
+            return (source.ActivityTypeId == ActivityTypeId.Happening || source.ActivityTypeId == ActivityTypeId.Challenge)
                 && source.User.Id == userId;
         }
     }

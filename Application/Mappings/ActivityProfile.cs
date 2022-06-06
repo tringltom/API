@@ -42,7 +42,7 @@ namespace Application.Mappings
                 .ForMember(d => d.IsUserAttending, o => o.MapFrom<AtendeeResolver>())
                 .ForMember(d => d.IsHeld, o => o.MapFrom(s => s.ActivityTypeId == ActivityTypeId.Happening && s.EndDate < DateTimeOffset.Now))
                 .ForMember(d => d.IsHost, o => o.MapFrom<HostResolver>())
-                .ForMember(d => d.IChallengeAnswered, o => o.MapFrom(s => s.ActivityTypeId == ActivityTypeId.Challenge && s.XpReward != null));
+                .ForMember(d => d.IsChallengeAnswered, o => o.MapFrom(s => s.ActivityTypeId == ActivityTypeId.Challenge && s.XpReward != null));
 
             CreateMap<Activity, HappeningReturn>()
                .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
@@ -72,6 +72,9 @@ namespace Application.Mappings
             CreateMap<HappeningMedia, Photo>()
                 .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
 
+            CreateMap<ChallengeMedia, Photo>()
+                .ForMember(d => d.Id, o => o.MapFrom(s => s.PublicId));
+
             CreateMap<ActivityReview, UserReview>();
 
             CreateMap<UserReview, UserReviewedActivity>();
@@ -81,7 +84,8 @@ namespace Application.Mappings
             CreateMap<UserFavoriteActivity, UserFavoriteActivityReturn>();
 
             CreateMap<UserChallengeAnswer, ChallengeAnswerReturn>()
-                .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName));
+                .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
+                .ForMember(d => d.ChallengePhotos, o => o.MapFrom(s => s.ChallengeMedias));
         }
     }
 }

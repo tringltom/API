@@ -22,6 +22,7 @@ namespace DAL
         IUserAttendaceRepository UserAttendaces { get; }
         IHappeningMediaRepository HappeningMedias { get; }
         IUserChallengeAnswerRepostiory UserChallengeAnswers { get; }
+        IChallengeMediaRepository ChallengeMedias { get; }
         Task<bool> CompleteAsync();
     }
 }
