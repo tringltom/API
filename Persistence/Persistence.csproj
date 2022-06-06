@@ -5,12 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Migrations\20220530212633_ChallengeAnswer.cs" />
-    <Compile Remove="Migrations\20220530212633_ChallengeAnswer.Designer.cs" />
-    <Compile Remove="Migrations\20220530212737_ChallengeAnswer.cs" />
-    <Compile Remove="Migrations\20220530212737_ChallengeAnswer.Designer.cs" />
-    <Compile Remove="Migrations\20220530220816_AddedChallengeDescription.cs" />
-    <Compile Remove="Migrations\20220530220816_AddedChallengeDescription.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>
