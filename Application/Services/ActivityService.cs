@@ -38,15 +38,15 @@ namespace Application.Services
             return _mapper.Map<ApprovedActivityReturn>(activity);
         }
 
-        public async Task<ApprovedActivityEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery)
+        public async Task<ActivitiesFromOtherUserEnvelope> GetActivitiesFromOtherUsersAsync(ActivityQuery activityQuery)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
             var activities = await _uow.Activities.GetOrderedActivitiesFromOtherUsersAsync(activityQuery, userId);
 
-            return new ApprovedActivityEnvelope
+            return new ActivitiesFromOtherUserEnvelope
             {
-                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<OtherUserActivityReturn>>(activities).ToList(),
                 ActivityCount = await _uow.Activities.CountOtherUsersActivitiesAsync(userId, activityQuery)
             };
         }
@@ -62,12 +62,26 @@ namespace Application.Services
             };
         }
 
+        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery)
+        {
+            var activities = await _uow.Activities.GetActivitiesCreatedByUser(userId, userQuery);
+
+            if (activities == null)
+                return new NotFound("Nema odobrenih aktivnosti");
+
+            return new ApprovedActivityEnvelope
+            {
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<ApprovedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountActivitiesCreatedByUser(userId),
+            };
+        }
+
         public async Task<Either<RestError, int>> AnswerToPuzzleAsync(int id, PuzzleAnswer puzzleAnswer)
         {
             var activity = await _uow.Activities.GetAsync(id);
 
             if (activity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             if (activity.ActivityTypeId != ActivityTypeId.Puzzle)
                 return new BadRequest("Aktivnost nije zagonetka");
@@ -110,7 +124,7 @@ namespace Application.Services
             var pendingActivity = await _uow.PendingActivities.GetAsync(id);
 
             if (pendingActivity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             var activity = _mapper.Map<Activity>(pendingActivity);
 
@@ -128,23 +142,23 @@ namespace Application.Services
             var activity = await _uow.Activities.GetAsync(id);
 
             if (activity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Dogadjaj");
+                return new BadRequest("Aktivnost nije Događaj");
 
             if (activity.EndDate < DateTimeOffset.Now)
-                return new BadRequest("Dogadjaj se već održao");
+                return new BadRequest("Događaj se već održao");
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
             if (activity.User.Id == userId)
-                return new BadRequest("Ne možete reagovati na vaš dogadjaj");
+                return new BadRequest("Ne možete reagovati na vaš događaj");
 
             var userAttendence = activity.UserAttendances.Where(ua => ua.UserId == userId).SingleOrDefault();
 
             if (attend && userAttendence != null || !attend && userAttendence == null)
-                return new BadRequest("Već ste reagovali na dogadjaj");
+                return new BadRequest("Već ste reagovali na događaj");
 
             if (attend)
                 _uow.UserAttendaces.Add(new UserAttendance { UserId = userId, ActivityId = id, Confirmed = false });
@@ -161,21 +175,21 @@ namespace Application.Services
             var activity = await _uow.Activities.GetAsync(id);
 
             if (activity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Dogadjaj");
+                return new BadRequest("Aktivnost nije Događaj");
 
             if (activity.EndDate < DateTimeOffset.Now)
-                return new BadRequest("Dogadjaj se već održao");
+                return new BadRequest("Događaj se već održao");
 
             if (activity.StartDate > DateTimeOffset.Now)
-                return new BadRequest("Dogadjaj još nije počeo");
+                return new BadRequest("Događaj još nije počeo");
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
             if (activity.User.Id == userId)
-                return new BadRequest("Ne možete potvrditi dolazak na vaš dogadjaj");
+                return new BadRequest("Ne možete potvrditi dolazak na vaš događaj");
 
             var userAttendence = activity.UserAttendances.Where(ua => ua.UserId == userId).SingleOrDefault();
 
@@ -200,7 +214,7 @@ namespace Application.Services
                 return new BadRequest("Aktivnost nije Događaj");
 
             if (activity.EndDate > DateTimeOffset.Now)
-                return new BadRequest("Dogadjaj se još nije završio");
+                return new BadRequest("Događaj se još nije završio");
 
             if (activity.EndDate < DateTimeOffset.Now.AddDays(-7))
                 return new BadRequest("Prošlo je nedelju dana od završetka Događaja!");
@@ -208,7 +222,7 @@ namespace Application.Services
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
             if (activity.User.Id != userId)
-                return new BadRequest("Ne možete završiti tudji događaj");
+                return new BadRequest("Ne možete završiti tuđi događaj");
 
             if (activity.HappeningMedias.Count > 0)
                 return new BadRequest("Već ste završili događaj");
@@ -230,16 +244,16 @@ namespace Application.Services
             var activity = await _uow.Activities.GetAsync(id);
 
             if (activity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Dogadjaj");
+                return new BadRequest("Aktivnost nije Događaj");
 
             if (activity.EndDate > DateTimeOffset.Now)
-                return new BadRequest("Dogadjaj se još nije završio");
+                return new BadRequest("Događaj se još nije završio");
 
             if (activity.HappeningMedias.Count == 0)
-                return new BadRequest("Morate priložiti slike sa dogadjaja");
+                return new BadRequest("Morate priložiti slike sa događaja");
 
             if (approve)
             {
