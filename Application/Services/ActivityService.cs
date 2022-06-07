@@ -323,6 +323,10 @@ namespace Application.Services
         public async Task<Either<RestError, Unit>> AnswerToChallengeAsync(int activityId, ChallengeAnswer challengeAnswer)
         {
             var activity = await _uow.Activities.GetAsync(activityId);
+
+            if (activity == null)
+                return new NotFound("Aktivnost nije pronadjena");
+
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
             if (activity.User.Id == userId)
