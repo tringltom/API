@@ -35,6 +35,14 @@ namespace Application.Mappings
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId));
 
             CreateMap<Activity, ApprovedActivityReturn>()
+                .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
+                .ForMember(d => d.NumberOfFavorites, o => o.MapFrom(s => s.UserFavorites.Count()))
+                .ForMember(d => d.NumberOfAwesomeReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.Awesome).Count()))
+                .ForMember(d => d.NumberOfGoodReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.Good).Count()))
+                .ForMember(d => d.NumberOfNoneReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.None).Count()))
+                .ForMember(d => d.NumberOfPoorReviews, o => o.MapFrom(s => s.UserReviews.Where(x => x.ReviewTypeId == ReviewTypeId.Poor).Count()));
+
+            CreateMap<Activity, OtherUserActivityReturn>()
                 .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                 .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
                 .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias))
@@ -48,7 +56,9 @@ namespace Application.Mappings
                .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))
                .ForMember(d => d.Type, o => o.MapFrom(s => s.ActivityTypeId))
                .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias))
-               .ForMember(d => d.HappeningPhotos, o => o.MapFrom(s => s.HappeningMedias));
+               .ForMember(d => d.HappeningPhotos, o => o.MapFrom(s => s.HappeningMedias))
+                .ForMember(d => d.Photos, o => o.MapFrom(s => s.ActivityMedias));
+
 
             CreateMap<Activity, ChallengeReturn>()
                .ForMember(d => d.UserName, o => o.MapFrom(s => s.User.UserName))

@@ -43,7 +43,7 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task GetActivitiesFromOtherUsers_SuccessfullAsync(ApprovedActivityEnvelope activityReturnEnvelope)
+        public async Task GetActivitiesFromOtherUsers_SuccessfullAsync(ActivitiesFromOtherUserEnvelope activityReturnEnvelope)
         {
             // Arrange
             _activityServiceMock.Setup(x => x.GetActivitiesFromOtherUsersAsync(It.IsAny<ActivityQuery>()))
@@ -174,6 +174,21 @@ namespace API.Tests.Controllers
 
             // Assert
             res.StatusCode.Should().Equals(HttpStatusCode.OK);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(ApprovedActivityEnvelope approvedActivitiesEnvelope)
+        {
+            // Arrange
+            _activityServiceMock.Setup(x => x.GetApprovedActivitiesCreatedByUserAsync(It.IsAny<int>(), It.IsAny<UserQuery>()))
+               .ReturnsAsync(approvedActivitiesEnvelope);
+
+            // Act
+            var res = await _sut.GetApprovedActivitiesCreatedByUser(It.IsAny<int>(), It.IsAny<UserQuery>()) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(approvedActivitiesEnvelope);
         }
     }
 }

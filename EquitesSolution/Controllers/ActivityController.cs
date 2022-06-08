@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
-using API.Validations;
+﻿using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using DAL.Query;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace API.Controllers
 {
@@ -57,6 +57,18 @@ namespace API.Controllers
         }
 
         [HttpPatch("{id}/puzzle-answer")]
+        [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesCreatedByUser))]
+        public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] UserQuery userQuery)
+        {
+            var result = await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery);
+
+            return result.Match(
+                approvedActivitiesEnvelope => Ok(approvedActivitiesEnvelope),
+                err => err.Response()
+                );
+        }
+
+        [HttpPatch("{id}/answer")]
         [IdValidation]
         public async Task<IActionResult> AnswerToPuzzle(int id, PuzzleAnswer puzzleAnswer)
         {

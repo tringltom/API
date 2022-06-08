@@ -5,7 +5,7 @@ using Domain;
 
 namespace Application.Mappings
 {
-    public class HostResolver : IValueResolver<Activity, ApprovedActivityReturn, bool>
+    public class HostResolver : IValueResolver<Activity, OtherUserActivityReturn, bool>
     {
         private readonly IUserAccessor _userAccessor;
 
@@ -14,7 +14,7 @@ namespace Application.Mappings
             _userAccessor = userAccessor;
         }
 
-        public bool Resolve(Activity source, ApprovedActivityReturn destination, bool destMember, ResolutionContext context)
+        public bool Resolve(Activity source, OtherUserActivityReturn destination, bool destMember, ResolutionContext context)
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
             return (source.ActivityTypeId == ActivityTypeId.Happening || source.ActivityTypeId == ActivityTypeId.Challenge)
