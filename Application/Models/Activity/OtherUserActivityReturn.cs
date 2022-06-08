@@ -10,5 +10,6 @@ namespace Application.Models.Activity
         public bool IsUserAttending { get; set; }
         public bool IsHeld { get; set; }
         public bool IsHost { get; set; }
+        public bool IsChallengeAnswered { get; set; }
     }
 }
