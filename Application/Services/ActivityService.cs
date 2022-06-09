@@ -1,4 +1,8 @@
-﻿using Application.Errors;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
@@ -9,10 +13,6 @@ using DAL.Query;
 using Domain;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Application.Services
 {
@@ -100,12 +100,9 @@ namespace Application.Services
             };
         }
 
-        public async Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery)
+        public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery)
         {
             var activities = await _uow.Activities.GetActivitiesCreatedByUser(userId, userQuery);
-
-            if (activities == null)
-                return new NotFound("Nema odobrenih aktivnosti");
 
             return new ApprovedActivityEnvelope
             {

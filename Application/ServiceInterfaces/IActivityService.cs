@@ -1,8 +1,8 @@
-﻿using Application.Errors;
+﻿using System.Threading.Tasks;
+using Application.Errors;
 using Application.Models.Activity;
 using DAL.Query;
 using LanguageExt;
-using System.Threading.Tasks;
 
 namespace Application.ServiceInterfaces
 {
@@ -14,7 +14,7 @@ namespace Application.ServiceInterfaces
         Task<HappeningEnvelope> GetHappeningsForApprovalAsync(QueryObject queryObject);
         Task<ChallengeEnvelope> GetChallengesForApprovalAsync(QueryObject queryObject);
         Task<Either<RestError, ChallengeAnswerEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject);
-        Task<Either<RestError, ApprovedActivityEnvelope>> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery);
+        Task<ApprovedActivityEnvelope> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery);
         Task<Either<RestError, ApprovedActivityReturn>> ApprovePendingActivity(int id);
         Task<Either<RestError, Unit>> AttendToHappeningAsync(int id, bool attend);
         Task<Either<RestError, Unit>> ConfirmAttendenceToHappeningAsync(int id);

@@ -59,12 +59,7 @@ namespace API.Controllers
         [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesCreatedByUser))]
         public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] UserQuery userQuery)
         {
-            var result = await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery);
-
-            return result.Match(
-                approvedActivitiesEnvelope => Ok(approvedActivitiesEnvelope),
-                err => err.Response()
-                );
+            return Ok(await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery));
         }
 
         [HttpPatch("{id}/puzzle-answer")]
