@@ -2105,5 +2105,395 @@ namespace Application.Tests.Services
             _emailManagerMock.Verify(x => x.SendChallengeAnsweredEmailAsync(challenge.Title, challenge.User.Email, user.UserName), Times.Never);
             _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ConfirmChallengeAnswer_SuccessfullAsync(UserChallengeAnswer existingUserChallengeAnswer, UserChallengeAnswer confirmedAnswer)
+        {
+            // Arrange
+            var userId = 1;
+            existingUserChallengeAnswer.Activity.User.Id = userId;
+            existingUserChallengeAnswer.Confirmed = false;
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(existingUserChallengeAnswer);
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId))
+                .ReturnsAsync(confirmedAnswer);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.ConfirmChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ConfirmChallengeAnswer_NotFoundAsync(UserChallengeAnswer existingUserChallengeAnswer, UserChallengeAnswer confirmedAnswer)
+        {
+            // Arrange
+            var userId = 1;
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync((UserChallengeAnswer)null);
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId))
+                .ReturnsAsync(confirmedAnswer);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.ConfirmChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ConfirmChallengeAnswerAlreadyChosenAsync(UserChallengeAnswer existingUserChallengeAnswer, UserChallengeAnswer confirmedAnswer)
+        {
+            // Arrange
+            var userId = 1;
+            existingUserChallengeAnswer.Confirmed = true;
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(existingUserChallengeAnswer);
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId))
+                .ReturnsAsync(confirmedAnswer);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.ConfirmChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ConfirmChallengeAnswer_NotOwnedAsync(UserChallengeAnswer existingUserChallengeAnswer, UserChallengeAnswer confirmedAnswer)
+        {
+            // Arrange
+            var userId = 1;
+            existingUserChallengeAnswer.Activity.User.Id = 2;
+            existingUserChallengeAnswer.Confirmed = false;
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(existingUserChallengeAnswer);
+
+            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
+                .Returns(userId);
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId))
+                .ReturnsAsync(confirmedAnswer);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            // Act
+            var res = await _sut.ConfirmChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingUserChallengeAnswer.ActivityId), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task DisapproveChallengeAnswer_SuccessfullAsync(UserChallengeAnswer userChallengeAnswer, UserChallengeAnswer confirmedAnswer)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(userChallengeAnswer);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true))
+                .Verifiable();
+
+            // Act
+            var res = await _sut.DisapproveChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task DisapproveChallengeAnswer_NotFoundAsync(UserChallengeAnswer userChallengeAnswer, UserChallengeAnswer confirmedAnswer)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync((UserChallengeAnswer)null);
+
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true))
+                .Verifiable();
+
+            // Act
+            var res = await _sut.DisapproveChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ApproveChallengeAnswer_SuccessfullAsync(UserChallengeAnswer userChallengeAnswer,
+            IEnumerable<ActivityReviewXp> challengeXps,
+            IEnumerable<UserChallengeAnswer> userChallangeAnswersForDeletion)
+        {
+            // Arrange
+            userChallengeAnswer.Confirmed = true;
+            userChallengeAnswer.Activity.XpReward = null;
+            userChallengeAnswer.Activity.UserReviews = new List<UserReview>();
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(userChallengeAnswer);
+            _uowMock.Setup(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId))
+                .ReturnsAsync((Skill)null);
+            _uowMock.Setup(x => x.ActivityReviewXps.GetChallengeXpRewardAsync())
+                .ReturnsAsync(challengeXps);
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId))
+                .ReturnsAsync(userChallangeAnswersForDeletion);
+            _photoAccessorMock.Setup(x => x.DeletePhotoAsync(It.IsAny<string>()))
+                .Verifiable();
+            _uowMock.Setup(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion))
+                .Verifiable();
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true))
+                .Verifiable();
+            _emailManagerMock.Setup(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email))
+                .Verifiable();
+
+            // Act
+            var res = await _sut.ApproveChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeEquivalentTo(Unit.Default),
+                err => err.Should().BeNull()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId), Times.Once);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetChallengeXpRewardAsync(), Times.Once);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId), Times.Once);
+            _photoAccessorMock.Verify(x => x.DeletePhotoAsync(It.IsAny<string>()), Times.AtLeastOnce);
+            _uowMock.Verify(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion), Times.Once);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Once);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true), Times.Once);
+            _emailManagerMock.Verify(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ApproveChallengeAnswer_NotFoundAsync(UserChallengeAnswer userChallengeAnswer,
+            IEnumerable<ActivityReviewXp> challengeXps,
+            IEnumerable<UserChallengeAnswer> userChallangeAnswersForDeletion)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync((UserChallengeAnswer)null);
+            _uowMock.Setup(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId))
+                .ReturnsAsync((Skill)null);
+            _uowMock.Setup(x => x.ActivityReviewXps.GetChallengeXpRewardAsync())
+                .ReturnsAsync(challengeXps);
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId))
+                .ReturnsAsync(userChallangeAnswersForDeletion);
+            _photoAccessorMock.Setup(x => x.DeletePhotoAsync(It.IsAny<string>()))
+                .Verifiable();
+            _uowMock.Setup(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion))
+                .Verifiable();
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true))
+                .Verifiable();
+            _emailManagerMock.Setup(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email))
+                .Verifiable();
+
+            // Act
+            var res = await _sut.ApproveChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId), Times.Never);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetChallengeXpRewardAsync(), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId), Times.Never);
+            _photoAccessorMock.Verify(x => x.DeletePhotoAsync(It.IsAny<string>()), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true), Times.Never);
+            _emailManagerMock.Verify(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ApproveChallengeAnswer_NotChosenAsync(UserChallengeAnswer userChallengeAnswer,
+            IEnumerable<ActivityReviewXp> challengeXps,
+            IEnumerable<UserChallengeAnswer> userChallangeAnswersForDeletion)
+        {
+            // Arrange
+            userChallengeAnswer.Confirmed = false;
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(userChallengeAnswer);
+            _uowMock.Setup(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId))
+                .ReturnsAsync((Skill)null);
+            _uowMock.Setup(x => x.ActivityReviewXps.GetChallengeXpRewardAsync())
+                .ReturnsAsync(challengeXps);
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId))
+                .ReturnsAsync(userChallangeAnswersForDeletion);
+            _photoAccessorMock.Setup(x => x.DeletePhotoAsync(It.IsAny<string>()))
+                .Verifiable();
+            _uowMock.Setup(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion))
+                .Verifiable();
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true))
+                .Verifiable();
+            _emailManagerMock.Setup(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email))
+                .Verifiable();
+
+            // Act
+            var res = await _sut.ApproveChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId), Times.Never);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetChallengeXpRewardAsync(), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId), Times.Never);
+            _photoAccessorMock.Verify(x => x.DeletePhotoAsync(It.IsAny<string>()), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true), Times.Never);
+            _emailManagerMock.Verify(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email), Times.Never);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task ApproveChallengeAnswer_AlreadySolvedAsync(UserChallengeAnswer userChallengeAnswer,
+            IEnumerable<ActivityReviewXp> challengeXps,
+            IEnumerable<UserChallengeAnswer> userChallangeAnswersForDeletion)
+        {
+            // Arrange
+            userChallengeAnswer.Confirmed = true;
+            userChallengeAnswer.Activity.XpReward = 10;
+
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()))
+                .ReturnsAsync(userChallengeAnswer);
+            _uowMock.Setup(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId))
+                .ReturnsAsync((Skill)null);
+            _uowMock.Setup(x => x.ActivityReviewXps.GetChallengeXpRewardAsync())
+                .ReturnsAsync(challengeXps);
+            _uowMock.Setup(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId))
+                .ReturnsAsync(userChallangeAnswersForDeletion);
+            _photoAccessorMock.Setup(x => x.DeletePhotoAsync(It.IsAny<string>()))
+                .Verifiable();
+            _uowMock.Setup(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion))
+                .Verifiable();
+            _uowMock.Setup(x => x.CompleteAsync())
+                .ReturnsAsync(true);
+            _emailManagerMock.Setup(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true))
+                .Verifiable();
+            _emailManagerMock.Setup(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email))
+                .Verifiable();
+
+            // Act
+            var res = await _sut.ApproveChallengeAnswerAsync(It.IsAny<int>());
+
+            // Assert
+            res.Match(
+                r => r.Should().BeNull(),
+                err => err.Should().BeOfType<BadRequest>()
+                );
+
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetAsync(It.IsAny<int>()), Times.Once);
+            _uowMock.Verify(x => x.Skills.GetChallengeSkillAsync(userChallengeAnswer.UserId), Times.Never);
+            _uowMock.Verify(x => x.ActivityReviewXps.GetChallengeXpRewardAsync(), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.GetNotConfirmedUserChallengeAnswersAsync(userChallengeAnswer.ActivityId), Times.Never);
+            _photoAccessorMock.Verify(x => x.DeletePhotoAsync(It.IsAny<string>()), Times.Never);
+            _uowMock.Verify(x => x.UserChallengeAnswers.RemoveRange(userChallangeAnswersForDeletion), Times.Never);
+            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
+            _emailManagerMock.Verify(x => x.SendActivityApprovalEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.Activity.User.Email, true), Times.Never);
+            _emailManagerMock.Verify(x => x.SendChallengeAnswerAcceptedEmailAsync(userChallengeAnswer.Activity.Title, userChallengeAnswer.User.Email), Times.Never);
+        }
     }
 }
