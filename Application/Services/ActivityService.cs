@@ -78,7 +78,7 @@ namespace Application.Services
             var activity = await _uow.Activities.GetAsync(activityId);
 
             if (activity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             if (activity.ActivityTypeId != ActivityTypeId.Challenge)
                 return new BadRequest("Aktivnost nije izazov");
@@ -336,7 +336,7 @@ namespace Application.Services
             var activity = await _uow.Activities.GetAsync(activityId);
 
             if (activity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+                return new NotFound("Aktivnost nije pronađena");
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
