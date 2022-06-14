@@ -9,6 +9,8 @@ namespace Application.InfrastructureInterfaces
         Task SendActivityApprovalEmailAsync(string activityTitle, string userEmail, bool approved);
         Task SendProfileImageApprovalEmailAsync(string userName, bool approved);
         Task SendPuzzleAnsweredAsync(string puzzleTitle, string creatorEmail, string answererUsername);
+        Task SendChallengeAnsweredEmailAsync(string challengeTitle, string creatorEmail, string answererUsername);
+        Task SendChallengeAnswerAcceptedEmailAsync(string challengeTitle, string answererEmail);
         string DecodeVerificationToken(string token);
     }
 }

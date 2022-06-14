@@ -37,18 +37,32 @@ namespace API.Controllers
             return Ok(await _activityService.GetHappeningsForApprovalAsync(queryObject));
         }
 
-        [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesCreatedByUser))]
-        public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] UserQuery userQuery)
+        [HttpGet("me/challenge-answers/activity/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> GetOwnerChallengeAnswers(int id, [FromQuery] QueryObject queryObject)
         {
-            var result = await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery);
+            var result = await _activityService.GetOwnerChallengeAnswersAsync(id, queryObject);
 
             return result.Match(
-                approvedActivitiesEnvelope => Ok(approvedActivitiesEnvelope),
+                challengeAnswers => Ok(challengeAnswers),
                 err => err.Response()
                 );
         }
 
-        [HttpPatch("{id}/answer")]
+        // TODO - Add checking if user is Admin
+        [HttpGet("pending-challenges")]
+        public async Task<IActionResult> GetChallengesForApproval([FromQuery] QueryObject queryObject)
+        {
+            return Ok(await _activityService.GetChallengesForApprovalAsync(queryObject));
+        }
+
+        [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesCreatedByUser))]
+        public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] UserQuery userQuery)
+        {
+            return Ok(await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery));
+        }
+
+        [HttpPatch("{id}/puzzle-answer")]
         [IdValidation]
         public async Task<IActionResult> AnswerToPuzzle(int id, PuzzleAnswer puzzleAnswer)
         {
@@ -73,11 +87,36 @@ namespace API.Controllers
                );
         }
 
+        [HttpPatch("challenge-confirmation/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> ConfirmChallengeAnswer(int id)
+        {
+            var result = await _activityService.ConfirmChallengeAnswerAsync(id);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
         [HttpPatch("{id}/happening-completion-approval")]
         [IdValidation]
         public async Task<IActionResult> ApproveHappeningCompletition(int id, HappeningApprove happeningApprove)
         {
             var result = await _activityService.ApproveHappeningCompletitionAsync(id, happeningApprove.Approve);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPatch("challenge-answer-disapproval/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> DisapproveChallengeAnswer(int id)
+        {
+            var result = await _activityService.DisapproveChallengeAnswerAsync(id);
 
             return result.Match(
                u => Ok(),
@@ -127,6 +166,31 @@ namespace API.Controllers
         public async Task<IActionResult> CompleteHappening(int id, [FromForm] HappeningUpdate happeningUpdate)
         {
             var result = await _activityService.CompleteHappeningAsync(id, happeningUpdate);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
+        [HttpPost("{id}/challenge-answer")]
+        [IdValidation]
+        public async Task<IActionResult> AnswerToChallenge(int id, [FromForm] ChallengeAnswer challengeAnswer)
+        {
+            var result = await _activityService.AnswerToChallengeAsync(id, challengeAnswer);
+
+            return result.Match(
+               u => Ok(),
+               err => err.Response()
+               );
+        }
+
+        // TODO - Add checking if user is Admin
+        [HttpPost("challenge-answer-approval/{id}")]
+        [IdValidation]
+        public async Task<IActionResult> ApproveChallengeAnswer(int id)
+        {
+            var result = await _activityService.ApproveChallengeAnswerAsync(id);
 
             return result.Match(
                u => Ok(),

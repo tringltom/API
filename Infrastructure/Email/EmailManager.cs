@@ -110,6 +110,28 @@ namespace Infrastructure.Email
             await SendEmail(creatorEmail, $"Ekviti - Obaveštenje u vezi zagonetke: {puzzleTitle}", bodyBuilder);
         }
 
+        public async Task SendChallengeAnsweredEmailAsync(string challengeTitle, string creatorEmail, string answererUsername)
+        {
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Vaš izazov pod nazivom {challengeTitle} je rešen od strane korisnika pod nazivom {answererUsername}</p>",
+                TextBody = $"Vaš izazov pod nazivom {challengeTitle} je rešen od strane korisnika pod nazivom {answererUsername}"
+            };
+
+            await SendEmail(creatorEmail, $"Ekviti - Obaveštenje u vezi izazova: {challengeTitle}", bodyBuilder);
+        }
+
+        public async Task SendChallengeAnswerAcceptedEmailAsync(string challengeTitle, string answererEmail)
+        {
+            var bodyBuilder = new BodyBuilder
+            {
+                HtmlBody = $"<p>Vaš odgovor na izazov pod nazivom {challengeTitle} je prihvaćen</p>",
+                TextBody = $"Vaš odgovor na izazov pod nazivom {challengeTitle} je prihvaćen"
+            };
+
+            await SendEmail(answererEmail, $"Ekviti - Obaveštenje u vezi izazova: {challengeTitle}", bodyBuilder);
+        }
+
         public string DecodeVerificationToken(string token)
         {
             var decodedTokenBytes = WebEncoders.Base64UrlDecode(token);

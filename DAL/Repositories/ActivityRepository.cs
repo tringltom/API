@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using DAL.Query;
+﻿using DAL.Query;
 using DAL.RepositoryInterfaces;
 using Domain;
 using Persistence;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DAL.Repositories
 {
@@ -27,6 +28,16 @@ namespace DAL.Repositories
                 queryObject.Offset,
                 a => a.ActivityTypeId == ActivityTypeId.Happening
                     && a.HappeningMedias.Count > 0,
+                a => a.Id);
+        }
+
+        public async Task<IEnumerable<Activity>> GetChallengesForApprovalAsync(QueryObject queryObject)
+        {
+            return await FindAsync(queryObject.Limit,
+                queryObject.Offset,
+                a => a.ActivityTypeId == ActivityTypeId.Challenge
+                    && a.XpReward == null
+                    && a.UserChallengeAnswers.Any(uc => uc.Confirmed),
                 a => a.Id);
         }
 
@@ -56,6 +67,13 @@ namespace DAL.Repositories
             return await CountAsync(a =>
                 a.ActivityTypeId == ActivityTypeId.Happening
                 && a.HappeningMedias != null);
+        }
+
+        public async Task<int> CountChallengesForApprovalAsync()
+        {
+            return await CountAsync(a =>
+                a.ActivityTypeId == ActivityTypeId.Challenge
+                && a.UserChallengeAnswers.Any(uc => uc.Confirmed));
         }
     }
 }

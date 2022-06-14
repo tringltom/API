@@ -90,7 +90,6 @@ namespace Application.Services
             pendingActivity.EndDate = updatedActivityCreate.EndDate;
             pendingActivity.Location = updatedActivityCreate.Location;
 
-
             pendingActivity.PendingActivityMedias
                 .ToList()
                 .ForEach(async m => await _photoAccessor.DeletePhotoAsync(m.PublicId));

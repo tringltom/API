@@ -73,7 +73,7 @@ namespace Application.Services
             var decodedToken = _emailManager.DecodeVerificationToken(userEmailVerify.Token);
 
             if (!await _userManager.ConfirmUserEmailAsync(user, decodedToken))
-                return new InternalServerError("Neuspešno slanje verifikacionog emaila.");
+                return new InternalServerError("Neuspešna potvrda email adrese.");
 
             return Unit.Default;
         }
