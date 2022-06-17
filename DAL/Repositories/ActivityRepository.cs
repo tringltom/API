@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using DAL.Query;
+﻿using DAL.Query;
 using DAL.RepositoryInterfaces;
 using Domain;
 using Persistence;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DAL.Repositories
 {
@@ -30,6 +31,25 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
+        public async Task<IEnumerable<Activity>> GetChallengesForApprovalAsync(QueryObject queryObject)
+        {
+            return await FindAsync(queryObject.Limit,
+                queryObject.Offset,
+                a => a.ActivityTypeId == ActivityTypeId.Challenge
+                    && a.XpReward == null
+                    && a.UserChallengeAnswers.Any(uc => uc.Confirmed),
+                a => a.Id);
+        }
+
+        public async Task<IEnumerable<Activity>> GetActivitiesCreatedByUser(int userId, UserQuery userQuery)
+        {
+            return await FindAsync(userQuery.Limit,
+                userQuery.Offset,
+                a => a.User.Id == userId && userQuery != null,
+                a => a.Id);
+        }
+
+
         public async Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery)
         {
             return await CountAsync(a =>
@@ -37,12 +57,23 @@ namespace DAL.Repositories
                 && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
                 && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)));
         }
+        public async Task<int> CountActivitiesCreatedByUser(int userId)
+        {
+            return await CountAsync(a => a.User.Id == userId);
+        }
 
         public async Task<int> CountHappeningsForApprovalAsync()
         {
             return await CountAsync(a =>
                 a.ActivityTypeId == ActivityTypeId.Happening
                 && a.HappeningMedias != null);
+        }
+
+        public async Task<int> CountChallengesForApprovalAsync()
+        {
+            return await CountAsync(a =>
+                a.ActivityTypeId == ActivityTypeId.Challenge
+                && a.UserChallengeAnswers.Any(uc => uc.Confirmed));
         }
     }
 }

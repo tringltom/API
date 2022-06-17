@@ -6,7 +6,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-    <PackageReference Include="Z.EntityFramework.Plus.EFCore" Version="3.13.10" />
   </ItemGroup>
 
   <ItemGroup>
