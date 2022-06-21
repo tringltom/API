@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Text;
+using API.Messages;
 using API.Middleware;
 using API.Validations;
 using Application.InfrastructureInterfaces;
@@ -144,6 +145,8 @@ namespace API
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
 
+            services.AddSignalR();
+
             services.AddSwaggerGen(c =>
 
             {
@@ -182,6 +185,7 @@ namespace API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<Hubs>("/hubs/notifications");
             });
         }
     }
