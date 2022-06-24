@@ -11,7 +11,6 @@ namespace Application.Services
 {
     public class DiceService : IDiceService
     {
-
         private readonly IUserAccessor _userAccessor;
         private readonly IUnitOfWork _uow;
 
