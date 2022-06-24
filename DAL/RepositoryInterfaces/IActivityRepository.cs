@@ -9,7 +9,9 @@ namespace DAL.RepositoryInterfaces
     {
         Task<IEnumerable<Activity>> GetOrderedActivitiesFromOtherUsersAsync(ActivityQuery activityQuery, int userId);
         Task<IEnumerable<Activity>> GetActivitiesCreatedByUser(int userId, UserQuery userQuery);
+        Task<IEnumerable<Activity>> GetFavoritedActivitiesByUser(int userId, UserQuery userQuery);
         Task<int> CountActivitiesCreatedByUser(int userId);
+        Task<int> CountFavoritedActivitiesByUser(int userId);
         Task<IEnumerable<Activity>> GetHappeningsForApprovalAsync(QueryObject queryObject);
         Task<IEnumerable<Activity>> GetChallengesForApprovalAsync(QueryObject queryObject);
         Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery);
