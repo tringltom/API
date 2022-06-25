@@ -29,6 +29,7 @@ namespace API.Tests.Messages
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task SendComment_SuccessfullAsync(CommentCreate commentCreate, CommentReturn comment)
         {
+            // Arrange
             _chatServiceMock.Setup(x => x.ApplyComment(commentCreate))
                 .ReturnsAsync(comment);
 
@@ -49,6 +50,7 @@ namespace API.Tests.Messages
         [Fixture(FixtureType.WithAutoMoq)]
         public async Task AddToGroup_SuccessfullAsync(string userName, string groupName, HubCallerContext hubCallerContext)
         {
+            // Arrange
             _userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
                 .Returns(userName);
 
@@ -76,6 +78,7 @@ namespace API.Tests.Messages
         [Fixture(FixtureType.WithAutoMoq)]
         public async Task RemoveFromGroup_SuccessfullAsync(string userName, string groupName, HubCallerContext hubCallerContext)
         {
+            // Arrange
             _userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
                 .Returns(userName);
 
