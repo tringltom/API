@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Messages;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Comment;
@@ -15,6 +14,8 @@ namespace API.Tests.Messages
     {
         private Mock<IChatService> _chatServiceMock;
         private Mock<IUserAccessor> _userAccessorMock;
+        private Mock<IHubCallerClients> _hubCallerClients;
+        private Mock<IGroupManager> _groupManager;
         private ChatHub _sut;
 
         [SetUp]
@@ -22,7 +23,13 @@ namespace API.Tests.Messages
         {
             _chatServiceMock = new Mock<IChatService>();
             _userAccessorMock = new Mock<IUserAccessor>();
-            _sut = new ChatHub(_chatServiceMock.Object, _userAccessorMock.Object);
+            _hubCallerClients = new Mock<IHubCallerClients>();
+            _groupManager = new Mock<IGroupManager>();
+            _sut = new ChatHub(_chatServiceMock.Object, _userAccessorMock.Object)
+            {
+                Clients = _hubCallerClients.Object,
+                Groups = _groupManager.Object
+            };
         }
 
         [Test]
@@ -33,74 +40,63 @@ namespace API.Tests.Messages
             _chatServiceMock.Setup(x => x.ApplyComment(commentCreate))
                 .ReturnsAsync(comment);
 
-            var mockClients = new Mock<IHubCallerClients>();
-            _sut.Clients = mockClients.Object;
-
-            mockClients.Setup(m => m.Group(commentCreate.ActivityId.ToString()).SendCoreAsync("ReceiveComment", new[] { comment }, new CancellationToken())).Verifiable();
+            _hubCallerClients.Setup(m => m.Group(commentCreate.ActivityId.ToString()).SendCoreAsync("ReceiveComment", new[] { comment }, default)).Verifiable();
 
             // Act
             await _sut.SendComment(commentCreate);
 
             // Assert
             _chatServiceMock.Verify(x => x.ApplyComment(commentCreate), Times.Once);
-            mockClients.Verify(m => m.Group(commentCreate.ActivityId.ToString()).SendCoreAsync("ReceiveComment", new[] { comment }, new CancellationToken()), Times.Once);
+            _hubCallerClients.Verify(m => m.Group(commentCreate.ActivityId.ToString()).SendCoreAsync("ReceiveComment", new[] { comment }, default), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task AddToGroup_SuccessfullAsync(string userName, string groupName, HubCallerContext hubCallerContext)
+        public async Task AddToGroup_SuccessfullAsync(string userName,
+            string groupName,
+            HubCallerContext hubCallerContext)
         {
             // Arrange
             _userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
                 .Returns(userName);
 
-            var mockClients = new Mock<IHubCallerClients>();
-            _sut.Clients = mockClients.Object;
-
-            var mockGroup = new Mock<IGroupManager>();
-            _sut.Groups = mockGroup.Object;
-
             _sut.Context = hubCallerContext;
 
-            mockGroup.Setup(m => m.AddToGroupAsync(hubCallerContext.ConnectionId, groupName, new CancellationToken())).Verifiable();
-            mockClients.Setup(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ćaska" }, new CancellationToken())).Verifiable();
+            _groupManager.Setup(m => m.AddToGroupAsync(hubCallerContext.ConnectionId, groupName, default)).Verifiable();
+            _hubCallerClients.Setup(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ćaska" }, default)).Verifiable();
 
             // Act
             await _sut.AddToGroup(groupName);
 
             // Assert
             _userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            mockGroup.Verify(m => m.AddToGroupAsync(hubCallerContext.ConnectionId, groupName, new CancellationToken()), Times.Once);
-            mockClients.Verify(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ćaska" }, new CancellationToken()), Times.Once);
+            _groupManager.Verify(m => m.AddToGroupAsync(hubCallerContext.ConnectionId, groupName, default), Times.Once);
+            _hubCallerClients.Verify(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ćaska" }, default), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task RemoveFromGroup_SuccessfullAsync(string userName, string groupName, HubCallerContext hubCallerContext)
+        public async Task RemoveFromGroup_SuccessfullAsync(string userName,
+            string groupName,
+            HubCallerContext hubCallerContext)
         {
             // Arrange
             _userAccessorMock.Setup(x => x.GetUsernameFromAccesssToken())
                 .Returns(userName);
 
-            var mockClients = new Mock<IHubCallerClients>();
-            _sut.Clients = mockClients.Object;
-
-            var mockGroup = new Mock<IGroupManager>();
-            _sut.Groups = mockGroup.Object;
-
             _sut.Context = hubCallerContext;
 
-            mockGroup.Setup(m => m.RemoveFromGroupAsync(hubCallerContext.ConnectionId, groupName, new CancellationToken())).Verifiable();
-            mockClients.Setup(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ode" }, new CancellationToken())).Verifiable();
+            _groupManager.Setup(m => m.RemoveFromGroupAsync(hubCallerContext.ConnectionId, groupName, default)).Verifiable();
+            _hubCallerClients.Setup(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ode" }, default)).Verifiable();
 
             // Act
             await _sut.RemoveFromGroup(groupName);
 
             // Assert
             _userAccessorMock.Verify(x => x.GetUsernameFromAccesssToken(), Times.Once);
-            mockGroup.Verify(m => m.RemoveFromGroupAsync(hubCallerContext.ConnectionId, groupName, new CancellationToken()), Times.Once);
+            _groupManager.Verify(m => m.RemoveFromGroupAsync(hubCallerContext.ConnectionId, groupName, default), Times.Once);
 
-            mockClients.Verify(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ode" }, new CancellationToken()), Times.Once);
+            _hubCallerClients.Verify(m => m.Group(groupName).SendCoreAsync("Send", new[] { $"{userName} ode" }, default), Times.Once);
         }
     }
 }

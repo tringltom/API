@@ -33,7 +33,10 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task ApplyComment_SuccessfulAsync(CommentCreate commentCreate, Activity activity, User user, CommentReturn commentReturn)
+        public async Task ApplyComment_SuccessfulAsync(CommentCreate commentCreate,
+            Activity activity,
+            User user,
+            CommentReturn commentReturn)
         {
 
             // Arrange
@@ -41,7 +44,7 @@ namespace Application.Tests.Services
                 .ReturnsAsync(activity);
 
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(It.IsAny<int>());
+                .Returns(user.Id);
 
             _uowMock.Setup(x => x.Users.GetAsync(It.IsAny<int>()))
                 .ReturnsAsync(user);
@@ -70,7 +73,9 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task ApplyComment_ActivityNotFoundAsync(CommentCreate commentCreate, Activity activity, User user, CommentReturn commentReturn)
+        public async Task ApplyComment_ActivityNotFoundAsync(CommentCreate commentCreate,
+            User user,
+            CommentReturn commentReturn)
         {
 
             // Arrange
@@ -78,7 +83,7 @@ namespace Application.Tests.Services
                 .ReturnsAsync((Activity)null);
 
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(It.IsAny<int>());
+                .Returns(user.Id);
 
             _uowMock.Setup(x => x.Users.GetAsync(It.IsAny<int>()))
                 .ReturnsAsync(user);
