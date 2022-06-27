@@ -1,5 +1,7 @@
-﻿using Domain;
-using System;
+﻿using System;
+using System.Collections.Generic;
+using Application.Models.Comment;
+using Domain;
 
 namespace Application.Models.Activity
 {
@@ -14,5 +16,6 @@ namespace Application.Models.Activity
         public int? NumberOfGoodReviews { get; set; }
         public int? NumberOfPoorReviews { get; set; }
         public int? NumberOfNoneReviews { get; set; }
+        public List<CommentReturn> Comments { get; set; }
     }
 }

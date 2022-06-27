@@ -32,6 +32,7 @@ namespace Persistence
         public virtual DbSet<HappeningMedia> HappeningMedias { get; set; }
         public virtual DbSet<ChallengeMedia> ChallengeMedias { get; set; }
         public virtual DbSet<UserChallengeAnswer> UserChallengeAnswers { get; set; }
+        public virtual DbSet<Comment> Comments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
