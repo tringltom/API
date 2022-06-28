@@ -389,6 +389,33 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(int userId, UserQuery userQuery, IEnumerable<Activity> activities,
+            IEnumerable<FavoritedActivityReturn> activitiesForEnvelope, FavoritedActivityEnvelope activityEnvelope)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.Activities.GetFavoritedActivitiesByUser(userId, userQuery))
+                .ReturnsAsync(activities);
+
+            _uowMock.Setup(x => x.Activities.CountFavoritedActivitiesByUser(userId))
+              .ReturnsAsync(activityEnvelope.ActivityCount);
+
+            _mapperMock
+                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities))
+                .Returns(activitiesForEnvelope);
+
+            activityEnvelope.Activities = activitiesForEnvelope.ToList();
+
+            // Act
+            var res = await _sut.GetFavoritedActivitiesByUserAsync(userId, userQuery);
+
+            // Assert
+            res.Should().BeEquivalentTo(activityEnvelope);
+            _uowMock.Verify(x => x.Activities.GetFavoritedActivitiesByUser(userId, userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountFavoritedActivitiesByUser(userId), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task AnswerToPuzzle_FirstTimeSuccessfullAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, User user)
         {
             // Arrange
