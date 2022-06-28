@@ -117,19 +117,29 @@ namespace Application.Tests.Services
         public async Task UpdateSkillsData_SuccessfulAsync(int userId,
             User user,
             SkillData skillData,
-            UserBaseResponse userResponse,
-            List<Skill> skills)
+            UserBaseResponse userResponse)
         {
             // Arrange
-            skillData.XpLevel = 1;
-            var potentialLevel = 1;
-
             var skillInThirdTree = _fixture
                 .Build<Skill>()
                 .With(s => s.Level, 7)
                 .Create();
 
-            skills.Add(skillInThirdTree);
+            var skills = new List<Skill>() { skillInThirdTree };
+
+            skillData.XpLevel = 1;
+
+            skillData.SkillLevels = Enum.GetValues(typeof(ActivityTypeId)).OfType<ActivityTypeId>()
+                    .GroupJoin(skills,
+                    atEnum => atEnum,
+                    sl => sl.ActivityTypeId,
+                    (type, levels) => new SkillLevel
+                    {
+                        Type = type,
+                        Level = levels.Select(l => l.Level).FirstOrDefault()
+                    }).ToList();
+
+            var potentialLevel = 1;
 
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
