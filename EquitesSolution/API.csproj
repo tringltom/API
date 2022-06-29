@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +18,7 @@
     <None Remove="bin\**" />
     <None Remove="Models\**" />
     <None Remove="Validators\**" />
+    <None Include="appsettings.Development.json" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>

@@ -48,7 +48,8 @@ namespace API
             services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseLazyLoadingProxies();
-                opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                opt.UseSqlServer(Configuration.GetValue<string>("DockerConnection") ??
+                    Configuration.GetConnectionString("DefaultConnection"));
                 opt.EnableSensitiveDataLogging();
             });
 

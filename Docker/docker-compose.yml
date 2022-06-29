@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+    db:
+        image: "mcr.microsoft.com/mssql/server:2019-latest"
+        environment:
+            SA_PASSWORD: "EqW!tty2022"
+            ACCEPT_EULA: "Y"
+        ports:
+            - "1433:1433"
+        container_name: "Ekviti-DB"
+            
+    api:
+        build:
+          context: ../
+          dockerfile: ./Docker/Dockerfile
+        ports:
+            - "4001:80"
+        environment:
+            - ASPNETCORE_ENVIRONMENT=Development
+            - DockerConnection=Server=db;Initial Catalog=Ekviti;User ID=SA;Password=EqW!tty2022
+        container_name: "Ekviti-API"
+        depends_on:
+            - db
