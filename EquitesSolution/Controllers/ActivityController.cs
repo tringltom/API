@@ -62,6 +62,12 @@ namespace API.Controllers
             return Ok(await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery));
         }
 
+        [HttpGet("favorited-activities/user/{id}", Name = nameof(GetFavoritedActivitiesByUser))]
+        public async Task<IActionResult> GetFavoritedActivitiesByUser(int id, [FromQuery] UserQuery userQuery)
+        {
+            return Ok(await _activityService.GetFavoritedActivitiesByUserAsync(id, userQuery));
+        }
+
         [HttpPatch("{id}/puzzle-answer")]
         [IdValidation]
         public async Task<IActionResult> AnswerToPuzzle(int id, PuzzleAnswer puzzleAnswer)

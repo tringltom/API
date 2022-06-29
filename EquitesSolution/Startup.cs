@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
+using API.Messages;
 using API.Middleware;
 using API.Validations;
 using Application.InfrastructureInterfaces;
@@ -84,6 +86,7 @@ namespace API
             services.AddScoped<IUsersService, UsersService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<ISkillService, SkillService>();
+            services.AddScoped<IChatService, ChatService>();
 
             services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
@@ -129,6 +132,19 @@ namespace API
                         ValidateLifetime = true,
                         ClockSkew = TimeSpan.Zero
                     };
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             services.AddControllers(opt =>
@@ -144,11 +160,18 @@ namespace API
                 options.SerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
             });
 
+            services.AddSignalR(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
+
             services.AddSwaggerGen(c =>
 
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = Assembly.GetEntryAssembly().GetName().Name, Version = "v1" });
             });
+
+            services.AddApplicationInsightsTelemetry();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -182,6 +205,7 @@ namespace API
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapHub<ChatHub>("/chat");
             });
         }
     }

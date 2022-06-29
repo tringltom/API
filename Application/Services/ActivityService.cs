@@ -111,6 +111,17 @@ namespace Application.Services
             };
         }
 
+        public async Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, UserQuery userQuery)
+        {
+            var activities = await _uow.Activities.GetFavoritedActivitiesByUser(userId, userQuery);
+
+            return new FavoritedActivityEnvelope
+            {
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountFavoritedActivitiesByUser(userId),
+            };
+        }
+
         public async Task<Either<RestError, int>> AnswerToPuzzleAsync(int id, PuzzleAnswer puzzleAnswer)
         {
             var activity = await _uow.Activities.GetAsync(id);
