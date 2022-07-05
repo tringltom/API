@@ -1,0 +1,6 @@
+- API
+- Application
+- DAL
+- Domain
+- Infrastructure
+- Persistence
