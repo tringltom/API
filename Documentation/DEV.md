@@ -7,6 +7,6 @@ Projekat je konstruisan kao REST API u .net Core 3.1 frejmwrku.
 
 ::: mermaid
 graph TD
-Ready? -->|try this|B[click <a href=//github.com/knsv/mermaid/issues/467>here</a>!!]
+Ready? -->|try this|B[click <Link href=//github.com/knsv/mermaid/issues/467>here</Link>!!]
 :::
 
