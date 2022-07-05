@@ -1,11 +1,11 @@
-Projekat je konstruisan kao REST API u .net Core 3.1 frejmwrku.
+Projekat je konstruisan kao REST API u .net Core 3.1 [frejmwrku]().
 ::: mermaid
  graph TD;
- API LINK[https://dev.azure.com/3MPOS/Ekviti/_wiki/wikis/Api/189/API] --> Infrastructure --> Application --> DAL --> Persistence --> Domain;
+ API(https://dev.azure.com/3MPOS/Ekviti/_wiki/wikis/Api/189/API) --> Infrastructure --> Application --> DAL --> Persistence --> Domain;
 :::
 ::: mermaid
  graph LR;
- A[Wiki supports Mermaid] --> B[Visit https://mermaidjs.github.io/ for Mermaid syntax];
+ A[Wiki supports Mermaid] --> a[Visit https://mermaidjs.github.io/ for Mermaid syntax];
 :::
 
 
@@ -14,3 +14,9 @@ graph TD
 Ready? -->|try this|B[click <Link href=//github.com/knsv/mermaid/issues/467>here</Link>!!]
 :::
 
+::: mermaid
+graph LR
+A[Note Name] --> B 
+
+class A internal-link;
+:::
