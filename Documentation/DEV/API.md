@@ -1,5 +1,8 @@
 API sluzi za primanje zahteva i vracanje odgovora.
 
+[[_TOC_]]
+
+
 ## Controllers
 
 Svi kontroleri nasledjuju CotrollerBase klasu koja ima anotaciju [ApiController] cime se smanjuje broj linija koda.
