@@ -18,7 +18,7 @@ Hub za chet. Ovde su definisane akcije koje sluze za live chat koristeci SignalR
 
 https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-6.0
 
-## MiddleWare
+## Middleware
 Glavni Exception hendler, ovde se susticu svi exceptionu u apiju.
 
 https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-6.0
