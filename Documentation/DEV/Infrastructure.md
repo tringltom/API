@@ -1,4 +1,4 @@
-Sluzi za komunikaciju sa #rd party komponentama i za generisanje tokena
+Sluzi za komunikaciju sa 3rd party komponentama i za generisanje tokena
 [[_TOC_]]
 
 ## Email
