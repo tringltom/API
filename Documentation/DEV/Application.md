@@ -1,5 +1,7 @@
 Core projekta i biznis logika
 
+[[_TOC_]]
+
 ## Errors
 
 ## InfractructureInterfaces
