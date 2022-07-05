@@ -8,4 +8,4 @@ https://code-maze.com/apicontroller-attribute-in-asp-net-core-web-api/
 
 Na svakom kontroleru definise se ruta i injektira po potrebi servis za svaki kontroler. Ime rute je u jednini , enpoinit su sortirani redosledom: Head, Get, Put, Patch, Delete, Post. Nazivi enpointa se formiraju o odnosu na resurs sa kojim se barata. https://restfulapi.net/resource-naming/
 
-Svi kontroleri su asinhroni, povratni tip je IActionResult, sto omogucava 200 response code sa resorsom ili povratne kodove koji definisu greske sa ili bez poruka.
+Svi kontroleri su asinhroni, povratni tip je IActionResult, sto omogucava 200 povratni kod sa resorsom ili povratne kodove koji definisu greske sa ili bez poruka.
