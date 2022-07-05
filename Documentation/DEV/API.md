@@ -1,4 +1,4 @@
-API sluzi za primanje zahteva i vracanje odgovora.
+Primanje zahteva i vracanje odgovora.
 
 [[_TOC_]]
 
