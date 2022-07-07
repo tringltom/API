@@ -11,7 +11,7 @@ ARG EmailSettings__0__Password_arg
 ARG EmailSettings__0__Server_arg
 ARG EmailSettings__0__Port_arg
 ARG AllowedHosts_arg
-ARG ASPNETCORE_ENVIRONMENT_arg
+ARG Environment_arg
 
 ENV TokenKey=$TokenKey_arg
 ENV Cloudinary:CloudName=$Cloudinary__0__CloudName_arg
@@ -22,7 +22,7 @@ ENV EmailSettings:Password=$EmailSettings__0__Password_arg
 ENV EmailSettings:Server=$EmailSettings__0__Server_arg
 ENV EmailSettings:Port=$EmailSettings__0__Port_arg
 ENV AllowedHosts=$AllowedHosts_arg
-ENV ASPNETCORE_ENVIRONMENT=$ASPNETCORE_ENVIRONMENT_arg
+ENV ASPNETCORE_ENVIRONMENT=$Environment_arg
 
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /src
