@@ -18,7 +18,6 @@
     <None Remove="bin\**" />
     <None Remove="Models\**" />
     <None Remove="Validators\**" />
-    <None Include="appsettings.Development.json" CopyToPublishDirectory="Always" />
   </ItemGroup>
 
   <ItemGroup>
