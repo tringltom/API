@@ -5,3 +5,11 @@
 **.Tests
 **.Test
 **SuperFixture
+
+*obj
+*bin
+*DbData
+*.git
+*.Tests
+*.Test
+*SuperFixture

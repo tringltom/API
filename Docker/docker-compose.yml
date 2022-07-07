@@ -12,14 +12,21 @@ services:
         container_name: "Ekviti-DB"
             
     api:
-        build:
-          context: ../
-          dockerfile: ./Docker/Dockerfile
+        image: ekviti/api:latest
         ports:
             - "4001:80"
         environment:
-            - ASPNETCORE_ENVIRONMENT=Development
+            - ASPNETCORE_ENVIRONMENT=DockerLocal
             - DockerConnection=Server=db;Initial Catalog=Ekviti;User ID=SA;Password=EqW!tty2022
         container_name: "Ekviti-API"
         depends_on:
             - db
+
+    mailhog:
+        image: mailhog/mailhog
+        logging:
+           driver: 'none'
+        container_name: "Ekviti-MailHog"
+        ports:
+           - 1025:1025
+           - 8025:8025
