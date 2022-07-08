@@ -20,6 +20,8 @@ Interfejsi menadzera za injektiranje.
 
 ## Managers
 
+Ideja je da ovde bude reusable kod na nivou servisa. Dakle ako se logika u jednom servisu ponavlja kao i u drugom, potebno je nju izdvojiti u menadzera i pozivati ga iz oba servisa.
+
 ## Mappings
 
 ## Models
