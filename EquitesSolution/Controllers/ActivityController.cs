@@ -57,15 +57,15 @@ namespace API.Controllers
         }
 
         [HttpGet("approved-activities/user/{id}", Name = nameof(GetApprovedActivitiesCreatedByUser))]
-        public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] UserQuery userQuery)
+        public async Task<IActionResult> GetApprovedActivitiesCreatedByUser(int id, [FromQuery] ActivityQuery activityQuery)
         {
-            return Ok(await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, userQuery));
+            return Ok(await _activityService.GetApprovedActivitiesCreatedByUserAsync(id, activityQuery));
         }
 
         [HttpGet("favorited-activities/user/{id}", Name = nameof(GetFavoritedActivitiesByUser))]
-        public async Task<IActionResult> GetFavoritedActivitiesByUser(int id, [FromQuery] UserQuery userQuery)
+        public async Task<IActionResult> GetFavoritedActivitiesByUser(int id, [FromQuery] ActivityQuery activityQuery)
         {
-            return Ok(await _activityService.GetFavoritedActivitiesByUserAsync(id, userQuery));
+            return Ok(await _activityService.GetFavoritedActivitiesByUserAsync(id, activityQuery));
         }
 
         [HttpPatch("{id}/puzzle-answer")]

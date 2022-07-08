@@ -14,8 +14,8 @@ namespace Application.ServiceInterfaces
         Task<HappeningEnvelope> GetHappeningsForApprovalAsync(QueryObject queryObject);
         Task<ChallengeEnvelope> GetChallengesForApprovalAsync(QueryObject queryObject);
         Task<Either<RestError, ChallengeAnswerEnvelope>> GetOwnerChallengeAnswersAsync(int id, QueryObject queryObject);
-        Task<ApprovedActivityEnvelope> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery);
-        Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, UserQuery userQuery);
+        Task<ApprovedActivityEnvelope> GetApprovedActivitiesCreatedByUserAsync(int userId, ActivityQuery activityQuery);
+        Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, ActivityQuery activityQuery);
         Task<Either<RestError, ApprovedActivityReturn>> ApprovePendingActivity(int id);
         Task<Either<RestError, Unit>> AttendToHappeningAsync(int id, bool attend);
         Task<Either<RestError, Unit>> ConfirmAttendenceToHappeningAsync(int id);
