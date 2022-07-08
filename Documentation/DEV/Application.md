@@ -24,7 +24,12 @@ Ideja je da ovde bude reusable kod na nivou servisa. Dakle ako se logika u jedno
 
 ## Mappings
 
+Ovde se definisu sva mapiranja iz aplikacijskih modela i domenskih objekata i obrnuto.
+Korisit se https://automapper.org/
+
 ## Models
+
+Svi modeli koji se koriste u aplikacijskom sloju, ulazni i izlazni. (DTO)
 
 ## ServiceInterfaces
 
