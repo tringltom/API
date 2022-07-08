@@ -8,9 +8,15 @@ Klase koje sluze za greske na apiju. Sadrze kod greske, poruke i imaju metodu Re
 
 ## InfractructureInterfaces
 
+Iterfejsi za 3rd party sisteme odnosno njihove metode. Ubaceno je ovde u svrhu lake promene 3rd partija.
+
 ## InfrastructureModels
 
+Modeli za komunikaciju Application sloja sa infrastrukturnim.
+
 ## ManagerInterfaces
+
+Interfejsi menadzera za injektiranje.
 
 ## Managers
 
@@ -19,5 +25,7 @@ Klase koje sluze za greske na apiju. Sadrze kod greske, poruke i imaju metodu Re
 ## Models
 
 ## ServiceInterfaces
+
+Interfejsi servisa za injektiranje.
 
 ## Services
