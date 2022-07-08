@@ -36,3 +36,5 @@ Svi modeli koji se koriste u aplikacijskom sloju, ulazni i izlazni. (DTO)
 Interfejsi servisa za injektiranje.
 
 ## Services
+
+Svaki servis se sastoji iz tri dela, prv je validacija sa resorsima iz baze, obrada i post efekti (slanje mejla). Svaki servis moze da konzumira menadzere i unitof work i infrastrukturne interfejse. Nije dozvoljena komunikacija izmedju servisa. Svaki servis treba da bude zaduzen za odredjenu biznis logiku.
