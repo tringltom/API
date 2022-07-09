@@ -16,7 +16,7 @@ Brojaci za aktivnosti koji se kreiraju kada korisnici kreiraju aktivnost, pri is
 Podaci za slike vezane za odobrene aktivnosti
 
 ### ActivityReviewXp
-Mapa koliko koji review za odredjenu aktivnost nosi iskustvenih poena.
+Mapa koliko koja ocena za odredjenu aktivnost nosi iskustvenih poena.
 
 ### ActivityTypes
 tipovi aktivnosti
@@ -76,11 +76,16 @@ Mnozilac bodova aktivnosti u zavisnosti od visine skila
 Prijavljeni dolasci korisnika i potvrde na odredjeni dogadjaj
 
 ### UserChallengeAnswers
+Odgovori na izazove
 
 ### UserFavoriteActivities
+Omiljene korisnicke aktivnosti
 
 ### UserPuzzleAnswers
+Korisnici koji su dali odgovore na odredjene pitalice
 
 ### UserReviews
+Korisnicke ocene odredjenih aktivnosti
 
 ### XpLevels
+Mapa korisnickih nivoa i potrebnih iskustvenih poena
