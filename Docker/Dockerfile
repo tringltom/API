@@ -36,10 +36,7 @@ COPY ["./Domain/Domain.csproj", "../Domain/"]
 RUN dotnet restore "./API.csproj"
 COPY . .
 WORKDIR "/src/."
-RUN echo ${ASPNETCORE_ENVIRONMENT}
-RUN echo $ASPNETCORE_ENVIRONMENT
-RUN echo $EnvJson
-COPY ["./EquitesSolution/appsettings.${ASPNETCORE_ENVIRONMENT}.json", "."]
+COPY ["$EnvJson", "."]
 COPY ["./EquitesSolution/NLog.config", "."]
 RUN dotnet build "API.csproj" -c Release -o /app/build
 
