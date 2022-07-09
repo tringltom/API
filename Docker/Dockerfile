@@ -12,7 +12,7 @@ ARG EmailSettings__0__Server_arg
 ARG EmailSettings__0__Port_arg
 ARG AllowedHosts_arg
 ARG Environment_arg
-ARG EnvJson=./EquitesSolution/appsettings.${Environment_arg}.json
+ARG EnvJson="./EquitesSolution/appsettings.${Environment_arg}.json"
 
 ENV TokenKey=$TokenKey_arg
 ENV Cloudinary:CloudName=$Cloudinary__0__CloudName_arg
