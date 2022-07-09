@@ -36,8 +36,11 @@ COPY ["./Domain/Domain.csproj", "../Domain/"]
 RUN dotnet restore "./API.csproj"
 COPY . .
 WORKDIR "/src/."
+RUN true
 COPY $EnvJson .
+RUN true
 COPY ["./EquitesSolution/NLog.config", "."]
+RUN true
 RUN dotnet build "API.csproj" -c Release -o /app/build
 
 FROM build AS publish
