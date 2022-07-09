@@ -12,6 +12,7 @@ ARG EmailSettings__0__Server_arg
 ARG EmailSettings__0__Port_arg
 ARG AllowedHosts_arg
 ARG Environment_arg
+ARG EnvJson=./EquitesSolution/appsettings.${Environment_arg}.json
 
 ENV TokenKey=$TokenKey_arg
 ENV Cloudinary:CloudName=$Cloudinary__0__CloudName_arg
@@ -35,6 +36,9 @@ COPY ["./Domain/Domain.csproj", "../Domain/"]
 RUN dotnet restore "./API.csproj"
 COPY . .
 WORKDIR "/src/."
+RUN echo ${ASPNETCORE_ENVIRONMENT}
+RUN echo $ASPNETCORE_ENVIRONMENT
+RUN echo $EnvJson
 COPY ["./EquitesSolution/appsettings.${ASPNETCORE_ENVIRONMENT}.json", "."]
 COPY ["./EquitesSolution/NLog.config", "."]
 RUN dotnet build "API.csproj" -c Release -o /app/build
