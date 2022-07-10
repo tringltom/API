@@ -25,6 +25,17 @@ namespace API.Controllers
             return Ok(await _usersService.GetRankedUsersAsync(userQuery));
         }
 
+        [HttpGet("getUserProfile")]
+        public async Task<IActionResult> GetUserProfile(int id)
+        {
+            var result = await _usersService.GetUserProfile(id);
+
+            return result.Match(
+               user => Ok(user),
+               err => err.Response()
+               );
+        }
+
         // TODO - Add checking if user is Admin
         [HttpGet("pending-images")]
         public async Task<IActionResult> GetImagesForApproval([FromQuery] QueryObject queryObject)

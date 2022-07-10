@@ -43,6 +43,15 @@ namespace Application.Services
 
             return userRangingEnvelope;
         }
+        public async Task<Either<RestError, UserBaseResponse>> GetUserProfile(int id)
+        {
+            var user = await _uow.Users.GetAsync(id);
+            if (user == null)
+                return new NotFound("Korisnički profil nije pronadjen");
+
+            var userProfile = _mapper.Map<UserBaseResponse>(user);
+            return userProfile;
+        }
 
         public async Task<UserImageEnvelope> GetImagesForApprovalAsync(QueryObject queryObject)
         {

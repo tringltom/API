@@ -6,6 +6,8 @@ namespace Application.Models.Activity
     public class ApprovedActivityReturn
     {
         public int Id { get; set; }
+        public string UserName { get; set; }
+        public int UserId { get; set; }
         public ActivityTypeId Type { get; set; }
         public string Title { get; set; }
         public DateTimeOffset DateApproved { get; set; }
