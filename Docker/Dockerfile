@@ -3,27 +3,29 @@ WORKDIR /app
 EXPOSE 80
 
 ARG TokenKey_arg
-ARG Cloudinary__0__CloudName_arg
-ARG Cloudinary__0__APIKey_arg
-ARG Cloudinary__0__APISecret_arg
-ARG EmailSettings__0__Sender_arg
-ARG EmailSettings__0__Password_arg
-ARG EmailSettings__0__Server_arg
-ARG EmailSettings__0__Port_arg
+ARG Cloudinary_CloudName_arg
+ARG Cloudinary_APIKey_arg
+ARG Cloudinary_APISecret_arg
+ARG EmailSettings_Sender_arg
+ARG EmailSettings_Password_arg
+ARG EmailSettings_Server_arg
+ARG EmailSettings_Port_arg
 ARG AllowedHosts_arg
+ARG DockerConnection_arg
 ARG Environment_arg
 ARG EnvJson="./EquitesSolution/appsettings.${Environment_arg}.json"
 
 ENV TokenKey=$TokenKey_arg
-ENV Cloudinary:CloudName=$Cloudinary__0__CloudName_arg
-ENV Cloudinary:APIKey=$Cloudinary__0__APIKey_arg
-ENV Cloudinary:APISecret=$Cloudinary__0__APISecret_arg
-ENV EmailSettings:Sender=$EmailSettings__0__Sender_arg
-ENV EmailSettings:Password=$EmailSettings__0__Password_arg
-ENV EmailSettings:Server=$EmailSettings__0__Server_arg
-ENV EmailSettings:Port=$EmailSettings__0__Port_arg
+ENV Cloudinary:CloudName=$Cloudinary_CloudName_arg
+ENV Cloudinary:APIKey=$Cloudinary_APIKey_arg
+ENV Cloudinary:APISecret=$Cloudinary_APISecret_arg
+ENV EmailSettings:Sender=$EmailSettings_Sender_arg
+ENV EmailSettings:Password=$EmailSettings_Password_arg
+ENV EmailSettings:Server=$EmailSettings_Server_arg
+ENV EmailSettings:Port=$EmailSettings_Port_arg
 ENV AllowedHosts=$AllowedHosts_arg
 ENV ASPNETCORE_ENVIRONMENT=$Environment_arg
+ENV DockerConnection=$DockerConnection_arg
 
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /src
