@@ -12,7 +12,7 @@ services:
         container_name: "Ekviti-DB"
             
     api:
-        image: "ekviti/api:$DockerLocal-latest"
+        image: "ekviti/api:DockerLocal-latest"
         ports:
             - "4001:80"
         container_name: "Ekviti-API"
