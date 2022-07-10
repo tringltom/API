@@ -18,7 +18,7 @@ services:
             - "4001:443"
         container_name: "Ekviti-API"
         environment:
-            - ASPNETCORE_URLS="https://+:443;http://+:80"
+            - ASPNETCORE_URLS=https://+:443;http://+:80
             - ASPNETCORE_HTTPS_PORT="5001"
             - DockerConnection=Server=db;Initial Catalog=Ekviti;User ID=SA;Password=EqW!tty2022
         depends_on:
