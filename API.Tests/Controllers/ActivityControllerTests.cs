@@ -118,6 +118,21 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
+        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(FavoritedActivityEnvelope favoritedActivitiesEnvelope)
+        {
+            // Arrange
+            _activityServiceMock.Setup(x => x.GetFavoritedActivitiesByUserAsync(It.IsAny<int>(), It.IsAny<UserQuery>()))
+               .ReturnsAsync(favoritedActivitiesEnvelope);
+
+            // Act
+            var res = await _sut.GetFavoritedActivitiesByUser(It.IsAny<int>(), It.IsAny<UserQuery>()) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(favoritedActivitiesEnvelope);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
         public async Task AnswerToPuzzle_SuccessfullAsync(PuzzleAnswer puzzleAnswer, int xpReward)
         {
             // Arrange

@@ -14,7 +14,8 @@ namespace API
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-            var logger = NLogBuilder.ConfigureNLog("NLog.config").GetCurrentClassLogger();
+            var env = host.Services.GetRequiredService<IWebHostEnvironment>().EnvironmentName;
+            var logger = NLogBuilder.ConfigureNLog($"NLog.{env}.config").GetCurrentClassLogger();
 
             using (var scope = host.Services.CreateScope())
             {

@@ -11,6 +11,7 @@ namespace Domain
         public virtual ICollection<PendingActivity> PendingActivities { get; set; }
         public virtual ICollection<ActivityCreationCounter> ActivityCreationCounters { get; set; }
         public virtual ICollection<Skill> Skills { get; set; }
+        public virtual ICollection<Comment> Comments { get; set; }
         public int CurrentXp { get; set; }
         public int XpLevelId { get; set; }
         public virtual XpLevel XpLevel { get; set; }

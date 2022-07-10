@@ -49,6 +49,13 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
+        public async Task<IEnumerable<Activity>> GetFavoritedActivitiesByUser(int userId, UserQuery userQuery)
+        {
+            return await FindAsync(userQuery.Limit,
+                userQuery.Offset,
+                a => a.UserFavorites.Any(a => a.UserId == userId && userQuery != null),
+                a => a.Id);
+        }
 
         public async Task<int> CountOtherUsersActivitiesAsync(int userId, ActivityQuery activityQuery)
         {
@@ -60,6 +67,11 @@ namespace DAL.Repositories
         public async Task<int> CountActivitiesCreatedByUser(int userId)
         {
             return await CountAsync(a => a.User.Id == userId);
+        }
+
+        public async Task<int> CountFavoritedActivitiesByUser(int userId)
+        {
+            return await CountAsync(a => a.UserFavorites.Any(a => a.UserId == userId));
         }
 
         public async Task<int> CountHappeningsForApprovalAsync()
