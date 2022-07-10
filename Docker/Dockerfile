@@ -11,7 +11,6 @@ ARG EmailSettings_Password_arg
 ARG EmailSettings_Server_arg
 ARG EmailSettings_Port_arg
 ARG AllowedHosts_arg
-ARG DockerConnection_arg
 ARG Environment_arg
 ARG EnvJson="./EquitesSolution/appsettings.${Environment_arg}.json"
 
@@ -25,7 +24,6 @@ ENV EmailSettings:Server=$EmailSettings_Server_arg
 ENV EmailSettings:Port=$EmailSettings_Port_arg
 ENV AllowedHosts=$AllowedHosts_arg
 ENV ASPNETCORE_ENVIRONMENT=$Environment_arg
-ENV DockerConnection=$DockerConnection_arg
 
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /src

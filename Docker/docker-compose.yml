@@ -12,10 +12,12 @@ services:
         container_name: "Ekviti-DB"
             
     api:
-        image: "ekviti/api:${Environment}-latest"
+        image: "ekviti/api:$DockerLocal-latest"
         ports:
             - "4001:80"
         container_name: "Ekviti-API"
+        environment:
+            - DockerConnection=Server=db;Initial Catalog=Ekviti;User ID=SA;Password=EqW!tty2022
         depends_on:
             - db
 
