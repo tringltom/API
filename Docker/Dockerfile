@@ -14,6 +14,7 @@ ARG EmailSettings_Port_arg
 ARG AllowedHosts_arg
 ARG Environment_arg
 ARG EnvJson="./EquitesSolution/appsettings.${Environment_arg}.json"
+ARG ASPNETCORE_Certificate_Password_arg
 
 ENV TokenKey=$TokenKey_arg
 ENV Cloudinary:CloudName=$Cloudinary_CloudName_arg
@@ -25,6 +26,8 @@ ENV EmailSettings:Server=$EmailSettings_Server_arg
 ENV EmailSettings:Port=$EmailSettings_Port_arg
 ENV AllowedHosts=$AllowedHosts_arg
 ENV ASPNETCORE_ENVIRONMENT=$Environment_arg
+ENV ASPNETCORE_Kestrel__Certificates__Default__Password=$ASPNETCORE_Certificate_Password_arg
+
 
 FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /src
@@ -51,6 +54,3 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "API.dll"]
-
-RUN curl -ks 'https://cert.host.server/ssl_certs/EnterpriseRootCA.crt' -o '/usr/local/share/ca-certificates/EnterpriseRootCA.crt'
-RUN /usr/sbin/update-ca-certificates

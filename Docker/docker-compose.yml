@@ -21,6 +21,9 @@ services:
             - ASPNETCORE_URLS=https://+:443;http://+:80
             - ASPNETCORE_HTTPS_PORT="5001"
             - DockerConnection=Server=db;Initial Catalog=Ekviti;User ID=SA;Password=EqW!tty2022
+            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/APIcert.pfx
+        volumes:
+            - ./Cert:/https
         depends_on:
             - db
 
