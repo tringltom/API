@@ -25,10 +25,10 @@ namespace API.Controllers
             return Ok(await _usersService.GetRankedUsersAsync(userQuery));
         }
 
-        [HttpGet("getUserProfile")]
-        public async Task<IActionResult> GetUserProfile(int id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetUser(int id)
         {
-            var result = await _usersService.GetUserProfile(id);
+            var result = await _usersService.GetUser(id);
 
             return result.Match(
                user => Ok(user),

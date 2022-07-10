@@ -43,7 +43,7 @@ namespace Application.Services
 
             return userRangingEnvelope;
         }
-        public async Task<Either<RestError, UserBaseResponse>> GetUserProfile(int id)
+        public async Task<Either<RestError, UserBaseResponse>> GetUser(int id)
         {
             var user = await _uow.Users.GetAsync(id);
             if (user == null)

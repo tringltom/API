@@ -40,6 +40,21 @@ namespace API.Tests.Controllers
             // Assert
             res.Value.Should().Be(userArenaEnvelope);
         }
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetUser_SuccessfullAsync(UserBaseResponse userBaseResponse)
+        {
+
+            // Arrange
+            _userServiceMock.Setup(x => x.GetUser(It.IsAny<int>()))
+               .ReturnsAsync(userBaseResponse);
+
+            // Act
+            var res = await _sut.GetUser(It.IsAny<int>()) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(userBaseResponse);
+        }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]

@@ -9,7 +9,7 @@ namespace Application.ServiceInterfaces
     public interface IUsersService
     {
         Task<UserRankedEnvelope> GetRankedUsersAsync(UserQuery userQuery);
-        Task<Either<RestError, UserBaseResponse>> GetUserProfile(int id);
+        Task<Either<RestError, UserBaseResponse>> GetUser(int id);
         Task<Unit> UpdateAboutAsync(UserAbout userAbout);
         Task<Either<RestError, Unit>> UpdateImageAsync(UserImageUpdate userImage);
         Task<UserImageEnvelope> GetImagesForApprovalAsync(QueryObject queryObject);
