@@ -41,19 +41,21 @@ namespace DAL.Repositories
                 a => a.Id);
         }
 
-        public async Task<IEnumerable<Activity>> GetActivitiesCreatedByUser(int userId, UserQuery userQuery)
+        public async Task<IEnumerable<Activity>> GetActivitiesCreatedByUser(int userId, ActivityQuery activityQuery)
         {
-            return await FindAsync(userQuery.Limit,
-                userQuery.Offset,
-                a => a.User.Id == userId && userQuery != null,
+            return await FindAsync(activityQuery.Limit,
+                activityQuery.Offset,
+                a => a.User.Id == userId && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
+                    && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)),
                 a => a.Id);
         }
 
-        public async Task<IEnumerable<Activity>> GetFavoritedActivitiesByUser(int userId, UserQuery userQuery)
+        public async Task<IEnumerable<Activity>> GetFavoritedActivitiesByUser(int userId, ActivityQuery activityQuery)
         {
-            return await FindAsync(userQuery.Limit,
-                userQuery.Offset,
-                a => a.UserFavorites.Any(a => a.UserId == userId && userQuery != null),
+            return await FindAsync(activityQuery.Limit,
+                activityQuery.Offset,
+                a => a.UserFavorites.Any(a => a.UserId == userId) && (string.IsNullOrEmpty(activityQuery.Title) || a.Title.Contains(activityQuery.Title))
+                    && (activityQuery.ActivityTypes == null || activityQuery.ActivityTypes.Contains(a.ActivityTypeId)),
                 a => a.Id);
         }
 
