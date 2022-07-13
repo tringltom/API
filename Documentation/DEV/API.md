@@ -19,12 +19,12 @@ Nije git tracked i tu se upisuju logovi na lokalu, koristeci Nlog https://nlog-p
 ## Messages
 Hub za chet. Ovde su definisane akcije koje sluze za live chat koristeci SignalR odnosno WebSocket-e.
 
-https://docs.microsoft.com/en-us/aspnet/core/signalr/introduction?view=aspnetcore-6.0
+https://wakeupandcode.com/signalr-in-asp-net-core-3-1/
 
 ## Middleware
-Glavni Exception hendler, ovde se susticu svi exceptionu u apiju.
+Glavni Exception hendler, ovde se "hvataju" svi exceptionu u apiju.
 
-https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-6.0
+https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-3.1 
 
 ## Validations
 
