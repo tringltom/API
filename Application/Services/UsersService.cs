@@ -47,7 +47,7 @@ namespace Application.Services
         {
             var user = await _uow.Users.GetAsync(id);
             if (user == null)
-                return new NotFound("Korisnički profil nije pronadjen");
+                return new NotFound("Korisnik nije pronađen");
 
             var userProfile = _mapper.Map<UserBaseResponse>(user);
             return userProfile;

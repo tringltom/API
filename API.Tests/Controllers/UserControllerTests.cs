@@ -42,15 +42,15 @@ namespace API.Tests.Controllers
         }
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetUser_SuccessfullAsync(UserBaseResponse userBaseResponse)
+        public async Task GetUser_SuccessfullAsync(UserBaseResponse userBaseResponse, int userId)
         {
 
             // Arrange
-            _userServiceMock.Setup(x => x.GetUser(It.IsAny<int>()))
+            _userServiceMock.Setup(x => x.GetUser(userId))
                .ReturnsAsync(userBaseResponse);
 
             // Act
-            var res = await _sut.GetUser(It.IsAny<int>()) as OkObjectResult;
+            var res = await _sut.GetUser(userId) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(userBaseResponse);

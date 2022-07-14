@@ -94,7 +94,39 @@ namespace Application.Tests.Services
                 );
 
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            res.Should().NotBeOfType<RestError>();
             res.Should().BeEquivalentTo(userBaseResponse);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetUser_UnsuccessfulAsync(
+          User userFromDb,
+          UserBaseResponse userBaseResponse,
+           int userId,
+           RestError error
+            )
+
+        {
+            //Arrange
+
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
+                .ReturnsAsync(userFromDb);
+
+
+
+            //Act
+            var res = await _sut.GetUser(userId);
+
+            //Assert
+            res.Match(
+                userResponse => userResponse.Should().BeNull(),
+                err => err.Should().BeEquivalentTo(error)
+                );
+
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            res.Should().BeOfType<RestError>();
+            res.Should().BeEquivalentTo(error);
         }
 
         [Test]
