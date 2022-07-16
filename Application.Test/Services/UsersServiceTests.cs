@@ -86,6 +86,7 @@ namespace Application.Tests.Services
 
             //Act
             var res = await _sut.GetUser(userId);
+            System.Console.WriteLine("CAo");
 
             //Assert
             res.Match(
@@ -94,26 +95,17 @@ namespace Application.Tests.Services
                 );
 
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            res.Should().NotBeOfType<RestError>();
-            res.Should().BeEquivalentTo(userBaseResponse);
+            _mapperMock.Verify(x => x.Map<UserBaseResponse>(userFromDb), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task GetUser_UnsuccessfulAsync(
-          User userFromDb,
-          UserBaseResponse userBaseResponse,
-           int userId,
-           RestError error
-            )
-
+          User userFromDb, int userId)
         {
             //Arrange
-
             _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(userFromDb);
-
-
+                .ReturnsAsync((User)null);
 
             //Act
             var res = await _sut.GetUser(userId);
@@ -121,12 +113,11 @@ namespace Application.Tests.Services
             //Assert
             res.Match(
                 userResponse => userResponse.Should().BeNull(),
-                err => err.Should().BeEquivalentTo(error)
-                );
+                err => err.Should().BeOfType<NotFound>());
 
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
-            res.Should().BeOfType<RestError>();
-            res.Should().BeEquivalentTo(error);
+            _mapperMock.Verify(x => x.Map<UserBaseResponse>(userFromDb), Times.Never);
+
         }
 
         [Test]
