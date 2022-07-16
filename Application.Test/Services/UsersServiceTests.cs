@@ -71,6 +71,57 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetUser_SuccessfullAsync(
+           User userFromDb,
+           UserBaseResponse userBaseResponse,
+            int userId)
+        {
+            //Arrange
+
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
+                .ReturnsAsync(userFromDb);
+
+            _mapperMock.Setup(x => x.Map<UserBaseResponse>(userFromDb))
+                .Returns(userBaseResponse);
+
+            //Act
+            var res = await _sut.GetUser(userId);
+            System.Console.WriteLine("CAo");
+
+            //Assert
+            res.Match(
+                userResponse => userResponse.Should().BeEquivalentTo(userBaseResponse),
+                err => err.Should().BeNull()
+                );
+
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            _mapperMock.Verify(x => x.Map<UserBaseResponse>(userFromDb), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetUser_UnsuccessfulAsync(
+          User userFromDb, int userId)
+        {
+            //Arrange
+            _uowMock.Setup(x => x.Users.GetAsync(userId))
+                .ReturnsAsync((User)null);
+
+            //Act
+            var res = await _sut.GetUser(userId);
+
+            //Assert
+            res.Match(
+                userResponse => userResponse.Should().BeNull(),
+                err => err.Should().BeOfType<NotFound>());
+
+            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
+            _mapperMock.Verify(x => x.Map<UserBaseResponse>(userFromDb), Times.Never);
+
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task GetImagesForApproval_SuccessfullAsync(
              IEnumerable<UserImageResponse> usersForImageApproval,
              IEnumerable<User> users, int usersCount)
