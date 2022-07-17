@@ -12,16 +12,18 @@ namespace Infrastructure.Email
     public class EmailManager : IEmailManager
     {
         private readonly string _sender;
+        private readonly string _userName;
         private readonly string _senderPassword;
         private readonly string _smtpServer;
         private readonly int _serverPort;
 
         public EmailManager(IOptions<EmailSettings> settings)
         {
-            _sender = settings.Value.Sender;
+            _userName = settings.Value.UserName;
             _senderPassword = settings.Value.Password;
             _smtpServer = settings.Value.Server;
             _serverPort = settings.Value.Port;
+            _sender = settings.Value.Sender;
         }
 
         private MimeMessage ComposeMessage(string recipientEmail)
@@ -41,7 +43,7 @@ namespace Infrastructure.Email
         {
             var client = new SmtpClient();
             await client.ConnectAsync(_smtpServer, _serverPort, false);
-            await client.AuthenticateAsync(_sender, _senderPassword);
+            await client.AuthenticateAsync(_userName, _senderPassword);
             await client.SendAsync(message);
             client.Disconnect(true);
             client.Dispose();
