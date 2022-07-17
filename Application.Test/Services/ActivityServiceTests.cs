@@ -362,11 +362,11 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(int userId, UserQuery userQuery, IEnumerable<Activity> activities,
+        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(int userId, ActivityQuery activityQuery, IEnumerable<Activity> activities,
             IEnumerable<ApprovedActivityReturn> activitiesForEnvelope, ApprovedActivityEnvelope activityEnvelope)
         {
             // Arrange
-            _uowMock.Setup(x => x.Activities.GetActivitiesCreatedByUser(userId, userQuery))
+            _uowMock.Setup(x => x.Activities.GetActivitiesCreatedByUser(userId, activityQuery))
                 .ReturnsAsync(activities);
 
             _uowMock.Setup(x => x.Activities.CountActivitiesCreatedByUser(userId))
@@ -379,21 +379,21 @@ namespace Application.Tests.Services
             activityEnvelope.Activities = activitiesForEnvelope.ToList();
 
             // Act
-            var res = await _sut.GetApprovedActivitiesCreatedByUserAsync(userId, userQuery);
+            var res = await _sut.GetApprovedActivitiesCreatedByUserAsync(userId, activityQuery);
 
             // Assert
             res.Should().BeEquivalentTo(activityEnvelope);
-            _uowMock.Verify(x => x.Activities.GetActivitiesCreatedByUser(userId, userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetActivitiesCreatedByUser(userId, activityQuery), Times.Once);
             _uowMock.Verify(x => x.Activities.CountActivitiesCreatedByUser(userId), Times.Once);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(int userId, UserQuery userQuery, IEnumerable<Activity> activities,
+        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(int userId, ActivityQuery activityQuery, IEnumerable<Activity> activities,
             IEnumerable<FavoritedActivityReturn> activitiesForEnvelope, FavoritedActivityEnvelope activityEnvelope)
         {
             // Arrange
-            _uowMock.Setup(x => x.Activities.GetFavoritedActivitiesByUser(userId, userQuery))
+            _uowMock.Setup(x => x.Activities.GetFavoritedActivitiesByUser(userId, activityQuery))
                 .ReturnsAsync(activities);
 
             _uowMock.Setup(x => x.Activities.CountFavoritedActivitiesByUser(userId))
@@ -406,11 +406,11 @@ namespace Application.Tests.Services
             activityEnvelope.Activities = activitiesForEnvelope.ToList();
 
             // Act
-            var res = await _sut.GetFavoritedActivitiesByUserAsync(userId, userQuery);
+            var res = await _sut.GetFavoritedActivitiesByUserAsync(userId, activityQuery);
 
             // Assert
             res.Should().BeEquivalentTo(activityEnvelope);
-            _uowMock.Verify(x => x.Activities.GetFavoritedActivitiesByUser(userId, userQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.GetFavoritedActivitiesByUser(userId, activityQuery), Times.Once);
             _uowMock.Verify(x => x.Activities.CountFavoritedActivitiesByUser(userId), Times.Once);
         }
 

@@ -106,11 +106,11 @@ namespace API.Tests.Controllers
         public async Task GetApprovedActivitiesForUser_SuccessfullAsync(ApprovedActivityEnvelope approvedActivitiesEnvelope)
         {
             // Arrange
-            _activityServiceMock.Setup(x => x.GetApprovedActivitiesCreatedByUserAsync(It.IsAny<int>(), It.IsAny<UserQuery>()))
+            _activityServiceMock.Setup(x => x.GetApprovedActivitiesCreatedByUserAsync(It.IsAny<int>(), It.IsAny<ActivityQuery>()))
                .ReturnsAsync(approvedActivitiesEnvelope);
 
             // Act
-            var res = await _sut.GetApprovedActivitiesCreatedByUser(It.IsAny<int>(), It.IsAny<UserQuery>()) as OkObjectResult;
+            var res = await _sut.GetApprovedActivitiesCreatedByUser(It.IsAny<int>(), It.IsAny<ActivityQuery>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(approvedActivitiesEnvelope);
@@ -121,11 +121,11 @@ namespace API.Tests.Controllers
         public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(FavoritedActivityEnvelope favoritedActivitiesEnvelope)
         {
             // Arrange
-            _activityServiceMock.Setup(x => x.GetFavoritedActivitiesByUserAsync(It.IsAny<int>(), It.IsAny<UserQuery>()))
+            _activityServiceMock.Setup(x => x.GetFavoritedActivitiesByUserAsync(It.IsAny<int>(), It.IsAny<ActivityQuery>()))
                .ReturnsAsync(favoritedActivitiesEnvelope);
 
             // Act
-            var res = await _sut.GetFavoritedActivitiesByUser(It.IsAny<int>(), It.IsAny<UserQuery>()) as OkObjectResult;
+            var res = await _sut.GetFavoritedActivitiesByUser(It.IsAny<int>(), It.IsAny<ActivityQuery>()) as OkObjectResult;
 
             // Assert
             res.Value.Should().Be(favoritedActivitiesEnvelope);
