@@ -100,9 +100,9 @@ namespace Application.Services
             };
         }
 
-        public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesCreatedByUserAsync(int userId, UserQuery userQuery)
+        public async Task<ApprovedActivityEnvelope> GetApprovedActivitiesCreatedByUserAsync(int userId, ActivityQuery activityQuery)
         {
-            var activities = await _uow.Activities.GetActivitiesCreatedByUser(userId, userQuery);
+            var activities = await _uow.Activities.GetActivitiesCreatedByUser(userId, activityQuery);
 
             return new ApprovedActivityEnvelope
             {
@@ -111,9 +111,9 @@ namespace Application.Services
             };
         }
 
-        public async Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, UserQuery userQuery)
+        public async Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, ActivityQuery activityQuery)
         {
-            var activities = await _uow.Activities.GetFavoritedActivitiesByUser(userId, userQuery);
+            var activities = await _uow.Activities.GetFavoritedActivitiesByUser(userId, activityQuery);
 
             return new FavoritedActivityEnvelope
             {

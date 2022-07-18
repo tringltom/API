@@ -6,5 +6,6 @@ namespace Application.Models.Activity
     {
         public int ActivityId { get; set; }
         public ReviewTypeId ReviewTypeId { get; set; }
+        public int UserId { get; set; }
     }
 }

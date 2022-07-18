@@ -2,6 +2,7 @@
 {
     public class UserRankedGet
     {
+        public string Id { get; set; }
         public string UserName { get; set; }
         public Photo Image { get; set; }
         public string Email { get; set; }
