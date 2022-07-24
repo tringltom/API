@@ -1,22 +1,24 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using LanguageExt;
 
 namespace Application.ServiceInterfaces
 {
-    public class FavoritesService : IFavoritesService
+    public class FavoriteService : IFavoriteService
     {
         private readonly IUserAccessor _userAccessor;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public FavoritesService(IMapper mapper, IUserAccessor userAccessor, IUnitOfWork uow)
+        public FavoriteService(IMapper mapper, IUserAccessor userAccessor, IUnitOfWork uow)
         {
             _mapper = mapper;
             _userAccessor = userAccessor;
@@ -67,6 +69,17 @@ namespace Application.ServiceInterfaces
             await _uow.CompleteAsync();
 
             return _mapper.Map<UserFavoriteActivityReturn>(userFavoriteActivity);
+        }
+
+        public async Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, ActivityQuery activityQuery)
+        {
+            var activities = await _uow.Activities.GetFavoritedActivitiesByUser(userId, activityQuery);
+
+            return new FavoritedActivityEnvelope
+            {
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountFavoritedActivitiesByUser(userId),
+            };
         }
     }
 }

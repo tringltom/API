@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces.Security;
@@ -7,6 +8,7 @@ using Application.ServiceInterfaces;
 using AutoFixture;
 using AutoMapper;
 using DAL;
+using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
@@ -22,7 +24,7 @@ namespace Application.Tests.Services
         private Mock<IMapper> _mapperMock;
         private Mock<IUserAccessor> _userAccessorMock;
         private Mock<IUnitOfWork> _uowMock;
-        private FavoritesService _sut;
+        private FavoriteService _sut;
 
         [SetUp]
         public void SetUp()
@@ -31,7 +33,7 @@ namespace Application.Tests.Services
             _userAccessorMock = new Mock<IUserAccessor>();
             _mapperMock = new Mock<IMapper>();
             _uowMock = new Mock<IUnitOfWork>();
-            _sut = new FavoritesService(_mapperMock.Object, _userAccessorMock.Object, _uowMock.Object);
+            _sut = new FavoriteService(_mapperMock.Object, _userAccessorMock.Object, _uowMock.Object);
         }
 
         [Test]
@@ -79,6 +81,33 @@ namespace Application.Tests.Services
             res.Should().BeEquivalentTo(favoriteIds);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
             _uowMock.Verify(x => x.UserFavorites.GetFavoriteActivitiesAsync(userId), Times.Once);
+        }
+
+        [Test]
+        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
+        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(int userId, ActivityQuery activityQuery, IEnumerable<Activity> activities,
+            IEnumerable<FavoritedActivityReturn> activitiesForEnvelope, FavoritedActivityEnvelope activityEnvelope)
+        {
+            // Arrange
+            _uowMock.Setup(x => x.Activities.GetFavoritedActivitiesByUser(userId, activityQuery))
+                .ReturnsAsync(activities);
+
+            _uowMock.Setup(x => x.Activities.CountFavoritedActivitiesByUser(userId))
+              .ReturnsAsync(activityEnvelope.ActivityCount);
+
+            _mapperMock
+                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities))
+                .Returns(activitiesForEnvelope);
+
+            activityEnvelope.Activities = activitiesForEnvelope.ToList();
+
+            // Act
+            var res = await _sut.GetFavoritedActivitiesByUserAsync(userId, activityQuery);
+
+            // Assert
+            res.Should().BeEquivalentTo(activityEnvelope);
+            _uowMock.Verify(x => x.Activities.GetFavoritedActivitiesByUser(userId, activityQuery), Times.Once);
+            _uowMock.Verify(x => x.Activities.CountFavoritedActivitiesByUser(userId), Times.Once);
         }
 
         [Test]

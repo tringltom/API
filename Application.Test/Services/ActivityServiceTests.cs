@@ -387,32 +387,7 @@ namespace Application.Tests.Services
             _uowMock.Verify(x => x.Activities.CountActivitiesCreatedByUser(userId), Times.Once);
         }
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(int userId, ActivityQuery activityQuery, IEnumerable<Activity> activities,
-            IEnumerable<FavoritedActivityReturn> activitiesForEnvelope, FavoritedActivityEnvelope activityEnvelope)
-        {
-            // Arrange
-            _uowMock.Setup(x => x.Activities.GetFavoritedActivitiesByUser(userId, activityQuery))
-                .ReturnsAsync(activities);
-
-            _uowMock.Setup(x => x.Activities.CountFavoritedActivitiesByUser(userId))
-              .ReturnsAsync(activityEnvelope.ActivityCount);
-
-            _mapperMock
-                .Setup(x => x.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities))
-                .Returns(activitiesForEnvelope);
-
-            activityEnvelope.Activities = activitiesForEnvelope.ToList();
-
-            // Act
-            var res = await _sut.GetFavoritedActivitiesByUserAsync(userId, activityQuery);
-
-            // Assert
-            res.Should().BeEquivalentTo(activityEnvelope);
-            _uowMock.Verify(x => x.Activities.GetFavoritedActivitiesByUser(userId, activityQuery), Times.Once);
-            _uowMock.Verify(x => x.Activities.CountFavoritedActivitiesByUser(userId), Times.Once);
-        }
+        
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]

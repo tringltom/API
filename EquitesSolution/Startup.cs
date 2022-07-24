@@ -76,7 +76,7 @@ namespace API
             //Add Scoped Managers
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IFavoritesService, FavoritesService>();
+            services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();

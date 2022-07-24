@@ -5,6 +5,7 @@ using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoFixture;
+using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
 using LanguageExt;
@@ -16,13 +17,13 @@ namespace API.Tests.Controllers
 {
     public class FavoriteControllerTests
     {
-        private Mock<IFavoritesService> _favoriteServiceMock;
+        private Mock<IFavoriteService> _favoriteServiceMock;
         private FavoriteController _sut;
 
         [SetUp]
         public void SetUp()
         {
-            _favoriteServiceMock = new Mock<IFavoritesService>();
+            _favoriteServiceMock = new Mock<IFavoriteService>();
             _sut = new FavoriteController(_favoriteServiceMock.Object);
         }
 
@@ -54,6 +55,20 @@ namespace API.Tests.Controllers
 
             // Assert
             res.Value.Should().Be(favoriteActivityIds);
+        }
+        [Test]
+        [Fixture(FixtureType.WithAutoMoq)]
+        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(FavoritedActivityEnvelope favoritedActivitiesEnvelope)
+        {
+            // Arrange
+            _favoriteServiceMock.Setup(x => x.GetFavoritedActivitiesByUserAsync(It.IsAny<int>(), It.IsAny<ActivityQuery>()))
+               .ReturnsAsync(favoritedActivitiesEnvelope);
+
+            // Act
+            var res = await _sut.GetFavoritedActivitiesByUser(It.IsAny<int>(), It.IsAny<ActivityQuery>()) as OkObjectResult;
+
+            // Assert
+            res.Value.Should().Be(favoritedActivitiesEnvelope);
         }
 
         [Test]
