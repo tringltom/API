@@ -59,7 +59,7 @@ namespace Application.Services
             var user = await _uow.Users.GetAsync(userId);
             var potentialLevel = await _uow.XpLevels.GetPotentialLevelAsync(user.CurrentXp);
 
-            if (skillData.XpLevel != potentialLevel)
+            if (skillData.XpLevel > potentialLevel)
                 return new BadRequest("Niste odgovarajući nivo!");
 
             var skills = await _uow.Skills.GetSkillsAsync(userId);
@@ -75,7 +75,8 @@ namespace Application.Services
             user.XpLevelId = skills.Sum(s => s.Level) + 1;
 
             var specialAbilities = skills.Where(s => s.IsInThirdTree());
-            user.SkillSpecial = await _uow.SkillSpecials.GetSkillSpecialAsync(specialAbilities.ElementAtOrDefault(0)?.ActivityTypeId, specialAbilities.ElementAtOrDefault(1)?.ActivityTypeId);
+            var skillSpecial = await _uow.SkillSpecials.GetSkillSpecialAsync(specialAbilities.ElementAtOrDefault(0)?.ActivityTypeId, specialAbilities.ElementAtOrDefault(1)?.ActivityTypeId);
+            user.SkillSpecial = skillSpecial;
 
             await _uow.CompleteAsync();
 
