@@ -192,7 +192,7 @@ namespace Application.Tests.Services
             UserBaseResponse userResponse,
             List<Skill> skills)
         {
-            skillData.XpLevel = 1;
+            skillData.XpLevel = 4;
             var potentialLevel = 3;
 
             // Arrange
