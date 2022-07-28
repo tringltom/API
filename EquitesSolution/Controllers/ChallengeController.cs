@@ -17,7 +17,7 @@ namespace API.Controllers
             _challengeService = challengeService;
         }
 
-        [HttpGet("me/challenge-answers/activity/{id}")]
+        [HttpGet("me/answers/activity/{id}")]
         [IdValidation]
         public async Task<IActionResult> GetOwnerChallengeAnswers(int id, [FromQuery] QueryObject queryObject)
         {
@@ -30,13 +30,13 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpGet("pending-challenges")]
+        [HttpGet("pending")]
         public async Task<IActionResult> GetChallengesForApproval([FromQuery] QueryObject queryObject)
         {
             return Ok(await _challengeService.GetChallengesForApprovalAsync(queryObject));
         }
 
-        [HttpPatch("challenge-confirmation/{id}")]
+        [HttpPatch("confirmation/{id}")]
         [IdValidation]
         public async Task<IActionResult> ConfirmChallengeAnswer(int id)
         {
@@ -49,7 +49,7 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpPatch("challenge-answer-disapproval/{id}")]
+        [HttpPatch("answer-disapproval/{id}")]
         [IdValidation]
         public async Task<IActionResult> DisapproveChallengeAnswer(int id)
         {
@@ -61,7 +61,7 @@ namespace API.Controllers
                );
         }
 
-        [HttpPost("{id}/challenge-answer")]
+        [HttpPost("{id}/answer")]
         [IdValidation]
         public async Task<IActionResult> AnswerToChallenge(int id, [FromForm] ChallengeAnswer challengeAnswer)
         {
@@ -74,7 +74,7 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpPost("challenge-answer-approval/{id}")]
+        [HttpPost("answer-approval/{id}")]
         [IdValidation]
         public async Task<IActionResult> ApproveChallengeAnswer(int id)
         {

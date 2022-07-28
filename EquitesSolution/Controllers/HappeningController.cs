@@ -18,7 +18,7 @@ namespace API.Controllers
         }
 
         // TODO - Add checking if user is Admin
-        [HttpGet("pending-happenings")]
+        [HttpGet("pending")]
         public async Task<IActionResult> GetHappeningsForApproval([FromQuery] QueryObject queryObject)
         {
             return Ok(await _happeningService.GetHappeningsForApprovalAsync(queryObject));
@@ -37,7 +37,7 @@ namespace API.Controllers
                );
         }
 
-        [HttpPatch("{id}/happening-completion-approval")]
+        [HttpPatch("{id}/completion-approval")]
         [IdValidation]
         public async Task<IActionResult> ApproveHappeningCompletition(int id, HappeningApprove happeningApprove)
         {
@@ -73,7 +73,7 @@ namespace API.Controllers
                );
         }
 
-        [HttpPost("{id}/happening-completion")]
+        [HttpPost("{id}/completion")]
         [IdValidation]
         public async Task<IActionResult> CompleteHappening(int id, [FromForm] HappeningUpdate happeningUpdate)
         {

@@ -80,7 +80,5 @@ namespace Application.ServiceInterfaces
 
             return _mapper.Map<UserFavoriteActivityReturn>(userFavoriteActivity);
         }
-
-
     }
 }
