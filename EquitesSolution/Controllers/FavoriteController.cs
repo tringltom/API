@@ -30,7 +30,7 @@ namespace API.Controllers
             return Ok(await _favoriteService.GetAllOwnerFavoriteIdsAsync());
         }
 
-        [HttpGet("favorites/user/{id}", Name = nameof(GetFavoritedActivitiesByUser))]
+        [HttpGet("user/{id}", Name = nameof(GetFavoritedActivitiesByUser))]
         public async Task<IActionResult> GetFavoritedActivitiesByUser(int id, [FromQuery] ActivityQuery activityQuery)
         {
             return Ok(await _favoriteService.GetFavoritedActivitiesByUserAsync(id, activityQuery));
