@@ -56,6 +56,7 @@ namespace API.Tests.Controllers
             // Assert
             res.Value.Should().Be(favoriteActivityIds);
         }
+
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
         public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(FavoritedActivityEnvelope favoritedActivitiesEnvelope)

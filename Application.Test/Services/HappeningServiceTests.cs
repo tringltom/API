@@ -46,7 +46,7 @@ namespace Application.Tests.Services
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task GetHappeningsForApprovalAsync_SuccessfullAsync(int userId, IEnumerable<Activity> happenings,
-    IEnumerable<HappeningReturn> happeningReturns, HappeningEnvelope happeningEnvelope)
+            IEnumerable<HappeningReturn> happeningReturns, HappeningEnvelope happeningEnvelope)
         {
             // Arrange
 
@@ -468,7 +468,6 @@ namespace Application.Tests.Services
             _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
         }
 
-
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
         public async Task ConfirmAttendenceToHappening_HappeningEndedAsync(Activity activity)
@@ -825,7 +824,6 @@ namespace Application.Tests.Services
                     Url = It.IsAny<string>()
                 }
             };
-
 
             _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
                 .ReturnsAsync(activity);

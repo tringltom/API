@@ -28,7 +28,6 @@ namespace API.Tests.Controllers
             _sut = new HappeningController(_happeningServiceMock.Object);
         }
 
-
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
         public async Task GetHappeningsForApproval_SuccessfullAsync(HappeningEnvelope happeningEnvelope)
@@ -58,7 +57,6 @@ namespace API.Tests.Controllers
             // Assert
             res.StatusCode.Should().Equals(HttpStatusCode.OK);
         }
-
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]

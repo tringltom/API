@@ -31,7 +31,6 @@ namespace Application.ServiceInterfaces
             return _mapper.Map<UserFavoriteActivityReturn>(favoredActivity);
         }
 
-
         public async Task<IList<FavoriteActivityIdReturn>> GetAllOwnerFavoriteIdsAsync()
         {
             var userId = _userAccessor.GetUserIdFromAccessToken();
@@ -39,6 +38,17 @@ namespace Application.ServiceInterfaces
             var favoriteActivities = await _uow.UserFavorites.GetFavoriteActivitiesAsync(userId);
 
             return _mapper.Map<List<FavoriteActivityIdReturn>>(favoriteActivities);
+        }
+
+        public async Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, ActivityQuery activityQuery)
+        {
+            var activities = await _uow.Activities.GetFavoritedActivitiesByUser(userId, activityQuery);
+
+            return new FavoritedActivityEnvelope
+            {
+                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities).ToList(),
+                ActivityCount = await _uow.Activities.CountFavoritedActivitiesByUser(userId),
+            };
         }
 
         public async Task<Either<RestError, Unit>> RemoveFavoriteActivityAsync(int activityId)
@@ -71,15 +81,6 @@ namespace Application.ServiceInterfaces
             return _mapper.Map<UserFavoriteActivityReturn>(userFavoriteActivity);
         }
 
-        public async Task<FavoritedActivityEnvelope> GetFavoritedActivitiesByUserAsync(int userId, ActivityQuery activityQuery)
-        {
-            var activities = await _uow.Activities.GetFavoritedActivitiesByUser(userId, activityQuery);
 
-            return new FavoritedActivityEnvelope
-            {
-                Activities = _mapper.Map<IEnumerable<Activity>, IEnumerable<FavoritedActivityReturn>>(activities).ToList(),
-                ActivityCount = await _uow.Activities.CountFavoritedActivitiesByUser(userId),
-            };
-        }
     }
 }
