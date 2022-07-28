@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
 using LanguageExt;
