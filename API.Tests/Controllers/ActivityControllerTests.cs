@@ -58,51 +58,6 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task GetHappeningsForApproval_SuccessfullAsync(HappeningEnvelope happeningEnvelope)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.GetHappeningsForApprovalAsync(It.IsAny<QueryObject>()))
-               .ReturnsAsync(happeningEnvelope);
-
-            // Act
-            var res = await _sut.GetHappeningsForApproval(It.IsAny<QueryObject>()) as OkObjectResult;
-
-            // Assert
-            res.Value.Should().Be(happeningEnvelope);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task GetOwnerChallengeAnswers_SuccessfullAsync(ChallengeAnswerEnvelope challengeAnswerEnvelope)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.GetOwnerChallengeAnswersAsync(It.IsAny<int>(), It.IsAny<QueryObject>()))
-               .ReturnsAsync(challengeAnswerEnvelope);
-
-            // Act
-            var res = await _sut.GetOwnerChallengeAnswers(It.IsAny<int>(), It.IsAny<QueryObject>()) as OkObjectResult;
-
-            // Assert
-            res.Value.Should().Be(challengeAnswerEnvelope);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task GetChallengesForApproval_SuccessfullAsync(ChallengeEnvelope challengeEnvelope)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.GetChallengesForApprovalAsync(It.IsAny<QueryObject>()))
-               .ReturnsAsync(challengeEnvelope);
-
-            // Act
-            var res = await _sut.GetChallengesForApproval(It.IsAny<QueryObject>()) as OkObjectResult;
-
-            // Assert
-            res.Value.Should().Be(challengeEnvelope);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
         public async Task GetApprovedActivitiesForUser_SuccessfullAsync(ApprovedActivityEnvelope approvedActivitiesEnvelope)
         {
             // Arrange
@@ -114,21 +69,6 @@ namespace API.Tests.Controllers
 
             // Assert
             res.Value.Should().Be(approvedActivitiesEnvelope);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task GetFavoritedActivitiesByUser_SuccessfullAsync(FavoritedActivityEnvelope favoritedActivitiesEnvelope)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.GetFavoritedActivitiesByUserAsync(It.IsAny<int>(), It.IsAny<ActivityQuery>()))
-               .ReturnsAsync(favoritedActivitiesEnvelope);
-
-            // Act
-            var res = await _sut.GetFavoritedActivitiesByUser(It.IsAny<int>(), It.IsAny<ActivityQuery>()) as OkObjectResult;
-
-            // Assert
-            res.Value.Should().Be(favoritedActivitiesEnvelope);
         }
 
         [Test]
@@ -148,81 +88,6 @@ namespace API.Tests.Controllers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoq)]
-        public async Task ConfirmAttendenceToHappening_SuccessfullAsync(ActivityReview activityReview)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.ConfirmAttendenceToHappeningAsync(It.IsAny<int>()))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.ConfirmAttendenceToHappening(It.IsAny<int>()) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task ConfirmChallengeAnswer_SuccessfullAsync()
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.ConfirmChallengeAnswerAsync(It.IsAny<int>()))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.ConfirmChallengeAnswer(It.IsAny<int>()) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task ApproveHappeningCompletition_SuccessfullAsync(HappeningApprove happeningApprove)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.ApproveHappeningCompletitionAsync(It.IsAny<int>(), happeningApprove.Approve))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.ApproveHappeningCompletition(It.IsAny<int>(), happeningApprove) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task DisapproveChallengeAnswer_SuccessfullAsync()
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.DisapproveChallengeAnswerAsync(It.IsAny<int>()))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.DisapproveChallengeAnswer(It.IsAny<int>()) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task CancelAttendenceToHappening_SuccessfullAsync()
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.AttendToHappeningAsync(It.IsAny<int>(), false))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.CancelAttendenceToHappening(It.IsAny<int>()) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
         public async Task ApprovePendingActivity_SuccessfullAsync(ApprovedActivityReturn activity)
         {
             // Arrange
@@ -236,64 +101,5 @@ namespace API.Tests.Controllers
             res.Value.Should().Be(activity);
         }
 
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task AttendToHappening_SuccessfullAsync()
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.AttendToHappeningAsync(It.IsAny<int>(), true))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.AttendToHappening(It.IsAny<int>()) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task CompleteHappening_SuccessfullAsync(HappeningUpdate happeningUpdate)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.CompleteHappeningAsync(It.IsAny<int>(), happeningUpdate))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.CompleteHappening(It.IsAny<int>(), happeningUpdate) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task AnswerToChallenge_SuccessfullAsync(ChallengeAnswer challengeAnswer)
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.AnswerToChallengeAsync(It.IsAny<int>(), challengeAnswer))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.AnswerToChallenge(It.IsAny<int>(), challengeAnswer) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoq)]
-        public async Task ApproveChallengeAnswer_SuccessfullAsync()
-        {
-            // Arrange
-            _activityServiceMock.Setup(x => x.ApproveChallengeAnswerAsync(It.IsAny<int>()))
-               .ReturnsAsync(Unit.Default);
-
-            // Act
-            var res = await _sut.ApproveChallengeAnswer(It.IsAny<int>()) as OkResult;
-
-            // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
-        }
     }
 }
