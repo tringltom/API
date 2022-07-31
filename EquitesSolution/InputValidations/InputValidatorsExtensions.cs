@@ -2,7 +2,7 @@
 
 namespace API.Validations
 {
-    public static class ValidatorsExtensions
+    public static class InputValidatorsExtensions
     {
         public static IRuleBuilder<T, string> Password<T>(this IRuleBuilder<T, string> ruleBuilder)
         {

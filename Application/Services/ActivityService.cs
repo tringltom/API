@@ -7,10 +7,12 @@ using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using Application.Validations;
 using AutoMapper;
 using DAL;
 using DAL.Query;
 using Domain;
+using FluentValidation;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 
@@ -23,14 +25,21 @@ namespace Application.Services
         private readonly IEmailManager _emailManager;
         private readonly IUnitOfWork _uow;
         private readonly IPhotoAccessor _photoAccessor;
+        private readonly IValidator<Activity> _validator;
 
-        public ActivityService(IUserAccessor userAccessor, IMapper mapper, IEmailManager emailManager, IUnitOfWork uow, IPhotoAccessor photoAccessor)
+        public ActivityService(IUserAccessor userAccessor,
+            IMapper mapper,
+            IEmailManager emailManager,
+            IUnitOfWork uow,
+            IPhotoAccessor photoAccessor,
+            IValidator<Activity> validator)
         {
             _userAccessor = userAccessor;
             _mapper = mapper;
             _emailManager = emailManager;
             _uow = uow;
             _photoAccessor = photoAccessor;
+            _validator = validator;
         }
 
         public async Task<ApprovedActivityReturn> GetActivityAsync(int id)
@@ -252,6 +261,13 @@ namespace Application.Services
         public async Task<Either<RestError, Unit>> CompleteHappeningAsync(int id, HappeningUpdate happeningUpdate)
         {
             var activity = await _uow.Activities.GetAsync(id);
+            //activity = new Activity();
+
+            var validationResult = _validator.Validate(activity,
+                o => o.IncludeRuleSets(Rules.CompleteHappening));
+
+            if (!validationResult.IsValid)
+                return (RestError)validationResult.Errors.First().CustomState;
 
             if (activity == null)
                 return new NotFound("Aktivnost nije pronađena");

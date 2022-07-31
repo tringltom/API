@@ -12,8 +12,10 @@ using Application.Managers;
 using Application.Mappings;
 using Application.ServiceInterfaces;
 using Application.Services;
+using Application.Validations;
 using DAL;
 using Domain;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using Infrastructure.Email;
 using Infrastructure.Media;
@@ -172,6 +174,8 @@ namespace API
             });
 
             services.AddApplicationInsightsTelemetry();
+
+            services.AddValidatorsFromAssemblyContaining<ActivityValidator>();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
