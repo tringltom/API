@@ -1,0 +1,37 @@
+version: "3.9"
+services:
+    db:
+        image: "mcr.microsoft.com/mssql/server:2019-latest"
+        environment:
+            SA_PASSWORD: "EqW!tty2022"
+            ACCEPT_EULA: "Y"
+        ports:
+            - "1433:1433"
+        volumes:
+            - ./DbData:/var/opt/mssql/data
+        container_name: "Ekviti-DB"
+            
+    api:
+        image: "ekviti/api:DockerLocal-latest"
+        ports:
+            - "4000:80"
+            - "4001:443"
+        container_name: "Ekviti-API"
+        environment:
+            - ASPNETCORE_URLS=https://+:443;http://+:80
+            - ASPNETCORE_HTTPS_PORT="5001"
+            - DockerConnection=Server=db;Initial Catalog=Ekviti;User ID=SA;Password=EqW!tty2022
+            - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/APIcert.pfx
+        volumes:
+            - ./Cert:/https
+        depends_on:
+            - db
+
+    mailhog:
+        image: mailhog/mailhog
+        logging:
+           driver: 'none'
+        container_name: "Ekviti-MailHog"
+        ports:
+           - 1025:1025
+           - 8025:8025
