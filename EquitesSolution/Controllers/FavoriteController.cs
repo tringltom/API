@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using API.Validations;
 using Application.ServiceInterfaces;
+using DAL.Query;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -9,9 +10,9 @@ namespace API.Controllers
     public class FavoriteController : BaseController
     {
 
-        private readonly IFavoritesService _favoriteService;
+        private readonly IFavoriteService _favoriteService;
 
-        public FavoriteController(IFavoritesService favoriteService)
+        public FavoriteController(IFavoriteService favoriteService)
         {
             _favoriteService = favoriteService;
         }
@@ -23,11 +24,16 @@ namespace API.Controllers
             return Ok(await _favoriteService.GetFavoriteActivityAsync(id));
         }
 
-
         [HttpGet("me/ids")]
         public async Task<IActionResult> GetOwnerFavoriteActivityIds()
         {
             return Ok(await _favoriteService.GetAllOwnerFavoriteIdsAsync());
+        }
+
+        [HttpGet("user/{id}", Name = nameof(GetFavoritedActivitiesByUser))]
+        public async Task<IActionResult> GetFavoritedActivitiesByUser(int id, [FromQuery] ActivityQuery activityQuery)
+        {
+            return Ok(await _favoriteService.GetFavoritedActivitiesByUserAsync(id, activityQuery));
         }
 
         [HttpDelete("{id}")]
