@@ -3,6 +3,7 @@ using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using DAL.Query;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -38,6 +39,7 @@ namespace API.Controllers
 
         [HttpPatch("{id}/puzzle-answer")]
         [IdValidation]
+        [AllowAnonymous]
         public async Task<IActionResult> AnswerToPuzzle(int id, PuzzleAnswer puzzleAnswer)
         {
             var result = await _activityService.AnswerToPuzzleAsync(id, puzzleAnswer);

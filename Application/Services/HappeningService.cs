@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using Application.Validations.ActivityValidation.Happening;
 using AutoMapper;
 using DAL;
 using DAL.Query;
 using Domain;
+using FluentValidation;
 using LanguageExt;
 
 namespace Application.Services
@@ -23,14 +23,21 @@ namespace Application.Services
         private readonly IUserAccessor _userAccessor;
         private readonly IPhotoAccessor _photoAccessor;
         private readonly IEmailManager _emailManager;
+        private readonly IValidator<Activity> _activityValidator;
 
-        public HappeningService(IMapper mapper, IUnitOfWork uow, IUserAccessor userAccessor, IPhotoAccessor photoAccessor, IEmailManager emailManager)
+        public HappeningService(IMapper mapper,
+            IUnitOfWork uow,
+            IUserAccessor userAccessor,
+            IPhotoAccessor photoAccessor,
+            IEmailManager emailManager,
+            IValidator<Activity> activityValidator)
         {
             _mapper = mapper;
             _uow = uow;
             _userAccessor = userAccessor;
             _photoAccessor = photoAccessor;
             _emailManager = emailManager;
+            _activityValidator = activityValidator;
         }
         public async Task<HappeningEnvelope> GetHappeningsForApprovalAsync(QueryObject queryObject)
         {
@@ -47,28 +54,19 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(id);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var validation = _activityValidator
+                .Validate(activity, o => o.IncludeRuleSets(nameof(AttendToHappeningValidator)));
 
-            if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Događaj");
-
-            if (activity.EndDate < DateTimeOffset.Now)
-                return new BadRequest("Događaj se već održao");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
 
-            if (activity.User.Id == userId)
-                return new BadRequest("Ne možete reagovati na vaš događaj");
+            var userAttendence = activity.UserAttendances.SingleOrDefault(ua => ua.UserId == userId);
 
-            var userAttendence = activity.UserAttendances.Where(ua => ua.UserId == userId).SingleOrDefault();
-
-            if (attend && userAttendence != null || !attend && userAttendence == null)
-                return new BadRequest("Već ste reagovali na događaj");
-
-            if (attend)
+            if (attend && userAttendence == null)
                 _uow.UserAttendaces.Add(new UserAttendance { UserId = userId, ActivityId = id, Confirmed = false });
-            else
+            if (!attend && userAttendence != null)
                 _uow.UserAttendaces.Remove(userAttendence);
 
             await _uow.CompleteAsync();
@@ -80,22 +78,13 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(id);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var validation = _activityValidator
+                .Validate(activity, o => o.IncludeRuleSets(nameof(ConfirmAttendenceToHappeningValidator)));
 
-            if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Događaj");
-
-            if (activity.EndDate < DateTimeOffset.Now)
-                return new BadRequest("Događaj se već održao");
-
-            if (activity.StartDate > DateTimeOffset.Now)
-                return new BadRequest("Događaj još nije počeo");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
-
-            if (activity.User.Id == userId)
-                return new BadRequest("Ne možete potvrditi dolazak na vaš događaj");
 
             var userAttendence = activity.UserAttendances.Where(ua => ua.UserId == userId).SingleOrDefault();
 
@@ -113,25 +102,11 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(id);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var validation = _activityValidator
+                .Validate(activity, o => o.IncludeRuleSets(nameof(CompleteHappeningValidator)));
 
-            if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Događaj");
-
-            if (activity.EndDate > DateTimeOffset.Now)
-                return new BadRequest("Događaj se još nije završio");
-
-            if (activity.EndDate < DateTimeOffset.Now.AddDays(-7))
-                return new BadRequest("Prošlo je nedelju dana od završetka Događaja!");
-
-            var userId = _userAccessor.GetUserIdFromAccessToken();
-
-            if (activity.User.Id != userId)
-                return new BadRequest("Ne možete završiti tuđi događaj");
-
-            if (activity.HappeningMedias.Count > 0)
-                return new BadRequest("Već ste završili događaj");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             foreach (var image in happeningUpdate.Images)
             {
@@ -149,17 +124,11 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(id);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var validation = _activityValidator
+                .Validate(activity, o => o.IncludeRuleSets(nameof(ApproveHappeningCompletitionValidator)));
 
-            if (activity.ActivityTypeId != ActivityTypeId.Happening)
-                return new BadRequest("Aktivnost nije Događaj");
-
-            if (activity.EndDate > DateTimeOffset.Now)
-                return new BadRequest("Događaj se još nije završio");
-
-            if (activity.HappeningMedias.Count == 0)
-                return new BadRequest("Morate priložiti slike sa događaja");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             if (approve)
             {

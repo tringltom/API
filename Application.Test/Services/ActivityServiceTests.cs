@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
-using Application.InfrastructureModels;
 using Application.Models.Activity;
 using Application.Services;
 using AutoMapper;
@@ -13,8 +12,9 @@ using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using FluentValidation;
+using FluentValidation.Results;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 using Moq;
 using NUnit.Framework;
 
@@ -26,7 +26,7 @@ namespace Application.Tests.Services
         private Mock<IMapper> _mapperMock;
         private Mock<IEmailManager> _emailManagerMock;
         private Mock<IUnitOfWork> _uowMock;
-        private Mock<IPhotoAccessor> _photoAccessorMock;
+        private Mock<IValidator<Activity>> _activityValidatorMock;
         private ActivityService _sut;
 
         [SetUp]
@@ -36,13 +36,15 @@ namespace Application.Tests.Services
             _mapperMock = new Mock<IMapper>();
             _emailManagerMock = new Mock<IEmailManager>();
             _uowMock = new Mock<IUnitOfWork>();
-            _photoAccessorMock = new Mock<IPhotoAccessor>();
-            _sut = new ActivityService(_userAccessorMock.Object, _mapperMock.Object, _emailManagerMock.Object, _uowMock.Object, _photoAccessorMock.Object);
+            _activityValidatorMock = new Mock<IValidator<Activity>>();
+            _sut = new ActivityService(_userAccessorMock.Object, _mapperMock.Object,
+                _emailManagerMock.Object, _uowMock.Object, _activityValidatorMock.Object);
         }
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetActivity_SuccessfullAsync(Activity activity, ApprovedActivityReturn approvedActivityReturn)
+        public async Task GetActivity_SuccessfullAsync(Activity activity,
+            ApprovedActivityReturn approvedActivityReturn)
         {
             // Arrange
             _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
@@ -94,7 +96,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task GetApprovedActivitiesForUser_SuccessfullAsync(int userId, ActivityQuery activityQuery, IEnumerable<Activity> activities,
+        public async Task GetApprovedActivitiesCreatedByUser_SuccessfullAsync(int userId, ActivityQuery activityQuery, IEnumerable<Activity> activities,
             IEnumerable<ApprovedActivityReturn> activitiesForEnvelope, ApprovedActivityEnvelope activityEnvelope)
         {
             // Arrange
@@ -175,10 +177,14 @@ namespace Application.Tests.Services
             activity.User.Id = 2;
             activity.XpReward = 100;
 
+            var validation = new ValidationResult();
+
             _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
                 .ReturnsAsync(activity);
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
+            _activityValidatorMock.Setup(x => x.Validate(It.IsAny<ValidationContext<Activity>>()))
+                .Returns(validation);
             _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
                 .ReturnsAsync((UserPuzzleAnswer)null);
             _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
@@ -214,7 +220,7 @@ namespace Application.Tests.Services
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task AnswerToPuzzle_ActivityNotFoundAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, User user)
+        public async Task AnswerToPuzzle_UnSuccessfullAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, User user)
         {
             // Arrange
             userId = 1;
@@ -222,11 +228,23 @@ namespace Application.Tests.Services
             activity.Answer = puzzleAnswer.Answer;
             activity.User.Id = 2;
             activity.XpReward = 100;
+
+            var error = new RestError();
+            var validationFailure = new ValidationFailure
+            {
+                CustomState = error
+            };
+            var validation = new ValidationResult()
+            {
+                Errors = new List<ValidationFailure>() { validationFailure }
+            };
 
             _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
                 .ReturnsAsync((Activity)null);
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
+            _activityValidatorMock.Setup(x => x.Validate(It.IsAny<ValidationContext<Activity>>()))
+                .Returns(validation);
             _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
                 .ReturnsAsync((UserPuzzleAnswer)null);
             _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
@@ -246,201 +264,12 @@ namespace Application.Tests.Services
             // Assert
             res.Match(
                 reward => reward.Should().Be(0),
-                err => err.Should().BeOfType<NotFound>()
+                err => err.Should().BeOfType<RestError>()
                 );
 
             _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Never);
             _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Never);
-            _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Never);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-            _emailManagerMock.Verify(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task AnswerToPuzzle_ActivityNotPuzzleAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, User user)
-        {
-            // Arrange
-            userId = 1;
-            activity.ActivityTypeId = ActivityTypeId.GoodDeed;
-            activity.Answer = puzzleAnswer.Answer;
-            activity.User.Id = 2;
-            activity.XpReward = 100;
-
-            _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
-                .ReturnsAsync(activity);
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
-                .ReturnsAsync((UserPuzzleAnswer)null);
-            _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
-                .ReturnsAsync((Skill)null);
-            _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()))
-                .Verifiable();
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-            _emailManagerMock.Setup(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName))
-                .Verifiable();
-
-            // Act
-            var res = await _sut.AnswerToPuzzleAsync(It.IsAny<int>(), puzzleAnswer);
-
-            // Assert
-            res.Match(
-                reward => reward.Should().Be(0),
-                err => err.Should().BeOfType<BadRequest>()
-                );
-
-            _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Never);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Never);
-            _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Never);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-            _emailManagerMock.Verify(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task AnswerToPuzzle_IncorrectAnswerAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, User user)
-        {
-            // Arrange
-            userId = 1;
-            puzzleAnswer.Answer = "correct";
-            activity.ActivityTypeId = ActivityTypeId.Puzzle;
-            activity.Answer = "wrong";
-            activity.User.Id = 2;
-            activity.XpReward = 100;
-
-            _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
-                .ReturnsAsync(activity);
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
-                .ReturnsAsync((UserPuzzleAnswer)null);
-            _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
-                .ReturnsAsync((Skill)null);
-            _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()))
-                .Verifiable();
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-            _emailManagerMock.Setup(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName))
-                .Verifiable();
-
-            // Act
-            var res = await _sut.AnswerToPuzzleAsync(It.IsAny<int>(), puzzleAnswer);
-
-            // Assert
-            res.Match(
-                reward => reward.Should().Be(0),
-                err => err.Should().BeOfType<BadRequest>()
-                );
-
-            _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Never);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Never);
-            _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Never);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-            _emailManagerMock.Verify(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task AnswerToPuzzle_CreatorAnsweringAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, User user)
-        {
-            // Arrange
-            userId = 2;
-            activity.ActivityTypeId = ActivityTypeId.Puzzle;
-            activity.Answer = puzzleAnswer.Answer;
-            activity.User.Id = 2;
-            activity.XpReward = 100;
-
-            _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
-                .ReturnsAsync(activity);
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
-                .ReturnsAsync((UserPuzzleAnswer)null);
-            _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
-                .ReturnsAsync((Skill)null);
-            _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()))
-                .Verifiable();
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-            _emailManagerMock.Setup(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName))
-                .Verifiable();
-
-            // Act
-            var res = await _sut.AnswerToPuzzleAsync(It.IsAny<int>(), puzzleAnswer);
-
-            // Assert
-            res.Match(
-                reward => reward.Should().Be(0),
-                err => err.Should().BeOfType<BadRequest>()
-                );
-
-            _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Never);
-            _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Never);
-            _uowMock.Verify(x => x.CompleteAsync(), Times.Never);
-            _emailManagerMock.Verify(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName), Times.Never);
-        }
-
-        [Test]
-        [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public async Task AnswerToPuzzle_AlreadyAnsweredAsync(Activity activity, PuzzleAnswer puzzleAnswer, int userId, UserPuzzleAnswer userAnswer, User user)
-        {
-            // Arrange
-            userId = 1;
-            activity.ActivityTypeId = ActivityTypeId.Puzzle;
-            activity.Answer = puzzleAnswer.Answer;
-            activity.User.Id = 2;
-            activity.XpReward = 100;
-
-            _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
-                .ReturnsAsync(activity);
-            _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
-                .Returns(userId);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
-                .ReturnsAsync(userAnswer);
-            _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
-                .ReturnsAsync((Skill)null);
-            _uowMock.Setup(x => x.Users.GetAsync(userId))
-                .ReturnsAsync(user);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()))
-                .Verifiable();
-            _uowMock.Setup(x => x.CompleteAsync())
-                .ReturnsAsync(true);
-            _emailManagerMock.Setup(x => x.SendPuzzleAnsweredAsync(activity.Title, activity.User.Email, user.UserName))
-                .Verifiable();
-
-            // Act
-            var res = await _sut.AnswerToPuzzleAsync(It.IsAny<int>(), puzzleAnswer);
-
-            // Assert
-            res.Match(
-                reward => reward.Should().Be(0),
-                err => err.Should().BeOfType<BadRequest>()
-                );
-
-            _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
-            _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Once);
             _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Never);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Never);
             _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Never);

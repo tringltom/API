@@ -7,10 +7,13 @@ using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using Application.Validations.PendingActivityValidation;
 using AutoMapper;
 using DAL;
 using DAL.Query;
 using Domain;
+using FluentValidation;
+using FluentValidation.Internal;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 
@@ -23,14 +26,21 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IEmailManager _emailManager;
         private readonly IUnitOfWork _uow;
+        private readonly IValidator<PendingActivity> _pendingActivityValidator;
 
-        public PendingActivityService(IPhotoAccessor photoAccessor, IUserAccessor userAccessor, IMapper mapper, IEmailManager emailManager, IUnitOfWork uow)
+        public PendingActivityService(IPhotoAccessor photoAccessor,
+            IUserAccessor userAccessor,
+            IMapper mapper,
+            IEmailManager emailManager,
+            IUnitOfWork uow,
+            IValidator<PendingActivity> pendingActivityValidator)
         {
             _photoAccessor = photoAccessor;
             _userAccessor = userAccessor;
             _mapper = mapper;
             _emailManager = emailManager;
             _uow = uow;
+            _pendingActivityValidator = pendingActivityValidator;
         }
 
         public async Task<PendingActivityEnvelope> GetPendingActivitiesAsync(QueryObject queryObject)
@@ -61,25 +71,28 @@ namespace Application.Services
             var userId = _userAccessor.GetUserIdFromAccessToken();
             var pendingActivity = await _uow.PendingActivities.GetAsync(id);
 
-            if (pendingActivity?.User?.Id != userId)
+            if (pendingActivity?.User.Id != userId)
                 return new BadRequest("Niste kreirali ovu aktivnost!");
 
             return _mapper.Map<ActivityCreate>(pendingActivity);
         }
 
-        public async Task<Either<RestError, PendingActivityReturn>> UpdatePendingActivityAsync(int id, ActivityCreate updatedActivityCreate)
+        public async Task<Either<RestError, PendingActivityReturn>> UpdatePendingActivityAsync(int id,
+            ActivityCreate updatedActivityCreate)
         {
-            var userId = _userAccessor.GetUserIdFromAccessToken();
             var pendingActivity = await _uow.PendingActivities.GetAsync(id);
 
-            if (pendingActivity == null)
-                return new NotFound("Aktivnost nije pronadjena");
+            var context = new ValidationContext<PendingActivity>(pendingActivity, new PropertyChain(),
+                ValidatorOptions.Global.ValidatorSelectors.RulesetValidatorSelectorFactory(
+                    new[] { nameof(UpdatePendingActivityValidator) })
+                );
 
-            if (pendingActivity.User.Id != userId)
-                return new BadRequest("Niste kreirali ovu aktivnost!");
+            context.RootContextData[nameof(ActivityTypeId)] = updatedActivityCreate.Type;
 
-            if (pendingActivity.ActivityTypeId != updatedActivityCreate.Type)
-                return new BadRequest("Ne možete izmeniti tip aktivnosti!");
+            var validation = _pendingActivityValidator.Validate(context);
+
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             pendingActivity.Title = updatedActivityCreate.Title;
             pendingActivity.Description = updatedActivityCreate.Description;

@@ -13,6 +13,7 @@ using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using FluentValidation;
 using LanguageExt;
 using Moq;
 using NUnit.Framework;
@@ -26,6 +27,7 @@ namespace Application.Tests.Services
         private Mock<IMapper> _mapperMock;
         private Mock<IEmailManager> _emailManagerMock;
         private Mock<IUnitOfWork> _uowMock;
+        private Mock<IValidator<PendingActivity>> _activityValidatorMock;
         private PendingActivityService _sut;
 
         [SetUp]
@@ -36,7 +38,9 @@ namespace Application.Tests.Services
             _mapperMock = new Mock<IMapper>();
             _emailManagerMock = new Mock<IEmailManager>();
             _uowMock = new Mock<IUnitOfWork>();
-            _sut = new PendingActivityService(_photoAccessorMock.Object, _userAccessorMock.Object, _mapperMock.Object, _emailManagerMock.Object, _uowMock.Object);
+            _activityValidatorMock = new Mock<IValidator<PendingActivity>>();
+            _sut = new PendingActivityService(_photoAccessorMock.Object, _userAccessorMock.Object,
+                _mapperMock.Object, _emailManagerMock.Object, _uowMock.Object, _activityValidatorMock.Object);
         }
 
         [Test]

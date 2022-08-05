@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
@@ -15,6 +13,7 @@ using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using FluentValidation;
 using LanguageExt;
 using Moq;
 using NUnit.Framework;
@@ -28,6 +27,8 @@ namespace Application.Tests.Services
         private Mock<IUserAccessor> _userAccessorMock;
         private Mock<IPhotoAccessor> _photoAccessorMock;
         private Mock<IEmailManager> _emailManagerMock;
+        private Mock<IValidator<Activity>> _activityValidatorMock;
+        private Mock<IValidator<UserChallengeAnswer>> _userChallengeAnswerValidatorMock;
         private ChallengeService _sut;
 
         [SetUp]
@@ -38,7 +39,11 @@ namespace Application.Tests.Services
             _uowMock = new Mock<IUnitOfWork>();
             _photoAccessorMock = new Mock<IPhotoAccessor>();
             _emailManagerMock = new Mock<IEmailManager>();
-            _sut = new ChallengeService(_mapperMock.Object, _uowMock.Object, _userAccessorMock.Object, _photoAccessorMock.Object, _emailManagerMock.Object);
+            _activityValidatorMock = new Mock<IValidator<Activity>>();
+            _userChallengeAnswerValidatorMock = new Mock<IValidator<UserChallengeAnswer>>();
+            _sut = new ChallengeService(_mapperMock.Object, _uowMock.Object, _userAccessorMock.Object,
+                _photoAccessorMock.Object, _emailManagerMock.Object, _activityValidatorMock.Object,
+                _userChallengeAnswerValidatorMock.Object);
         }
 
         [Test]

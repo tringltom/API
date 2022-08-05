@@ -3,6 +3,7 @@ using API.Validations;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using DAL.Query;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -75,6 +76,7 @@ namespace API.Controllers
 
         [HttpPost("{id}/completion")]
         [IdValidation]
+        [AllowAnonymous]
         public async Task<IActionResult> CompleteHappening(int id, [FromForm] HappeningUpdate happeningUpdate)
         {
             var result = await _happeningService.CompleteHappeningAsync(id, happeningUpdate);

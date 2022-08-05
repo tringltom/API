@@ -5,6 +5,10 @@ namespace Application.Errors
 {
     public class RestError
     {
+        public RestError()
+        {
+
+        }
         public RestError(HttpStatusCode code, object errors = null)
         {
             Code = code;

@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Application.Errors;
 using Application.InfrastructureInterfaces;
@@ -16,6 +14,7 @@ using DAL.Query;
 using Domain;
 using FixtureShared;
 using FluentAssertions;
+using FluentValidation;
 using LanguageExt;
 using Microsoft.AspNetCore.Http;
 using Moq;
@@ -30,6 +29,7 @@ namespace Application.Tests.Services
         private Mock<IUserAccessor> _userAccessorMock;
         private Mock<IPhotoAccessor> _photoAccessorMock;
         private Mock<IEmailManager> _emailManagerMock;
+        private Mock<IValidator<Activity>> _activityValidatorMock;
         private HappeningService _sut;
 
         [SetUp]
@@ -40,7 +40,9 @@ namespace Application.Tests.Services
             _userAccessorMock = new Mock<IUserAccessor>();
             _photoAccessorMock = new Mock<IPhotoAccessor>();
             _emailManagerMock = new Mock<IEmailManager>();
-            _sut = new HappeningService(_mapperMock.Object, _uowMock.Object, _userAccessorMock.Object, _photoAccessorMock.Object, _emailManagerMock.Object);
+            _activityValidatorMock = new Mock<IValidator<Activity>>();
+            _sut = new HappeningService(_mapperMock.Object, _uowMock.Object, _userAccessorMock.Object,
+                _photoAccessorMock.Object, _emailManagerMock.Object, _activityValidatorMock.Object);
         }
 
         [Test]

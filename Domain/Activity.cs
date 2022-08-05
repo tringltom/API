@@ -23,6 +23,7 @@ namespace Domain
         public virtual ICollection<UserAttendance> UserAttendances { get; set; }
         public virtual ICollection<HappeningMedia> HappeningMedias { get; set; }
         public virtual ICollection<UserFavoriteActivity> UserFavorites { get; set; }
+        public virtual ICollection<UserPuzzleAnswer> UserPuzzleAnswers { get; set; }
         public virtual ICollection<UserChallengeAnswer> UserChallengeAnswers { get; set; }
         public virtual ICollection<UserReview> UserReviews { get; set; }
         public virtual ICollection<Comment> Comments { get; set; }

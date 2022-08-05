@@ -1,19 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Application.Errors;
+using Application.InfrastructureInterfaces;
+using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using Application.Validations.ActivityValidation.Challenge;
+using AutoMapper;
+using DAL;
 using DAL.Query;
 using Domain;
-using AutoMapper;
+using FluentValidation;
 using LanguageExt;
-using Application.Errors;
-using DAL;
-using System.Linq;
-using Application.InfrastructureInterfaces.Security;
 using Microsoft.AspNetCore.Http;
-using Application.InfrastructureInterfaces;
 
 namespace Application.Services
 {
@@ -25,14 +25,24 @@ namespace Application.Services
         private readonly IUserAccessor _userAccessor;
         private readonly IPhotoAccessor _photoAccessor;
         private readonly IEmailManager _emailManager;
+        private readonly IValidator<Activity> _activityValidator;
+        private readonly IValidator<UserChallengeAnswer> _userChallengeAnswerValidator;
 
-        public ChallengeService(IMapper mapper, IUnitOfWork uow, IUserAccessor userAccessor, IPhotoAccessor photoAccessor, IEmailManager emailManager)
+        public ChallengeService(IMapper mapper,
+            IUnitOfWork uow,
+            IUserAccessor userAccessor,
+            IPhotoAccessor photoAccessor,
+            IEmailManager emailManager,
+            IValidator<Activity> activityValidator,
+            IValidator<UserChallengeAnswer> userChallengeAnswerValidator)
         {
             _mapper = mapper;
             _uow = uow;
             _userAccessor = userAccessor;
             _photoAccessor = photoAccessor;
             _emailManager = emailManager;
+            _activityValidator = activityValidator;
+            _userChallengeAnswerValidator = userChallengeAnswerValidator;
         }
 
         public async Task<ChallengeEnvelope> GetChallengesForApprovalAsync(QueryObject queryObject)
@@ -49,19 +59,11 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(activityId);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var validation = _activityValidator
+                .Validate(activity, o => o.IncludeRuleSets(nameof(GetOwnerChallengeAnswersValidator)));
 
-            if (activity.ActivityTypeId != ActivityTypeId.Challenge)
-                return new BadRequest("Aktivnost nije izazov");
-
-            if (activity.XpReward != null)
-                return new BadRequest("Izazov je rešen");
-
-            var userId = _userAccessor.GetUserIdFromAccessToken();
-
-            if (activity.User.Id != userId)
-                return new BadRequest("Niste kreirali ovaj izazov");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             var userChallengeAnswers = await _uow.UserChallengeAnswers.GetUserChallengeAnswersAsync(activityId, queryObject);
 
@@ -75,13 +77,13 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(activityId);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var validation = _activityValidator
+                .Validate(activity, o => o.IncludeRuleSets(nameof(AnswerToChallengeValidator)));
+
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
-
-            if (activity.User.Id == userId)
-                return new BadRequest("Ne možete odgovoriti na svoj izazov");
 
             var userChallengeAnswer = new UserChallengeAnswer
             {
@@ -129,16 +131,11 @@ namespace Application.Services
         {
             var existingAnswerToChallenge = await _uow.UserChallengeAnswers.GetAsync(challengeAnswerId);
 
-            if (existingAnswerToChallenge == null)
-                return new NotFound("Nepostojeći odgovor");
+            var validation = _userChallengeAnswerValidator
+                .Validate(existingAnswerToChallenge, o => o.IncludeRuleSets(nameof(ConfirmChallengeValidator)));
 
-            if (existingAnswerToChallenge.Confirmed)
-                return new BadRequest("Ovaj odgovor ste već odabrali");
-
-            var userId = _userAccessor.GetUserIdFromAccessToken();
-
-            if (userId != existingAnswerToChallenge.Activity.User.Id)
-                return new BadRequest("Ne možete odabrati odgovor za izazov koji niste kreirali");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             var confirmedAnswer = await _uow.UserChallengeAnswers.GetConfirmedUserChallengeAnswersAsync(existingAnswerToChallenge.ActivityId);
 
@@ -172,14 +169,11 @@ namespace Application.Services
         {
             var answerToChallenge = await _uow.UserChallengeAnswers.GetAsync(challengeAnswerId);
 
-            if (answerToChallenge == null)
-                return new NotFound("Nepostojeći odgovor");
+            var validation = _userChallengeAnswerValidator
+                .Validate(answerToChallenge, o => o.IncludeRuleSets(nameof(ApproveChallengeAnswerValidator)));
 
-            if (!answerToChallenge.Confirmed)
-                return new BadRequest("Ovaj odgovor nije odabran");
-
-            if (answerToChallenge.Activity.XpReward != null)
-                return new BadRequest("Izazov je rešen");
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             foreach (var media in answerToChallenge.ChallengeMedias)
             {

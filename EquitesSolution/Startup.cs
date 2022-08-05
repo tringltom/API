@@ -12,7 +12,7 @@ using Application.Managers;
 using Application.Mappings;
 using Application.ServiceInterfaces;
 using Application.Services;
-using Application.Validations;
+using Application.Validation.ActivityValidation;
 using DAL;
 using Domain;
 using FluentValidation;
@@ -158,6 +158,10 @@ namespace API
             }).AddFluentValidation(cfg =>
             {
                 cfg.RegisterValidatorsFromAssemblyContaining<UserEmailVerificationValidation>();
+            }).AddFluentValidation(cfg =>
+            {
+                cfg.ValidatorOptions.DefaultClassLevelCascadeMode = CascadeMode.Stop;
+                cfg.RegisterValidatorsFromAssemblyContaining<ActivityValidator>();
             }).AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -177,7 +181,7 @@ namespace API
 
             services.AddApplicationInsightsTelemetry();
 
-            services.AddValidatorsFromAssemblyContaining<ActivityValidator>();
+            //services.AddValidatorsFromAssemblyContaining<ActivityValidator>();
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

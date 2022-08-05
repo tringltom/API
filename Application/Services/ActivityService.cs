@@ -7,12 +7,14 @@ using Application.InfrastructureInterfaces;
 using Application.InfrastructureInterfaces.Security;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
+using Application.Validations.ActivityValidation.Puzzle;
 using AutoMapper;
 using DAL;
 using DAL.Query;
 using Domain;
+using FluentValidation;
+using FluentValidation.Internal;
 using LanguageExt;
-using Microsoft.AspNetCore.Http;
 
 namespace Application.Services
 {
@@ -22,15 +24,19 @@ namespace Application.Services
         private readonly IMapper _mapper;
         private readonly IEmailManager _emailManager;
         private readonly IUnitOfWork _uow;
-        private readonly IPhotoAccessor _photoAccessor;
+        private readonly IValidator<Activity> _activityValidator;
 
-        public ActivityService(IUserAccessor userAccessor, IMapper mapper, IEmailManager emailManager, IUnitOfWork uow, IPhotoAccessor photoAccessor)
+        public ActivityService(IUserAccessor userAccessor,
+            IMapper mapper,
+            IEmailManager emailManager,
+            IUnitOfWork uow,
+            IValidator<Activity> activityValidator)
         {
             _userAccessor = userAccessor;
             _mapper = mapper;
             _emailManager = emailManager;
             _uow = uow;
-            _photoAccessor = photoAccessor;
+            _activityValidator = activityValidator;
         }
 
         public async Task<ApprovedActivityReturn> GetActivityAsync(int id)
@@ -67,24 +73,19 @@ namespace Application.Services
         {
             var activity = await _uow.Activities.GetAsync(id);
 
-            if (activity == null)
-                return new NotFound("Aktivnost nije pronađena");
+            var context = new ValidationContext<Activity>(activity, new PropertyChain(),
+                ValidatorOptions.Global.ValidatorSelectors.RulesetValidatorSelectorFactory(
+                    new[] { nameof(AnswerToPuzzleValidator) })
+                );
 
-            if (activity.ActivityTypeId != ActivityTypeId.Puzzle)
-                return new BadRequest("Aktivnost nije zagonetka");
+            context.RootContextData[nameof(PuzzleAnswer)] = puzzleAnswer.Answer;
 
-            if (!string.Equals(activity.Answer.Trim(), puzzleAnswer.Answer.Trim(), StringComparison.OrdinalIgnoreCase))
-                return new BadRequest("Netačan odgovor");
+            var validation = _activityValidator.Validate(context);
+
+            if (!validation.IsValid)
+                return (RestError)validation.Errors.Single().CustomState;
 
             var userId = _userAccessor.GetUserIdFromAccessToken();
-
-            if (activity.User.Id == userId)
-                return new BadRequest("Ne možete odgovarati na svoje zagonetke");
-
-            var userAnswer = await _uow.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, id);
-
-            if (userAnswer != null)
-                return new BadRequest("Već ste dali tačan odgovor");
 
             var userSkill = await _uow.Skills.GetPuzzleSkillAsync(userId);
             var xpMultiplier = userSkill != null && userSkill.IsInSecondTree() ? await _uow.SkillXpBonuses.GetSkillMultiplierAsync(userSkill) : 1;
