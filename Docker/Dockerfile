@@ -14,6 +14,7 @@ ARG EmailSettings_Port_arg
 ARG AllowedHosts_arg
 ARG Environment_arg
 ARG EnvJson="./EquitesSolution/appsettings.${Environment_arg}.json"
+ARG EnvNlog="./EquitesSolution/NLog.${Environment_arg}.config"
 ARG ASPNETCORE_Certificate_Password_arg
 
 ENV TokenKey=$TokenKey_arg
@@ -43,7 +44,7 @@ WORKDIR "/src/."
 RUN true
 COPY $EnvJson .
 RUN true
-COPY ["./EquitesSolution/NLog.config", "."]
+COPY $EnvNlog .
 RUN true
 RUN dotnet build "API.csproj" -c Release -o /app/build
 
