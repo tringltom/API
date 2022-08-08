@@ -50,7 +50,8 @@ namespace API
             services.AddDbContext<DataContext>(opt =>
             {
                 opt.UseLazyLoadingProxies();
-                opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+                opt.UseSqlServer(Configuration.GetValue<string>("DockerConnection") ??
+                    Configuration.GetConnectionString("DefaultConnection"));
                 opt.EnableSensitiveDataLogging();
             });
 
@@ -76,7 +77,7 @@ namespace API
             //Add Scoped Managers
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.AddScoped<IFavoritesService, FavoritesService>();
+            services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IUserRecoveryService, UserRecoveryService>();
             services.AddScoped<IUserRegistrationService, UserRegistrationService>();
             services.AddScoped<IUserSessionService, UserSessionService>();
@@ -87,6 +88,8 @@ namespace API
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<ISkillService, SkillService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IHappeningService, HappeningService>();
+            services.AddScoped<IChallengeService, ChallengeService>();
 
             services.AddScoped<ITokenManager, TokenManager>();
             services.AddScoped<IPhotoAccessor, CloudinaryPhotoAccessor>();
