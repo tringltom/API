@@ -15,7 +15,7 @@ namespace FixtureShared
 
         public FixtureBuilder WithOmitRecursion()
         {
-            //_fixture.Behaviors.Add(new OmitOnRecursionBehavior(1));
+            //_fixture.Behaviors.Add(new OmitOnRecursionBehavior(3));
 
             _fixture.Customizations.Add(new IgnoreVirtualMembersSpecimenBuilder());
             return this;

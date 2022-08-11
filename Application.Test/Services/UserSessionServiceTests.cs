@@ -57,6 +57,7 @@ namespace Application.Tests.Services
             string token)
         {
             //Arrange
+            currentUser.Id = 1;
             userBaseResponse.Token = token;
             userBaseResponse.ActivityCounts = activityCounts;
 

@@ -3,6 +3,7 @@ using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
 using AutoFixture;
+using AutoFixture.NUnit3;
 using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
@@ -18,7 +19,8 @@ namespace API.Tests.Controllers
         private ActivityController _sut;
 
         [SetUp]
-        public void SetUp()
+        [Fixture(FixtureType.WithAutoMoq)]
+        public void SetUp([Frozen])
         {
             _activityServiceMock = new Mock<IActivityService>();
             _sut = new ActivityController(_activityServiceMock.Object);

@@ -76,9 +76,10 @@ namespace Application.Tests.Managers
 
         [Test]
         [Fixture(FixtureType.WithAutoMoqAndOmitRecursion)]
-        public void SendActivityApprovalEmailAsync_IncorrectEmail(PendingActivity activity, EmailManager sut)
+        public void SendActivityApprovalEmailAsync_IncorrectEmail(User user, PendingActivity activity, EmailManager sut)
         {
             // Arrange
+            activity.User = user;
             activity.User.Email = "";
 
             // Act
