@@ -133,12 +133,15 @@ namespace Application.Tests.Services
             activity.XpReward = null;
             activity.DateApproved = System.DateTimeOffset.Now;
 
+            var validation = new ValidationResult();
+
+
             _uowMock.Setup(x => x.Activities.GetAsync(It.IsAny<int>()))
                 .ReturnsAsync(activity);
             _userAccessorMock.Setup(x => x.GetUserIdFromAccessToken())
                 .Returns(userId);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
-                .ReturnsAsync((UserPuzzleAnswer)null);
+            _activityValidatorMock.Setup(x => x.Validate(It.IsAny<ValidationContext<Activity>>()))
+                .Returns(validation);
             _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
                 .ReturnsAsync((Skill)null);
             _uowMock.Setup(x => x.Users.GetAsync(userId))
@@ -159,7 +162,6 @@ namespace Application.Tests.Services
 
             _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Once);
             _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Once);
@@ -185,8 +187,6 @@ namespace Application.Tests.Services
                 .Returns(userId);
             _activityValidatorMock.Setup(x => x.Validate(It.IsAny<ValidationContext<Activity>>()))
                 .Returns(validation);
-            _uowMock.Setup(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()))
-                .ReturnsAsync((UserPuzzleAnswer)null);
             _uowMock.Setup(x => x.Skills.GetPuzzleSkillAsync(userId))
                 .ReturnsAsync((Skill)null);
             _uowMock.Setup(x => x.Users.GetAsync(userId))
@@ -210,7 +210,6 @@ namespace Application.Tests.Services
 
             _uowMock.Verify(x => x.Activities.GetAsync(It.IsAny<int>()), Times.Once);
             _userAccessorMock.Verify(x => x.GetUserIdFromAccessToken(), Times.Once);
-            _uowMock.Verify(x => x.UserPuzzleAnswers.GetUserPuzzleAnswerAsync(userId, It.IsAny<int>()), Times.Once);
             _uowMock.Verify(x => x.Skills.GetPuzzleSkillAsync(userId), Times.Once);
             _uowMock.Verify(x => x.Users.GetAsync(userId), Times.Once);
             _uowMock.Verify(x => x.UserPuzzleAnswers.Add(It.IsAny<UserPuzzleAnswer>()), Times.Once);

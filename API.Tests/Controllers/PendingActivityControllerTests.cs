@@ -97,7 +97,7 @@ namespace API.Tests.Controllers
             var res = await _sut.DisapprovePendingActivity(It.IsAny<int>()) as NoContentResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.NoContent);
+            res.StatusCode.Should().Be((int)HttpStatusCode.NoContent);
         }
 
         [Test]

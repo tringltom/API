@@ -29,7 +29,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().ThrowAsync<Exception>();
         }
 
         [Test]
@@ -43,7 +43,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendConfirmationEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().ThrowAsync<Exception>();
         }
 
         [Test]
@@ -57,7 +57,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().ThrowAsync<Exception>();
         }
 
         [Test]
@@ -71,7 +71,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendPasswordRecoveryEmailAsync(url, email);
 
             // Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().ThrowAsync<Exception>();
         }
 
         [Test]
@@ -85,7 +85,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendActivityApprovalEmailAsync(activity.Title, activity.User.Email, true);
 
             // Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().ThrowAsync<Exception>();
         }
 
         [Test]
@@ -97,7 +97,7 @@ namespace Application.Tests.Managers
             Func<Task> methodInTest = async () => await sut.SendProfileImageApprovalEmailAsync(userEmail, true);
 
             // Assert
-            methodInTest.Should().Throw<Exception>();
+            methodInTest.Should().ThrowAsync<Exception>();
         }
     }
 }

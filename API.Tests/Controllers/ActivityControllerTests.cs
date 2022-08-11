@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
 using Application.ServiceInterfaces;
@@ -7,7 +6,6 @@ using AutoFixture;
 using DAL.Query;
 using FixtureShared;
 using FluentAssertions;
-using LanguageExt;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using NUnit.Framework;

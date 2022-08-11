@@ -83,7 +83,7 @@ namespace API.Tests.Controllers
             var res = await _sut.UpdateAbout(userAbout) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -98,7 +98,7 @@ namespace API.Tests.Controllers
             var res = await _sut.UpdateImage(userImageUpdate) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -113,7 +113,7 @@ namespace API.Tests.Controllers
             var res = await _sut.ResolveImage(It.IsAny<int>(), photoApprove) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
     }
 }

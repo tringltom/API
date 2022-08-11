@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
@@ -55,7 +52,7 @@ namespace API.Tests.Controllers
             var res = await _sut.ConfirmAttendenceToHappening(It.IsAny<int>()) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -70,7 +67,7 @@ namespace API.Tests.Controllers
             var res = await _sut.ApproveHappeningCompletition(It.IsAny<int>(), happeningApprove) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -85,7 +82,7 @@ namespace API.Tests.Controllers
             var res = await _sut.CancelAttendenceToHappening(It.IsAny<int>()) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -100,7 +97,7 @@ namespace API.Tests.Controllers
             var res = await _sut.AttendToHappening(It.IsAny<int>()) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -115,7 +112,7 @@ namespace API.Tests.Controllers
             var res = await _sut.CompleteHappening(It.IsAny<int>(), happeningUpdate) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
     }
 }

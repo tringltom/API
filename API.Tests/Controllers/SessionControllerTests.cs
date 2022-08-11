@@ -57,7 +57,7 @@ namespace API.Tests.Controllers
             var res = await _sut.SendEmailVerification(user) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -72,7 +72,7 @@ namespace API.Tests.Controllers
             var res = await _sut.SendRecoverPassword(user) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -132,7 +132,7 @@ namespace API.Tests.Controllers
             var res = await _sut.VerifyEmail(userEmailVerification) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -147,7 +147,7 @@ namespace API.Tests.Controllers
             var res = await _sut.VerifyPasswordRecovery(userPasswordRecoveryVerification) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -162,7 +162,7 @@ namespace API.Tests.Controllers
             var res = await _sut.Logout() as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         //[Test]

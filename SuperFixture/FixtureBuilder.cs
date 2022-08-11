@@ -1,5 +1,7 @@
-﻿using AutoFixture;
+﻿using System.Reflection;
+using AutoFixture;
 using AutoFixture.AutoMoq;
+using AutoFixture.Kernel;
 
 namespace FixtureShared
 {
@@ -13,7 +15,9 @@ namespace FixtureShared
 
         public FixtureBuilder WithOmitRecursion()
         {
-            _fixture.Behaviors.Add(new OmitOnRecursionBehavior());
+            //_fixture.Behaviors.Add(new OmitOnRecursionBehavior(1));
+
+            _fixture.Customizations.Add(new IgnoreVirtualMembersSpecimenBuilder());
             return this;
         }
 
@@ -26,6 +30,25 @@ namespace FixtureShared
         public IFixture Create()
         {
             return _fixture;
+        }
+    }
+
+    public class IgnoreVirtualMembersSpecimenBuilder : ISpecimenBuilder
+    {
+        public object Create(object request, ISpecimenContext context)
+        {
+            var propertyInfo = request as PropertyInfo;
+            if (propertyInfo == null)
+            {
+                return new NoSpecimen();
+            }
+
+            if (propertyInfo.GetGetMethod().IsVirtual)
+            {
+                return null;
+            }
+
+            return new NoSpecimen();
         }
     }
 }

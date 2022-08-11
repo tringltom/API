@@ -14,6 +14,7 @@ using NUnit.Framework;
 
 namespace Application.Tests.Managers
 {
+    [TestFixture]
     public class ActivityCounterManagerTests
     {
         private IFixture _fixture;

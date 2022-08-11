@@ -53,7 +53,7 @@ namespace API.Tests.Controllers
             var res = await _sut.ReviewActivity(activityReview) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
     }
 }

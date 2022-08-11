@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Text;
+﻿using System.Net;
 using System.Threading.Tasks;
 using API.Controllers;
 using Application.Models.Activity;
@@ -70,7 +67,7 @@ namespace API.Tests.Controllers
             var res = await _sut.ConfirmChallengeAnswer(It.IsAny<int>()) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -85,7 +82,7 @@ namespace API.Tests.Controllers
             var res = await _sut.DisapproveChallengeAnswer(It.IsAny<int>()) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -100,7 +97,7 @@ namespace API.Tests.Controllers
             var res = await _sut.AnswerToChallenge(It.IsAny<int>(), challengeAnswer) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
 
         [Test]
@@ -115,7 +112,7 @@ namespace API.Tests.Controllers
             var res = await _sut.ApproveChallengeAnswer(It.IsAny<int>()) as OkResult;
 
             // Assert
-            res.StatusCode.Should().Equals(HttpStatusCode.OK);
+            res.StatusCode.Should().Be((int)HttpStatusCode.OK);
         }
     }
 }
